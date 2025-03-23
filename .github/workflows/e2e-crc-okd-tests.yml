@@ -1,0 +1,114 @@
+name: E2E CRC-OKD Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      intersmash-applications-repo:
+        description: 'The Intersmash applications repository that will be used to run tests'
+        required: false
+        default: "https://github.com/Intersmash/intersmash-applications.git"
+        type: string
+      intersmash-applications-ref:
+        description: 'The Intersmash applications branch that will be used to run tests'
+        required: false
+        default: "main"
+        type: string
+
+concurrency:
+  group: single-instance-for-crc-okd-cluster
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    #if: github.repository == 'Intersmash/intersmash-applications'
+    strategy:
+      fail-fast: false
+      matrix:
+        # There is some problem with latest version of crc configured with okd preset.
+        # It was not possible to run tests successfully on latest version of crc. See linked issue:
+        # https://github.com/crc-org/crc/issues/4382
+        okd: [ v4.14.0 ]
+        crc: [ 2.32.0 ]
+    name: CRC ${{ matrix.crc }} / OKD ${{ matrix.okd }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - name: Install required virtualization software
+        run: |
+          sudo apt-get update
+          sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
+          # This package may not be present depending on Ubuntu version
+          sudo apt install virtiofsd || true
+          sudo adduser $USER libvirt
+          sudo adduser $USER kvm
+          sudo usermod -a -G libvirt $USER
+      - name: Remove unwanted stuff to free up disk image
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+          sudo docker image prune --all --force
+
+          sudo swapoff -a
+          sudo rm -f /mnt/swapfile
+      - name: Download CRC
+        run: |
+          wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc/${{ matrix.crc }}/crc-linux-amd64.tar.xz
+          tar -xJf crc-linux-amd64.tar.xz
+          sudo cp crc-linux-${{ matrix.crc }}-amd64/crc /usr/local/bin/crc
+      - name: Set the crc config
+        run: |
+          crc config set preset okd
+          crc config set network-mode user
+      - name: Setup CRC
+        run: sudo -su $USER crc setup
+      - name: Create Intersmash Tests users
+        run: |          
+          export HTPASSWD_FILE=./users.htpasswd
+          htpasswd -c -B -b $HTPASSWD_FILE admin admin
+          htpasswd -b $HTPASSWD_FILE imash imash
+          cat $HTPASSWD_FILE
+          oc create secret generic htpass-secret-2 --from-file=htpasswd=$HTPASSWD_FILE -n openshift-config
+          oc patch OAuth cluster -p '{"spec": {"identityProviders": [{"htpasswd": {"fileData": {"name": "htpass-secret-2"}},"mappingMethod": "claim","name": "my_htpasswd_provider","type": "HTPasswd"}]}}' --type=merge
+          oc adm policy add-cluster-role-to-user cluster-admin admin
+      - name: Set Intersmash Tests users tokens not to expire
+        run: |
+          oc patch OAuthClient openshift-challenging-client -p '{
+            "accessTokenMaxAgeSeconds": 0,
+            "apiVersion": "oauth.openshift.io/v1",
+            "grantMethod": "auto",
+            "kind": "OAuthClient",
+            "respondWithChallenges": true
+          }' --type=merge
+      - name: Start CRC
+        run: sudo -su $USER crc start
+      - name: Create test.properties file
+        run: |
+          oc login -u admin -p admin https://api.crc.testing:6443/ 
+          export ADMIN_TOKEN=$(oc whoami -t)
+          oc login -u imash -p imash https://api.crc.testing:6443/ 
+          export USER_TOKEN=$(oc whoami -t)
+          cat >>test.properties <<EOL
+          xtf.openshift.url=https://api.crc.testing:6443/
+          xtf.openshift.namespace=imash-tests
+          xtf.bm.namespace=imash-tests-bm
+          xtf.junit.clean_openshift=true
+          xtf.openshift.admin.username=admin
+          xtf.openshift.admin.password=admin
+          xtf.openshift.admin.token=${ADMIN_TOKEN}
+          xtf.openshift.master.username=imash
+          xtf.openshift.master.password=imash
+          xtf.openshift.master.token=${USER_TOKEN}
+          EOL
+      - name: Run tests on OpenShift, with community deliverables and applications
+        run: |
+          mvn clean verify -Popenshift -Dintersmash.deployments.repository.url=${{ inputs.intersmash-applications-repo }} -Dintersmash.deployments.repository.ref=${{ inputs.intersmash-applications-ref }}

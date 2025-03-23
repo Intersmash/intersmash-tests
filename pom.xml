@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!-- Parent -->
+    <parent>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>47</version>
+    </parent>
+    <!-- Model Version -->
+    <modelVersion>4.0.0</modelVersion>
+    <!-- Artifact Configuration -->
+    <groupId>org.jboss.intersmash.tests</groupId>
+    <artifactId>intersmash-tests</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Intersmash Tests :: Parent aggregator</name>
+    <url>https://github.com/Intersmash/intersmash-tests</url>
+    <description>Intersmash test cases</description>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Fabio Burzigotti</name>
+            <email>fburzigo@redhat.com</email>
+            <organization>Red Hat</organization>
+            <organizationUrl>http://www.redhat.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/Intersmash/intersmash-tests.git</connection>
+        <developerConnection>scm:git:ssh://github.com:Intersmash/intersmash-tests.git</developerConnection>
+        <url>http://github.com/Intersmash/intersmash-tests/tree/main</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <version.intersmash>0.0.3.Beta3-SNAPSHOT</version.intersmash>
+        <version.junit-jupiter>5.11.1</version.junit-jupiter>
+        <version.rest-assured>5.5.1</version.rest-assured>
+        <version.junit-platform-launcher>1.11.3</version.junit-platform-launcher>
+        <version.spotless-maven-plugin>2.44.3</version.spotless-maven-plugin>
+        <version.commons-lang3>3.17.0</version.commons-lang3>
+        <version.system-stubs-core>2.1.7</version.system-stubs-core>
+        <version.slf4j>2.0.17</version.slf4j>
+        <!-- Property to identify the tested WildFly applications target distribution (i.e. WildFly/JBoss EAP/JBoss EAP XP) -->
+        <intersmash.test.wildfly-target-distribution>community</intersmash.test.wildfly-target-distribution>
+        <!-- Property to identify the tested WildFly applications build stream (i.e. WildFly/JBoss EAP 8.1.x/JBoss EAP XP 6.x) -->
+        <intersmash.test.wildfly-build-stream>wildfly-latest</intersmash.test.wildfly-build-stream>
+    </properties>
+
+    <modules>
+        <module>style-config</module>
+        <module>intersmash-tests-core</module>
+        <module>wildfly-microprofile-reactive-messaging-kafka</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.intersmash</groupId>
+                <artifactId>intersmash-provisioners</artifactId>
+                <version>${version.intersmash}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.intersmash.tests</groupId>
+                <artifactId>intersmash-tests-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${version.commons-lang3}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>uk.org.webcompere</groupId>
+                <artifactId>system-stubs-jupiter</artifactId>
+                <version>${version.system-stubs-core}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- JUnit 5 Jupiter -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${version.junit-jupiter}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${version.junit-jupiter}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${version.junit-jupiter}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-launcher</artifactId>
+                <version>${version.junit-platform-launcher}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${version.rest-assured}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${version.slf4j}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- JUnit 5 Jupiter -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${version.failsafe.plugin}</version>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${version.spotless-maven-plugin}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.jboss.intersmash.tests</groupId>
+                            <artifactId>style-config</artifactId>
+                            <version>0.0.1-SNAPSHOT</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <java>
+                            <removeUnusedImports/>
+                            <importOrder/>
+                            <eclipse>
+                                <file>org/jboss/intersmash/tests/configs/eclipse-formatter.xml</file>
+                            </eclipse>
+                            <licenseHeader>
+                                <content>
+/**
+* Copyright (C) $YEAR Red Hat, Inc.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*         http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+                                </content>
+                            </licenseHeader>
+                        </java>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <!-- WildFly target distribution -->
+                    <systemPropertyVariables>
+                        <wildfly-target-distribution>${intersmash.test.wildfly-target-distribution}</wildfly-target-distribution>
+                        <wildfly-build-stream>${intersmash.test.wildfly-build-stream}</wildfly-build-stream>
+                    </systemPropertyVariables>
+                    <!-- Excluded groups -->
+                    <excludedGroups>openshift</excludedGroups>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>k8s</id>
+            <!-- default -->
+            <properties/>
+        </profile>
+        <profile>
+            <id>openshift</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <xtf.global_test_properties.path>global-test.openshift.properties</xtf.global_test_properties.path>
+                            </systemPropertyVariables>
+                            <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
+                            <excludedGroups>k8s</excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- Configuration settings for testing JBoss EAP 8.1.x -->
+            <id>wildfly.build-stream.jboss-eap.81</id>
+            <properties>
+                <!-- set the WildFly target distribution to JBoss EAP -->
+                <intersmash.test.wildfly-target-distribution>jboss-eap</intersmash.test.wildfly-target-distribution>
+                <!-- set the WildFly build stream to JBoss EAP 8.1.x -->
+                <intersmash.test.wildfly-build-stream>jboss-eap.81</intersmash.test.wildfly-build-stream>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <!-- JBoss EAP 8.1.x tests are only executed on OpenShift -->
+                                <xtf.global_test_properties.path>global-test.eap-81.openshift.properties</xtf.global_test_properties.path>
+                            </systemPropertyVariables>
+                            <!-- Exclude tests that shouldn't be executed when dealing JBoss EAP, i.e. Bootable Jar tests
+                            (Bootable JAR is only available with WildFLy or JBoss EAP XP) -->
+                            <excludedGroups>k8s,requires-wildfly-bootable-jar</excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- Configuration settings for testing JBoss EAP XP 6.x -->
+            <id>wildfly.build-stream.jboss-eap-xp.6</id>
+            <properties>
+                <!-- set the WildFly target distribution to JBoss EAP -->
+                <intersmash.test.wildfly-target-distribution>jboss-eap-xp</intersmash.test.wildfly-target-distribution>
+                <!-- set the WildFly build stream to JBoss EAP XP 6.x -->
+                <intersmash.test.wildfly-build-stream>jboss-eap-xp.6</intersmash.test.wildfly-build-stream>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <!-- JBoss EAP XP 6.x tests are only executed on OpenShift -->
+                                <xtf.global_test_properties.path>global-test.eap-xp6.openshift.properties</xtf.global_test_properties.path>
+                            </systemPropertyVariables>
+                            <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
+                            <excludedGroups>k8s</excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <repository>
+            <id>redhat-ga-repository</id>
+            <name>RedHat GA Repository</name>
+            <url>https://maven.repository.redhat.com/ga/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jboss-qa-releases</id>
+            <name>JBoss QA releases</name>
+            <url>https://repository.engineering.redhat.com/nexus/content/repositories/jboss-qa-releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jboss-qa-snapshots</id>
+            <name>JBoss QA Snapshot Repository</name>
+            <url>https://repository.engineering.redhat.com/nexus/content/repositories/jboss-qa-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>jboss-releases-repository</id>
+            <name>JBoss Releases Repository</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jboss-snapshots-repository</id>
+            <name>JBoss Snapshots Repository</name>
+            <url>https://repository.jboss.org/nexus/content/repositories/snapshots</url>
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>redhat-ea-maven-repository</id>
+            <name>Red Hat Early Access Maven Repository</name>
+            <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>redhat-ga-repository-plugin</id>
+            <name>RedHat GA Repository</name>
+            <url>https://maven.repository.redhat.com/ga/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>jboss-qa-releases-plugin</id>
+            <name>JBoss QA releases</name>
+            <url>https://repository.engineering.redhat.com/nexus/content/repositories/jboss-qa-releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>redhat-ea-maven-repository-plugin</id>
+            <name>Red Hat Early Access Maven Repository</name>
+            <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
