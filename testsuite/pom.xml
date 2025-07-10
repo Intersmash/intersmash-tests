@@ -20,7 +20,13 @@
     </properties>
 
     <modules>
-        <!-- So far, all the tests require MicroProfile support, therefore they need either WildFly or JBoss EAP XP profiles -->
+        <!--
+            Test related submodules are listed per profile, see below.
+
+            Those supported only by specific variants (e.g.: requiring MicroProfile integration) are defined in
+            relevant profiles, see below.
+            JBoss EAP does not support MicroProfile, therefore related test submodules are not defined here.
+        -->
     </modules>
 
     <dependencies>
@@ -73,6 +79,7 @@
             </properties>
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
+                <module>wildfly-elytron-oidc-client-keycloak</module>
             </modules>
             <build>
                 <plugins>
@@ -97,9 +104,9 @@
                 <!-- set the WildFly target distribution to JBoss EAP -->
                 <intersmash.test.wildfly-target-distribution>jboss-eap</intersmash.test.wildfly-target-distribution>
             </properties>
-            <!--
-                No submodules are (yet) built when testing JBoss EAP.
-            -->
+            <modules>
+                <module>wildfly-elytron-oidc-client-keycloak</module>
+            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -130,6 +137,7 @@
             <!-- Submodules which are built when testing JBoss EAP XP -->
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
+                <module>wildfly-elytron-oidc-client-keycloak</module>
             </modules>
             <build>
                 <plugins>
