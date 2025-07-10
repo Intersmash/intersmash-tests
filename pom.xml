@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>47</version>
+        <version>48.0.0.redhat-00001</version>
     </parent>
     <!-- Model Version -->
     <modelVersion>4.0.0</modelVersion>
