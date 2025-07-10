@@ -20,7 +20,7 @@
     </properties>
 
     <modules>
-        <!-- So far, all the tests require MicroProfile support, therefore they need either WildFly or JBoss EAP XP profiles -->
+        <module>wildfly-elytron-oidc-client-keycloak</module>
     </modules>
 
     <dependencies>
@@ -73,6 +73,7 @@
             </properties>
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
+                <module>wildfly-elytron-oidc-client-keycloak</module>
             </modules>
             <build>
                 <plugins>
@@ -130,6 +131,7 @@
             <!-- Submodules which are built when testing JBoss EAP XP -->
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
+                <module>wildfly-elytron-oidc-client-keycloak</module>
             </modules>
             <build>
                 <plugins>
