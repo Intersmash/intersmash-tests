@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  */
 public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 
-	protected abstract String getEapRouteUrl();
+	protected abstract String getApplicationRouteUrl();
 
 	/**
 	 * Verify that custom data serializers (<i>PersonSerializer</i>) and
@@ -40,7 +40,7 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testSerializer() {
-		RestAssured.get(getEapRouteUrl() + "/serializer")
+		RestAssured.get(getApplicationRouteUrl() + "/serializer")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -69,7 +69,7 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testTx() {
-		RestAssured.get(getEapRouteUrl() + "/tx")
+		RestAssured.get(getApplicationRouteUrl() + "/tx")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -94,7 +94,7 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testMetadata() {
-		RestAssured.get(getEapRouteUrl() + "/metadata")
+		RestAssured.get(getApplicationRouteUrl() + "/metadata")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -120,7 +120,7 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testPartitionsMetadata() {
-		RestAssured.get(getEapRouteUrl() + "/partitionsMetadata")
+		RestAssured.get(getApplicationRouteUrl() + "/partitionsMetadata")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
