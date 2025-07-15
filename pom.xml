@@ -62,8 +62,8 @@
 
     <modules>
         <module>style-config</module>
-        <module>intersmash-tests-core</module>
-        <module>wildfly-microprofile-reactive-messaging-kafka</module>
+        <module>core</module>
+        <module>testsuite</module>
     </modules>
 
     <dependencyManagement>

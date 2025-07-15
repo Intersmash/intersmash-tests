@@ -1,8 +1,9 @@
 /.idea/
-/wildfly-microprofile-reactive-messaging-kafka/target/
-/wildfly-microprofile-reactive-messaging-kafka/tmp/
+/testsuite/wildfly-microprofile-reactive-messaging-kafka/target/
+/testsuite/wildfly-microprofile-reactive-messaging-kafka/tmp/
+/testsuite/wildfly-microprofile-reactive-messaging-kafka/log/
 /style-config/target/
-/intersmash-tests-core/target/
 /target/
 /test.properties
-/wildfly-microprofile-reactive-messaging-kafka/log/
+/core/target/
+/testsuite/target
