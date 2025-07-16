@@ -297,10 +297,12 @@ public interface WildflyApplicationConfiguration {
 	static String getWildflyApplicationTargetDistributionProfile() {
 		String targetDistribution = "wildfly-target-distribution.";
 		final String buildStream = System.getProperty("wildfly-build-stream", "wildfly-latest");
-		switch (buildStream) {
-			case "jboss-eap.81" -> targetDistribution = targetDistribution.concat("jboss-eap");
-			case "jboss-eap-xp.6" -> targetDistribution = targetDistribution.concat("jboss-eap-xp");
-			default -> targetDistribution = targetDistribution.concat("community");
+		if (buildStream.startsWith("jboss-eap-xp.")) {
+			targetDistribution = targetDistribution.concat("jboss-eap-xp");
+		} else if (buildStream.startsWith("jboss-eap.")) {
+			targetDistribution = targetDistribution.concat("jboss-eap");
+		} else {
+			targetDistribution = targetDistribution.concat("community");
 		}
 		return String.format("-P%s", targetDistribution);
 	}
