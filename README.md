@@ -5,7 +5,7 @@ Intersmash test cases.
 ## Overview
 
 The goal is to have a common repository for Intersmash test cases, which are executed to verify complex interoperability 
-scenarios between middleware services in Cloud platform environments, most notably OpenShift.
+scenarios between Middleware runtimes in Cloud platform environments, most notably OpenShift.
 
 Intersmash Tests leverage the [Intersmash framework](https://github.com/Intersmash/intersmash) to provision the tested 
 scenarios, including both service runtimes - like Kafka, Infinispan or Keycloak - and 
@@ -17,8 +17,8 @@ product deliverables, like images or Helm Charts, see the [Profiles section](#pr
 ## Tests
 
 Tests are executed by default on Kubernetes, and with community bits for applications, with the Maven Failsafe Plugin 
-using the [global-test.properties](global-test.properties) file to configure Intersmash framework in order to use 
-community deliverables and Kubernetes specifics, like for example the default OLM namespace and catalog source.
+using the [global-test.properties](global-test.properties) file to configure Intersmash framework in order to employ Kubernetes specifics, 
+like for example the default OLM namespace and catalog source.
 
 ### Running the tests
 
@@ -26,11 +26,11 @@ The simplest test execution can be performed via a `mvn clean install` command.
 
 ### Implemented tests
 
-#### [WildFly (JBoss EAP XP) MiroProfile Reactive Messaging + Kafka (Streams for ApacheKafka)](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests.java)
+#### [WildFly (JBoss EAP XP) MiroProfile Reactive Messaging + Kafka (Streams for ApacheKafka)](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP XP) MicroProfile Reactive
 Messaging application, which interacts with a remote Kafka (Streams for Apache Kafka) service.
-See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests.java) class Javadoc for more details.
+See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT.java) class Javadoc for more details.
 
 ## Profiles
 
@@ -50,7 +50,7 @@ When this profile is enabled, the Maven Failsafe Plugin is configured to use the
 file, so that the Intersmash framework will run tests on OpenShift, and leverage OpenShift cluster specifics - like the 
 default OLM namespace and catalog source - rather than the Kubernetes ones.
 
-### WildFly/JBoss EAP/JBoss EAP XP related profiles
+### WildFly, JBoss EAP and JBoss EAP XP related profiles
 
 #### Executing tests based on the target distribution
 
@@ -61,7 +61,7 @@ etc.
 - `wildfly.build-stream.jboss-eap.81`
 
 When this profile is enabled, _application descriptors_ that implement the
-[WildflyApplicationConfiguration](./intersmash-tests-core/src/main/java/org/jboss/intersmash/tests/wildfly/WildflyApplicationConfiguration.java)
+[WildflyApplicationConfiguration](./core/src/main/java/org/jboss/intersmash/tests/wildfly/WildflyApplicationConfiguration.java)
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the 
@@ -73,20 +73,31 @@ Charts -  will be used during the test execution.
 - `wildfly.build-stream.jboss-eap-xp.6`
 
 When this profile is enabled, _application descriptors_ that implement the
-[WildflyApplicationConfiguration](./intersmash-tests-core/src/main/java/org/jboss/intersmash/tests/wildfly/WildflyApplicationConfiguration.java)
+[WildflyApplicationConfiguration](./core/src/main/java/org/jboss/intersmash/tests/wildfly/WildflyApplicationConfiguration.java)
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the
-[global-test.eap-xp6.openshift.properties](./global-test.eap-xp6.openshift.properties)
+[global-test.eap-xp-6.openshift.properties](global-test.eap-xp-6.openshift.properties)
 file in order to configure the Intersmash framework, so that JBoss EAP XP 6.x cloud deliverables - e.g.: images and Helm
 Charts -  will be used during the test execution.
 
+**IMPORTANT**:
+- When using `-Pwildfly-build-stream.jboss-eap.81` the JBoss EAP 8.1 **Beta** GA deliverables will be used by default,
+  since JBoss EAP 8.1.0 is still not available.
+- When using `-Pwildfly-build-stream.jboss-eap-xp.6` the JBoss EAP XP **5.x** GA deliverables will be used by default,
+  since JBoss EAP XP 6 is still not available.
+
 ## Modules
 
-### [intersmash-tests-core](./intersmash-tests-core)
+### [intersmash-tests-core](./core)
 
 This module contains annotations used to decorate test classes, specifically JUnit 5 `@Tag` Java interfaces which can be 
 used to selectively execute groups of tests.
+
+### [intersmash-tests-testsuite](./testsuite)
+
+This module contains the actual Intersmash tests, i.e. integration tests that verify runtimes interoperability scenarios 
+on OpenShift.
 
 ### [style-config](./style-config)
 
