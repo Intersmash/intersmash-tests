@@ -26,11 +26,11 @@ The simplest test execution can be performed via a `mvn clean install` command.
 
 ### Implemented tests
 
-#### [WildFly (JBoss EAP XP) MiroProfile Reactive Messaging + Kafka (Streams for ApacheKafka)](wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests.java)
+#### [WildFly (JBoss EAP XP) MiroProfile Reactive Messaging + Kafka (Streams for ApacheKafka)](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP XP) MicroProfile Reactive
 Messaging application, which interacts with a remote Kafka (Streams for Apache Kafka) service.
-See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests](wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests.java) class Javadoc for more details.
+See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests.java) class Javadoc for more details.
 
 ## Profiles
 

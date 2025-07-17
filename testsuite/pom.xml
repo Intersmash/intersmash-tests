@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jboss.intersmash.tests</groupId>
@@ -8,8 +10,13 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>wildfly-microprofile-reactive-messaging-kafka</artifactId>
-    <name>Intersmash Tests :: WildFly MicroProfile Reactive Messaging + Kafka</name>
+    <artifactId>intersmash-tests-testsuite</artifactId>
+    <packaging>pom</packaging>
+    <name>Intersmash Tests :: Testsuite</name>
+
+    <modules>
+        <!-- So far, all the tests require MicroProfile support, therefore they need either WildFly or JBoss EAP XP profiles -->
+    </modules>
 
     <dependencies>
         <dependency>
@@ -40,4 +47,22 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>all-modules</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>wildfly-microprofile-reactive-messaging-kafka</module>
+            </modules>
+        </profile>
+        <profile>
+            <!-- Configuration settings for testing JBoss EAP XP 5.x -->
+            <id>wildfly.build-stream.jboss-eap-xp.5</id>
+            <modules>
+                <module>wildfly-microprofile-reactive-messaging-kafka</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
