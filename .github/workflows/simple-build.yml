@@ -1,0 +1,28 @@
+name: Intersmash Tests - Simple build + unit tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  simple-build-and-unit-tests:
+    if: '! github.event.pull_request.draft'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Simple build
+        run: mvn clean install --batch-mode -DskipTests
+      - name: Run unit tests
+        run: mvn test --batch-mode -pl core
