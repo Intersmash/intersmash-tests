@@ -7,3 +7,4 @@
 /test.properties
 /core/target/
 /testsuite/target
+/testsuite/wildfly-elytron-oidc-client-keycloak/target/

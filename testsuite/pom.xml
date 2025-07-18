@@ -15,7 +15,7 @@
     <name>Intersmash Tests :: Testsuite</name>
 
     <modules>
-        <!-- So far, all the tests require MicroProfile support, therefore they need either WildFly or JBoss EAP XP profiles -->
+        <module>wildfly-elytron-oidc-client-keycloak</module>
     </modules>
 
     <dependencies>
@@ -55,6 +55,7 @@
             </activation>
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
+                <module>wildfly-elytron-oidc-client-keycloak</module>
             </modules>
         </profile>
         <profile>
@@ -62,6 +63,7 @@
             <id>wildfly.build-stream.jboss-eap-xp.6</id>
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
+                <module>wildfly-elytron-oidc-client-keycloak</module>
             </modules>
         </profile>
     </profiles>
