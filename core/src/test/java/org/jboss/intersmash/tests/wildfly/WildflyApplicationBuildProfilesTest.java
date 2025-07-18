@@ -23,14 +23,18 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
 /**
- * Verifies {@link WildflyApplicationConfiguration} functionality, based on
- * documented WildFly application build profiles.
+ * Verifies {@link WildflyApplicationConfiguration} functionality when this is expected to be used to run a
+ * WildFly s2i build, based on documented WildFly application build profiles.
  */
 @ExtendWith(SystemStubsExtension.class)
 public class WildflyApplicationBuildProfilesTest {
 	@SystemStub
 	private SystemProperties systemProperties;
 
+	/**
+	 * Verifies that the correct properties are generated to be passed to an OpenShift s2i build which should produce
+	 * a WildFly application.
+	 */
 	@Test
 	void generatedMavenArgsIncludeValidProfiles() {
 		// Arrange

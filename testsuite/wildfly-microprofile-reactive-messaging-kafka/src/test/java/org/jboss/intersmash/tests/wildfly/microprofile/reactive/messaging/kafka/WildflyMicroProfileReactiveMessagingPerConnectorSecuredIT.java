@@ -23,7 +23,7 @@ import org.jboss.intersmash.annotations.ServiceProvisioner;
 import org.jboss.intersmash.annotations.ServiceUrl;
 import org.jboss.intersmash.provision.openshift.OpenShiftProvisioner;
 import org.jboss.intersmash.provision.openshift.WildflyImageOpenShiftProvisioner;
-import org.jboss.intersmash.tests.junit.annotations.EapXp6Test;
+import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
 import org.jboss.intersmash.tests.junit.annotations.KafkaTest;
 import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
 import org.jboss.intersmash.tests.junit.annotations.WildflyTest;
@@ -42,13 +42,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <br>
  * This application sends messages to a Kafka/Streams for Apache Kafka service and, at the same time, listens to
  * different topic in order to read data.
- * Connections are performed both as not secured (plaintext) and secured via SSL with SSLContext too, ileveraging
+ * Connections are performed both as not secured (plaintext) and secured via SSL with SSLContext too, leveraging
  * Elytron based SSLContext configuration.
  * Actual test implementations are placed in {@link WildflyMicroProfileReactiveMessagingTestsCommon}
  */
 @KafkaTest
 @WildflyTest
-@EapXp6Test
+@EapXpTest
 @OpenShiftTest
 @ExtendWith(ProjectCreator.class)
 @Intersmash({

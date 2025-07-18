@@ -58,8 +58,8 @@
             </modules>
         </profile>
         <profile>
-            <!-- Configuration settings for testing JBoss EAP XP 5.x -->
-            <id>wildfly.build-stream.jboss-eap-xp.5</id>
+            <!-- Configuration settings for testing JBoss EAP XP 6.x -->
+            <id>wildfly.build-stream.jboss-eap-xp.6</id>
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
             </modules>

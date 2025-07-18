@@ -309,7 +309,7 @@
                         <configuration>
                             <systemPropertyVariables>
                                 <!-- JBoss EAP XP 6.x tests are only executed on OpenShift -->
-                                <xtf.global_test_properties.path>global-test.eap-xp6.openshift.properties</xtf.global_test_properties.path>
+                                <xtf.global_test_properties.path>global-test.eap-xp-6.openshift.properties</xtf.global_test_properties.path>
                             </systemPropertyVariables>
                             <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
                             <excludedGroups>k8s</excludedGroups>
