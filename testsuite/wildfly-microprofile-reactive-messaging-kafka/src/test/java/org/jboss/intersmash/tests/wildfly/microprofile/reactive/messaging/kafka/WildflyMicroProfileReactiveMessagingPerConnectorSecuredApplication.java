@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jboss.intersmash.IntersmashConfig;
 import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
 import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplication;
@@ -57,8 +58,8 @@ public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication
 		// Set up the Reactive-messaging deployment.
 		String applicationDir = "wildfly/microprofile-reactive-messaging-kafka";
 		buildInput = new BuildInputBuilder()
-				.uri("https://github.com/Intersmash/intersmash-applications.git")
-				.ref("main")
+				.uri(IntersmashConfig.deploymentsRepositoryUrl())
+				.ref(IntersmashConfig.deploymentsRepositoryRef())
 				.build();
 
 		clientSecret = OpenShifts.master().getSecret("amq-streams-cluster-ca-cert");
