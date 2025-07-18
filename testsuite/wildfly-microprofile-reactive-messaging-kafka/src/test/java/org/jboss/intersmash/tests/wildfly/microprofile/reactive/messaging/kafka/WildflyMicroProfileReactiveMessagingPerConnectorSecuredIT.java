@@ -59,7 +59,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT
 		extends WildflyMicroProfileReactiveMessagingTestsCommon {
 	@ServiceUrl(WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication.class)
-	private String eapRouteUrl;
+	private String applicationRouteUrl;
 
 	@ServiceProvisioner(KafkaMicroProfileReactiveMessagingApplication.class)
 	private OpenShiftProvisioner<KafkaMicroProfileReactiveMessagingApplication> amqStreamsOpenShiftProvisioner;
@@ -68,7 +68,7 @@ public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT
 	private WildflyImageOpenShiftProvisioner eapOpenShiftProvisioner;
 
 	@Override
-	protected String getEapRouteUrl() {
-		return eapRouteUrl;
+	protected String getApplicationRouteUrl() {
+		return applicationRouteUrl;
 	}
 }
