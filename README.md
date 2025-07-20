@@ -58,33 +58,33 @@ By default, tests involving WildFly and the related products (i.e. JBoss EAP and
 the community version of the involved applications (WildFly) and cloud related deliverables, e.g.: images, Helm Charts
 etc.
 
-- `wildfly.build-stream.jboss-eap.81`
+- `wildfly-target-distribution.jboss-eap`
 
 When this profile is enabled, _application descriptors_ that implement the
 [WildflyApplicationConfiguration](./core/src/main/java/org/jboss/intersmash/tests/wildfly/WildflyApplicationConfiguration.java)
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the 
-[global-test.eap-81.openshift.properties](./global-test.eap-81.openshift.properties)
-file in order to configure the Intersmash framework, so that JBoss EAP 8.1.x cloud deliverables - e.g.: images and Helm 
+[global-test.jboss-eap.openshift.properties](global-test.jboss-eap.openshift.properties)
+file in order to configure the Intersmash framework, so that JBoss EAP cloud deliverables - e.g.: images and Helm 
 Charts -  will be used during the test execution.
 
 
-- `wildfly.build-stream.jboss-eap-xp.6`
+- `wildfly-target-distribution.jboss-eap-xp`
 
 When this profile is enabled, _application descriptors_ that implement the
 [WildflyApplicationConfiguration](./core/src/main/java/org/jboss/intersmash/tests/wildfly/WildflyApplicationConfiguration.java)
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the
-[global-test.eap-xp-6.openshift.properties](global-test.eap-xp-6.openshift.properties)
-file in order to configure the Intersmash framework, so that JBoss EAP XP 6.x cloud deliverables - e.g.: images and Helm
+[global-test.jboss-eap-xp.openshift.properties](global-test.jboss-eap-xp.openshift.properties)
+file in order to configure the Intersmash framework, so that JBoss EAP XP cloud deliverables - e.g.: images and Helm
 Charts -  will be used during the test execution.
 
 **IMPORTANT**:
-- When using `-Pwildfly-build-stream.jboss-eap.81` the JBoss EAP 8.1 **Beta** GA deliverables will be used by default,
+- When using `-Pwildfly-target-distribution.jboss-eap` the JBoss EAP 8.1 **Beta** GA deliverables will be used by default,
   since JBoss EAP 8.1.0 is still not available.
-- When using `-Pwildfly-build-stream.jboss-eap-xp.6` the JBoss EAP XP **5.x** GA deliverables will be used by default,
+- When using `-Pwildfly-target-distribution.jboss-eap-xp` the JBoss EAP XP **5.x** GA deliverables will be used by default,
   since JBoss EAP XP 6 is still not available.
 
 ## Modules

@@ -49,7 +49,7 @@
 
     <profiles>
         <profile>
-            <id>all-modules</id>
+            <id>wildfly</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -58,11 +58,19 @@
             </modules>
         </profile>
         <profile>
-            <!-- Configuration settings for testing JBoss EAP XP 6.x -->
-            <id>wildfly.build-stream.jboss-eap-xp.6</id>
+            <!-- Submodules which are built when testing JBoss EAP XP -->
+            <id>wildfly-target-distribution.jboss-eap-xp</id>
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
             </modules>
+        </profile>
+        <profile>
+            <!--
+                Submodules which are built when testing JBoss EAP.
+                Empty because we only need a profile declaration to make it disable the "wildfly" profile (active by default)
+                when we explicitly enable "wildfly-target-distribution.jboss-eap"
+            -->
+            <id>wildfly-target-distribution.jboss-eap</id>
         </profile>
     </profiles>
 </project>
