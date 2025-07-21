@@ -14,6 +14,11 @@
     <packaging>pom</packaging>
     <name>Intersmash Tests :: Testsuite</name>
 
+    <properties>
+        <!-- Property to identify the tested WildFly applications target distribution (i.e. WildFly/JBoss EAP/JBoss EAP XP) -->
+        <intersmash.test.wildfly-target-distribution>wildfly</intersmash.test.wildfly-target-distribution>
+    </properties>
+
     <modules>
         <!-- So far, all the tests require MicroProfile support, therefore they need either WildFly or JBoss EAP XP profiles -->
     </modules>
@@ -36,6 +41,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <!-- WildFly target distribution -->
+                    <systemPropertyVariables>
+                        <wildfly-target-distribution>${intersmash.test.wildfly-target-distribution}</wildfly-target-distribution>
+                    </systemPropertyVariables>
+                    <!-- Excluded groups -->
+                    <excludedGroups>openshift</excludedGroups>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -48,29 +61,92 @@
     </build>
 
     <profiles>
+        <!-- WildFly related profiles -->
         <profile>
-            <id>wildfly</id>
+            <id>wildfly-target-distribution.wildfly</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+            <properties>
+                <!-- set the WildFly target distribution to WildFly -->
+                <intersmash.test.wildfly-target-distribution>wildfly</intersmash.test.wildfly-target-distribution>
+            </properties>
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
             </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <xtf.global_test_properties.path>global-test.openshift.properties</xtf.global_test_properties.path>
+                            </systemPropertyVariables>
+                            <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
+                            <excludedGroups>k8s</excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
-            <!-- Submodules which are built when testing JBoss EAP XP -->
-            <id>wildfly-target-distribution.jboss-eap-xp</id>
-            <modules>
-                <module>wildfly-microprofile-reactive-messaging-kafka</module>
-            </modules>
-        </profile>
-        <profile>
-            <!--
-                Submodules which are built when testing JBoss EAP.
-                Empty because we only need a profile declaration to make it disable the "wildfly" profile (active by default)
-                when we explicitly enable "wildfly-target-distribution.jboss-eap"
-            -->
+            <!-- Configuration settings for testing JBoss EAP -->
             <id>wildfly-target-distribution.jboss-eap</id>
+            <properties>
+                <!-- set the WildFly target distribution to JBoss EAP -->
+                <intersmash.test.wildfly-target-distribution>jboss-eap</intersmash.test.wildfly-target-distribution>
+            </properties>
+            <!--
+                No submodules are (yet) built when testing JBoss EAP.
+            -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <!-- JBoss EAP tests are only executed on OpenShift -->
+                                <xtf.global_test_properties.path>global-test.jboss-eap.openshift.properties</xtf.global_test_properties.path>
+                            </systemPropertyVariables>
+                            <!--
+                                Exclude tests that shouldn't be executed when dealing JBoss EAP, i.e. Bootable JAR tests
+                                (Bootable JAR is only available with WildFLy or JBoss EAP XP)
+                            -->
+                            <excludedGroups>k8s,requires-wildfly-bootable-jar</excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- Configuration settings for testing JBoss EAP XP -->
+            <id>wildfly-target-distribution.jboss-eap-xp</id>
+            <properties>
+                <!-- set the WildFly target distribution to JBoss EAP -->
+                <intersmash.test.wildfly-target-distribution>jboss-eap-xp</intersmash.test.wildfly-target-distribution>
+            </properties>
+            <!-- Submodules which are built when testing JBoss EAP XP -->
+            <modules>
+                <module>wildfly-microprofile-reactive-messaging-kafka</module>
+            </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <!-- JBoss EAP XP tests are only executed on OpenShift -->
+                                <xtf.global_test_properties.path>global-test.jboss-eap-xp.openshift.properties</xtf.global_test_properties.path>
+                            </systemPropertyVariables>
+                            <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
+                            <excludedGroups>k8s</excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

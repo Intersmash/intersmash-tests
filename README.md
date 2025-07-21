@@ -17,7 +17,7 @@ product deliverables, like images or Helm Charts, see the [Profiles section](#pr
 ## Tests
 
 Tests are executed by default on Kubernetes, and with community bits for applications, with the Maven Failsafe Plugin 
-using the [global-test.properties](global-test.properties) file to configure Intersmash framework in order to employ Kubernetes specifics, 
+using the [global-test.properties](testsuite/global-test.properties) file to configure Intersmash framework in order to employ Kubernetes specifics, 
 like for example the default OLM namespace and catalog source.
 
 ### Running the tests
@@ -46,7 +46,7 @@ instance those that involve an s2i build.
 Adding `-Popenshift` to the build will make JUnit exclude tests that are expected to run on Kubernetes only. 
 
 When this profile is enabled, the Maven Failsafe Plugin is configured to use the 
-[global-test.openshift.properties](./global-test.openshift.properties) 
+[global-test.openshift.properties](testsuite/global-test.openshift.properties) 
 file, so that the Intersmash framework will run tests on OpenShift, and leverage OpenShift cluster specifics - like the 
 default OLM namespace and catalog source - rather than the Kubernetes ones.
 
@@ -65,7 +65,7 @@ When this profile is enabled, _application descriptors_ that implement the
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the 
-[global-test.jboss-eap.openshift.properties](global-test.jboss-eap.openshift.properties)
+[global-test.jboss-eap.openshift.properties](testsuite/global-test.jboss-eap.openshift.properties)
 file in order to configure the Intersmash framework, so that JBoss EAP cloud deliverables - e.g.: images and Helm 
 Charts -  will be used during the test execution.
 
@@ -77,7 +77,7 @@ When this profile is enabled, _application descriptors_ that implement the
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the
-[global-test.jboss-eap-xp.openshift.properties](global-test.jboss-eap-xp.openshift.properties)
+[global-test.jboss-eap-xp.openshift.properties](testsuite/global-test.jboss-eap-xp.openshift.properties)
 file in order to configure the Intersmash framework, so that JBoss EAP XP cloud deliverables - e.g.: images and Helm
 Charts -  will be used during the test execution.
 
