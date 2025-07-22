@@ -38,7 +38,7 @@ public class WildflyApplicationBuildProfilesTest {
 	@Test
 	void generatedMavenArgsIncludeValidProfiles() {
 		// Arrange
-		systemProperties.set("wildfly-build-stream", "wildfly-latest");
+		systemProperties.set("wildfly-target-distribution", "wildfly");
 
 		// Act
 		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
@@ -46,7 +46,6 @@ public class WildflyApplicationBuildProfilesTest {
 		final String mavenArgs = app.generateAdditionalMavenArgs();
 
 		// Assert
-		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-target-distribution.community"));
-		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-build-stream.wildfly-latest"));
+		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-target-distribution.wildfly"));
 	}
 }

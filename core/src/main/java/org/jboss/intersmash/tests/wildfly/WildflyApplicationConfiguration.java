@@ -232,7 +232,7 @@ public interface WildflyApplicationConfiguration {
 	 * Build a string that will be used to set the {@code MAVEN_ARGS_APPEND}
 	 * environment variable of a s2i build configuration. This way all relevant
 	 * system properties and profiles which should be used to build a WildFly/JBoss
-	 * EAP 8.x or JBoss EAP XP application conveniently, i.e. with the expected bits
+	 * EAP or JBoss EAP XP application conveniently, i.e. with the expected bits
 	 * and configuration, can be forwarded to a remote s2i build.
 	 * 
 	 * @return A string that will be set as the value for the
@@ -282,10 +282,8 @@ public interface WildflyApplicationConfiguration {
 				+ ((StringUtils.isBlank(this.bomsEeServerVersion())
 						? ""
 						: (" -D" + this.bomsEeServerVersionPropertyName() + "=" + this.bomsEeServerVersion()))));
-		// let's forward the distribution for building the application...
+		// let's forward the distribution for building the application.
 		result = result.concat(" " + getWildflyApplicationTargetDistributionProfile());
-		// ... and the build stream too
-		result = result.concat(" " + getWildflyApplicationBuildStreamProfile());
 		// a maven mirror for testable artifacts, i.e. which are not released yet, can
 		// be provided
 		result = result.concat((StringUtils.isBlank(this.getMavenMirrorUrl())
@@ -295,19 +293,7 @@ public interface WildflyApplicationConfiguration {
 	}
 
 	static String getWildflyApplicationTargetDistributionProfile() {
-		String targetDistribution = "wildfly-target-distribution.";
-		final String buildStream = System.getProperty("wildfly-build-stream", "wildfly-latest");
-		if (buildStream.startsWith("jboss-eap-xp.")) {
-			targetDistribution = targetDistribution.concat("jboss-eap-xp");
-		} else if (buildStream.startsWith("jboss-eap.")) {
-			targetDistribution = targetDistribution.concat("jboss-eap");
-		} else {
-			targetDistribution = targetDistribution.concat("community");
-		}
-		return String.format("-P%s", targetDistribution);
-	}
-
-	static String getWildflyApplicationBuildStreamProfile() {
-		return String.format("-Pwildfly-build-stream.%s", System.getProperty("wildfly-build-stream", "wildfly-latest"));
+		return String.format("-Pwildfly-target-distribution.%s",
+				System.getProperty("wildfly-target-distribution", "wildfly"));
 	}
 }

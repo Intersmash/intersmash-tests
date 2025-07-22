@@ -38,7 +38,7 @@ public class EapXpApplicationBuildProfilesTest {
 	@Test
 	void generatedMavenArgsIncludeValidProfiles() {
 		// Arrange
-		systemProperties.set("wildfly-build-stream", "jboss-eap-xp.6");
+		systemProperties.set("wildfly-target-distribution", "jboss-eap-xp");
 
 		// Act
 		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
@@ -47,6 +47,5 @@ public class EapXpApplicationBuildProfilesTest {
 
 		// Assert
 		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-target-distribution.jboss-eap-xp"));
-		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-build-stream.jboss-eap-xp.6"));
 	}
 }

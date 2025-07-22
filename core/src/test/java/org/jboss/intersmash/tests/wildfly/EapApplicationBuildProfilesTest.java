@@ -24,21 +24,21 @@ import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
 /**
  * Verifies {@link WildflyApplicationConfiguration} functionality when this is expected to be used to run a
- * JBoss EAP 8.x s2i build, based on documented WildFly application build profiles.
+ * JBoss EAP s2i build, based on documented WildFly application build profiles.
  */
 @ExtendWith(SystemStubsExtension.class)
-public class Eap8ApplicationBuildProfilesTest {
+public class EapApplicationBuildProfilesTest {
 	@SystemStub
 	private SystemProperties systemProperties;
 
 	/**
 	 * Verifies that the correct properties are generated to be passed to an OpenShift s2i build which should produce
-	 * a JBoss EAP 8.x application.
+	 * a JBoss EAP application.
 	 */
 	@Test
 	void generatedMavenArgsIncludeValidProfiles() {
 		// Arrange
-		systemProperties.set("wildfly-build-stream", "jboss-eap.81");
+		systemProperties.set("wildfly-target-distribution", "jboss-eap");
 
 		// Act
 		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
@@ -47,6 +47,5 @@ public class Eap8ApplicationBuildProfilesTest {
 
 		// Assert
 		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-target-distribution.jboss-eap"));
-		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-build-stream.jboss-eap.81"));
 	}
 }

@@ -1,5 +1,7 @@
 # Intersmash Tests
 
+![Simple build workflow](https://github.com/Intersmash/intersmash-tests/actions/workflows/simple-build.yml/badge.svg)
+
 Intersmash test cases.
 
 ## Overview
@@ -22,7 +24,7 @@ like for example the default OLM namespace and catalog source.
 
 ### Running the tests
 
-The simplest test execution can be performed via a `mvn clean install` command.
+The simplest test execution can be performed via a `mvn clean verify` command.
 
 ### Implemented tests
 
@@ -36,55 +38,54 @@ See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests](testsuite
 
 ### Executing tests based on target platform
 
-- `k8s`
+The default test execution will exclude tests that are expected to run on OpenShift only, as for 
+instance those that involve an s2i build. 
 
-Adding `-Pk8s` to the build will make JUnit exclude tests that are expected to run on OpenShift only, as for 
-instance those that involve an s2i build.
-
-- `openshift`
-
-Adding `-Popenshift` to the build will make JUnit exclude tests that are expected to run on Kubernetes only. 
-
-When this profile is enabled, the Maven Failsafe Plugin is configured to use the 
-[global-test.openshift.properties](./global-test.openshift.properties) 
-file, so that the Intersmash framework will run tests on OpenShift, and leverage OpenShift cluster specifics - like the 
-default OLM namespace and catalog source - rather than the Kubernetes ones.
+By default, i.e. when no profiles are enabled, the Maven Failsafe Plugin is configured to use the
+[global-test.openshift.properties](global-test.openshift.properties)
+file, so that the Intersmash framework will run tests on OpenShift, and leverage OpenShift cluster specifics - like the
+default OLM namespace and catalog source.
 
 ### WildFly, JBoss EAP and JBoss EAP XP related profiles
 
+Tests involving WildFly and the related products (i.e. JBoss EAP and JBoss EAP XP) are executed by using 
+the community version of the involved applications (WildFly) and cloud related deliverables, e.g.: images, Helm Charts
+etc. by default. 
+
+Such values can be overridden via system properties.
+
 #### Executing tests based on the target distribution
 
-By default, tests involving WildFly and the related products (i.e. JBoss EAP and JBoss EAP XP) are executed by using
-the community version of the involved applications (WildFly) and cloud related deliverables, e.g.: images, Helm Charts
-etc.
-
-- `wildfly.build-stream.jboss-eap.81`
+- `wildfly-target-distribution.jboss-eap`
 
 When this profile is enabled, _application descriptors_ that implement the
 [WildflyApplicationConfiguration](./core/src/main/java/org/jboss/intersmash/tests/wildfly/WildflyApplicationConfiguration.java)
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the 
-[global-test.eap-81.openshift.properties](./global-test.eap-81.openshift.properties)
-file in order to configure the Intersmash framework, so that JBoss EAP 8.1.x cloud deliverables - e.g.: images and Helm 
+[global-test.jboss-eap.openshift.properties](global-test.jboss-eap.openshift.properties) defaults
+file in order to configure the Intersmash framework, so that JBoss EAP cloud deliverables - e.g.: images and Helm 
 Charts -  will be used during the test execution.
 
+Such values can be overridden via system properties.
 
-- `wildfly.build-stream.jboss-eap-xp.6`
+- `wildfly-target-distribution.jboss-eap-xp`
 
 When this profile is enabled, _application descriptors_ that implement the
 [WildflyApplicationConfiguration](./core/src/main/java/org/jboss/intersmash/tests/wildfly/WildflyApplicationConfiguration.java)
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the
-[global-test.eap-xp-6.openshift.properties](global-test.eap-xp-6.openshift.properties)
-file in order to configure the Intersmash framework, so that JBoss EAP XP 6.x cloud deliverables - e.g.: images and Helm
+[global-test.jboss-eap-xp.openshift.properties](global-test.jboss-eap-xp.openshift.properties)
+file in order to configure the Intersmash framework, so that JBoss EAP XP cloud deliverables - e.g.: images and Helm
 Charts -  will be used during the test execution.
 
+Such values can be overridden via system properties.
+
 **IMPORTANT**:
-- When using `-Pwildfly-build-stream.jboss-eap.81` the JBoss EAP 8.1 **Beta** GA deliverables will be used by default,
+- When using `-Pwildfly-target-distribution.jboss-eap` the JBoss EAP 8.1 **Beta** GA deliverables will be used by default,
   since JBoss EAP 8.1.0 is still not available.
-- When using `-Pwildfly-build-stream.jboss-eap-xp.6` the JBoss EAP XP **5.x** GA deliverables will be used by default,
+- When using `-Pwildfly-target-distribution.jboss-eap-xp` the JBoss EAP XP **5.x** GA deliverables will be used by default,
   since JBoss EAP XP 6 is still not available.
 
 ## Modules

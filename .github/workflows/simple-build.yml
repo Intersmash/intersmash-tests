@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  simple-build-and-unit-tests:
+  simple-build-and-unit-tests-wildfly:
     if: '! github.event.pull_request.draft'
     runs-on: ubuntu-latest
 
@@ -22,7 +22,37 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-      - name: Simple build
-        run: mvn clean install --batch-mode -DskipTests
-      - name: Run unit tests
-        run: mvn test --batch-mode -pl core
+      - name: Simple build and unit tests (WildFly)
+        run: mvn clean install --batch-mode -DskipITs
+
+  simple-build-and-unit-tests-jboss-eap:
+    if: '! github.event.pull_request.draft'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Simple build and unit tests (JBoss EAP)
+        run: mvn clean install --batch-mode -Pwildfly-target-distribution.jboss-eap -DskipITs
+
+  simple-build-and-unit-tests-jboss-eap-xp:
+    if: '! github.event.pull_request.draft'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Simple build and unit tests (JBoss EAP XP)
+        run: mvn clean install --batch-mode -Pwildfly-target-distribution.jboss-eap-xp -DskipITs

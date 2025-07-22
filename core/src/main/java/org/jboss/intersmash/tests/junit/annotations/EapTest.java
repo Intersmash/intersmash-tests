@@ -21,11 +21,11 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.Tag;
 
 /**
- * Mark test that tests JBoss EAP 8.x services.
+ * Mark test that tests JBoss EAP services.
  * Used per class.
  */
-@Tag("eap8")
+@Tag("eap")
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ java.lang.annotation.ElementType.TYPE })
-public @interface Eap8Test {
+public @interface EapTest {
 }

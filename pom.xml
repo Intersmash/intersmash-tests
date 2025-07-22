@@ -54,10 +54,6 @@
         <version.commons-lang3>3.17.0</version.commons-lang3>
         <version.system-stubs-core>2.1.7</version.system-stubs-core>
         <version.slf4j>2.0.17</version.slf4j>
-        <!-- Property to identify the tested WildFly applications target distribution (i.e. WildFly/JBoss EAP/JBoss EAP XP) -->
-        <intersmash.test.wildfly-target-distribution>community</intersmash.test.wildfly-target-distribution>
-        <!-- Property to identify the tested WildFly applications build stream (i.e. WildFly/JBoss EAP 8.1.x/JBoss EAP XP 6.x) -->
-        <intersmash.test.wildfly-build-stream>wildfly-latest</intersmash.test.wildfly-build-stream>
     </properties>
 
     <modules>
@@ -222,103 +218,11 @@
 
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <!-- WildFly target distribution -->
-                    <systemPropertyVariables>
-                        <wildfly-target-distribution>${intersmash.test.wildfly-target-distribution}</wildfly-target-distribution>
-                        <wildfly-build-stream>${intersmash.test.wildfly-build-stream}</wildfly-build-stream>
-                    </systemPropertyVariables>
-                    <!-- Excluded groups -->
-                    <excludedGroups>openshift</excludedGroups>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>k8s</id>
-            <!-- default -->
-            <properties/>
-        </profile>
-        <profile>
-            <id>openshift</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <xtf.global_test_properties.path>global-test.openshift.properties</xtf.global_test_properties.path>
-                            </systemPropertyVariables>
-                            <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
-                            <excludedGroups>k8s</excludedGroups>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!-- Configuration settings for testing JBoss EAP 8.1.x -->
-            <id>wildfly.build-stream.jboss-eap.81</id>
-            <properties>
-                <!-- set the WildFly target distribution to JBoss EAP -->
-                <intersmash.test.wildfly-target-distribution>jboss-eap</intersmash.test.wildfly-target-distribution>
-                <!-- set the WildFly build stream to JBoss EAP 8.1.x -->
-                <intersmash.test.wildfly-build-stream>jboss-eap.81</intersmash.test.wildfly-build-stream>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <!-- JBoss EAP 8.1.x tests are only executed on OpenShift -->
-                                <xtf.global_test_properties.path>global-test.eap-81.openshift.properties</xtf.global_test_properties.path>
-                            </systemPropertyVariables>
-                            <!-- Exclude tests that shouldn't be executed when dealing JBoss EAP, i.e. Bootable Jar tests
-                            (Bootable JAR is only available with WildFLy or JBoss EAP XP) -->
-                            <excludedGroups>k8s,requires-wildfly-bootable-jar</excludedGroups>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!-- Configuration settings for testing JBoss EAP XP 6.x -->
-            <id>wildfly.build-stream.jboss-eap-xp.6</id>
-            <properties>
-                <!-- set the WildFly target distribution to JBoss EAP -->
-                <intersmash.test.wildfly-target-distribution>jboss-eap-xp</intersmash.test.wildfly-target-distribution>
-                <!-- set the WildFly build stream to JBoss EAP XP 6.x -->
-                <intersmash.test.wildfly-build-stream>jboss-eap-xp.6</intersmash.test.wildfly-build-stream>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <!-- JBoss EAP XP 6.x tests are only executed on OpenShift -->
-                                <xtf.global_test_properties.path>global-test.eap-xp-6.openshift.properties</xtf.global_test_properties.path>
-                            </systemPropertyVariables>
-                            <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
-                            <excludedGroups>k8s</excludedGroups>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <repositories>
         <repository>
