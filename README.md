@@ -1,5 +1,7 @@
 # Intersmash Tests
 
+![Simple build workflow](https://github.com/Intersmash/intersmash-tests/actions/workflows/simple-build.yml/badge.svg)
+
 Intersmash test cases.
 
 ## Overview
@@ -17,12 +19,12 @@ product deliverables, like images or Helm Charts, see the [Profiles section](#pr
 ## Tests
 
 Tests are executed by default on Kubernetes, and with community bits for applications, with the Maven Failsafe Plugin 
-using the [global-test.properties](testsuite/global-test.properties) file to configure Intersmash framework in order to employ Kubernetes specifics, 
+using the [global-test.properties](global-test.properties) file to configure Intersmash framework in order to employ Kubernetes specifics, 
 like for example the default OLM namespace and catalog source.
 
 ### Running the tests
 
-The simplest test execution can be performed via a `mvn clean install` command.
+The simplest test execution can be performed via a `mvn clean verify` command.
 
 ### Implemented tests
 
@@ -36,27 +38,23 @@ See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests](testsuite
 
 ### Executing tests based on target platform
 
-- `k8s`
+The default test execution will exclude tests that are expected to run on OpenShift only, as for 
+instance those that involve an s2i build. 
 
-Adding `-Pk8s` to the build will make JUnit exclude tests that are expected to run on OpenShift only, as for 
-instance those that involve an s2i build.
-
-- `openshift`
-
-Adding `-Popenshift` to the build will make JUnit exclude tests that are expected to run on Kubernetes only. 
-
-When this profile is enabled, the Maven Failsafe Plugin is configured to use the 
-[global-test.openshift.properties](testsuite/global-test.openshift.properties) 
-file, so that the Intersmash framework will run tests on OpenShift, and leverage OpenShift cluster specifics - like the 
-default OLM namespace and catalog source - rather than the Kubernetes ones.
+By default, i.e. when no profiles are enabled, the Maven Failsafe Plugin is configured to use the
+[global-test.openshift.properties](global-test.openshift.properties)
+file, so that the Intersmash framework will run tests on OpenShift, and leverage OpenShift cluster specifics - like the
+default OLM namespace and catalog source.
 
 ### WildFly, JBoss EAP and JBoss EAP XP related profiles
 
-#### Executing tests based on the target distribution
-
-By default, tests involving WildFly and the related products (i.e. JBoss EAP and JBoss EAP XP) are executed by using
+Tests involving WildFly and the related products (i.e. JBoss EAP and JBoss EAP XP) are executed by using 
 the community version of the involved applications (WildFly) and cloud related deliverables, e.g.: images, Helm Charts
-etc.
+etc. by default. 
+
+Such values can be overridden via system properties.
+
+#### Executing tests based on the target distribution
 
 - `wildfly-target-distribution.jboss-eap`
 
@@ -65,10 +63,11 @@ When this profile is enabled, _application descriptors_ that implement the
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the 
-[global-test.jboss-eap.openshift.properties](testsuite/global-test.jboss-eap.openshift.properties)
+[global-test.jboss-eap.openshift.properties](global-test.jboss-eap.openshift.properties) defaults
 file in order to configure the Intersmash framework, so that JBoss EAP cloud deliverables - e.g.: images and Helm 
 Charts -  will be used during the test execution.
 
+Such values can be overridden via system properties.
 
 - `wildfly-target-distribution.jboss-eap-xp`
 
@@ -77,9 +76,11 @@ When this profile is enabled, _application descriptors_ that implement the
 interface will generate additional Maven args that will be forwarded to a remote s2i build, so that the tested
 application will be built accordingly.
 Additionally, the Maven Failsafe Plugin will use the
-[global-test.jboss-eap-xp.openshift.properties](testsuite/global-test.jboss-eap-xp.openshift.properties)
+[global-test.jboss-eap-xp.openshift.properties](global-test.jboss-eap-xp.openshift.properties)
 file in order to configure the Intersmash framework, so that JBoss EAP XP cloud deliverables - e.g.: images and Helm
 Charts -  will be used during the test execution.
+
+Such values can be overridden via system properties.
 
 **IMPORTANT**:
 - When using `-Pwildfly-target-distribution.jboss-eap` the JBoss EAP 8.1 **Beta** GA deliverables will be used by default,
