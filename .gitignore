@@ -7,3 +7,6 @@
 /test.properties
 /core/target/
 /testsuite/target
+/testsuite/wildfly-elytron-oidc-client-keycloak/target/
+/testsuite/wildfly-elytron-oidc-client-keycloak/log/
+/testsuite/wildfly-elytron-oidc-client-keycloak/tmp/
