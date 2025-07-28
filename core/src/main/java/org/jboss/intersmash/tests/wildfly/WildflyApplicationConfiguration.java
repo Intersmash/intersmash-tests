@@ -36,6 +36,8 @@ public interface WildflyApplicationConfiguration {
 	String WILDFLY_MAVEN_PLUGIN_VERSION = "wildfly-maven-plugin.version";
 	String WILDFLY_KEYCLOAK_SAML_ADAPTER_FEATURE_PACK_VERSION = "wildfly.keycloak-saml-adapter-feature-pack.version";
 	String MAVEN_MIRROR_URL = "maven-mirror.url";
+	String MAVEN_RESOLVER_TRANSPORT = "maven.resolver.transport";
+	String MAVEN_WAGON_HTTP_SSL_INSECURE = "maven.wagon.http.ssl.insecure";
 
 	default String wildflyMavenPluginGroupId() {
 		return System.getProperty(WILDFLY_MAVEN_PLUGIN_GROUPID);
@@ -83,6 +85,14 @@ public interface WildflyApplicationConfiguration {
 
 	default String getMavenMirrorUrl() {
 		return System.getProperty(MAVEN_MIRROR_URL);
+	}
+
+	default String getMavenResolverTransport() {
+		return System.getProperty(MAVEN_RESOLVER_TRANSPORT);
+	}
+
+	default String getMavenWagonHttpSslInsecure() {
+		return System.getProperty(MAVEN_WAGON_HTTP_SSL_INSECURE);
 	}
 
 	default String keycloakSamlAdapterFeaturePackVersion() {
@@ -284,11 +294,15 @@ public interface WildflyApplicationConfiguration {
 						: (" -D" + this.bomsEeServerVersionPropertyName() + "=" + this.bomsEeServerVersion()))));
 		// let's forward the distribution for building the application.
 		result = result.concat(" " + getWildflyApplicationTargetDistributionProfile());
-		// a maven mirror for testable artifacts, i.e. which are not released yet, can
-		// be provided
-		result = result.concat((StringUtils.isBlank(this.getMavenMirrorUrl())
+		// wagon related properties
+		final String mavenResolverTransport = this.getMavenResolverTransport();
+		result = result.concat(StringUtils.isBlank(mavenResolverTransport)
 				? ""
-				: " -Dmaven-mirror.url=" + this.getMavenMirrorUrl()));
+				: String.format(" -D%s=%s", MAVEN_RESOLVER_TRANSPORT, mavenResolverTransport));
+		final String mavenWagonHttpSslInsecure = this.getMavenWagonHttpSslInsecure();
+		result = result.concat(StringUtils.isBlank(mavenWagonHttpSslInsecure)
+				? ""
+				: String.format(" -D%s=%s", MAVEN_WAGON_HTTP_SSL_INSECURE, mavenWagonHttpSslInsecure));
 		return result;
 	}
 

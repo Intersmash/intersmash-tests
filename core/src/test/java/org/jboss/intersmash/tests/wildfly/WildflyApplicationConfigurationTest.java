@@ -51,7 +51,6 @@ public class WildflyApplicationConfigurationTest {
 		systemProperties.set("wildfly.ee-channel.groupId", "wildfly.ee-channel.groupId.NONE_FOR_WILDFLY");
 		systemProperties.set("wildfly.ee-channel.artifactId", "wildfly.ee-channel.artifactId.NONE_FOR_WILDFLY");
 		systemProperties.set("wildfly.ee-channel.version", "wildfly.ee-channel.version.NONE_FOR_WILDFLY");
-		systemProperties.set("bom.wildfly-ee.version", "30.0.0.Final");
 
 		// Act
 		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
@@ -98,6 +97,8 @@ public class WildflyApplicationConfigurationTest {
 		systemProperties.set("wildfly.ee-channel.artifactId", "wildfly.ee-channel.artifactId.NONE_FOR_WILDFLY");
 		systemProperties.set("wildfly.ee-channel.version", "wildfly.ee-channel.version.NONE_FOR_WILDFLY");
 		systemProperties.set("bom.wildfly-ee.version", "30.0.0.Final");
+		systemProperties.set("maven.wagon.http.ssl.insecure", "true");
+		systemProperties.set("maven.resolver.transport", "wagon");
 
 		// Act
 		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
@@ -130,5 +131,7 @@ public class WildflyApplicationConfigurationTest {
 				mavenArgs.contains(String.format(" -Dwildfly.ee-channel.version=%s", app.eeChannelVersion())));
 		Assertions.assertTrue(
 				mavenArgs.contains(String.format(" -Dbom.wildfly-ee.version=%s", app.bomsEeServerVersion())));
+		Assertions.assertTrue(mavenArgs.contains("-Dmaven.wagon.http.ssl.insecure=true"));
+		Assertions.assertTrue(mavenArgs.contains("-Dmaven.resolver.transport=wagon"));
 	}
 }
