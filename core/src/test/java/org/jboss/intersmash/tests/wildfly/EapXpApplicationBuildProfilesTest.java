@@ -48,4 +48,22 @@ public class EapXpApplicationBuildProfilesTest {
 		// Assert
 		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-target-distribution.jboss-eap-xp"));
 	}
+
+	/**
+	 * Verifies that the correct properties are generated to be passed to an OpenShift s2i build which should produce
+	 * a JBoss EAP XP application, provisioned with a single - i.e. merged - channel manifest.
+	 */
+	@Test
+	void generatedMavenArgsIncludeValidProfilesWhenMergedChannelManifestIsUsed() {
+		// Arrange
+		systemProperties.set("wildfly-target-distribution", "jboss-eap-xp.merged-channel");
+
+		// Act
+		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
+		};
+		final String mavenArgs = app.generateAdditionalMavenArgs();
+
+		// Assert
+		Assertions.assertTrue(mavenArgs.contains(" -Pwildfly-target-distribution.jboss-eap-xp.merged-channel"));
+	}
 }

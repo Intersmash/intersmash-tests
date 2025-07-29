@@ -80,6 +80,12 @@ Additionally, the Maven Failsafe Plugin will use the
 file in order to configure the Intersmash framework, so that JBoss EAP XP cloud deliverables - e.g.: images and Helm
 Charts -  will be used during the test execution.
 
+- `wildfly-target-distribution.jboss-eap-xp.merged-channel`
+
+Similar to `wildfly-target-distribution.jboss-eap-xp` but when forwarded to the remote s2i build, it will enable 
+a dedicated profile to provision the tested JBoss EAP XP application by using a single - i.e. merged - channel 
+manifest, as when testing JBoss EAP candidate releases. 
+
 Such values can be overridden via system properties.
 
 **IMPORTANT**:
