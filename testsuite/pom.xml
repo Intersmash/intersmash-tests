@@ -148,5 +148,33 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <!-- Configuration settings for testing JBoss EAP XP -->
+            <id>wildfly-target-distribution.jboss-eap-xp.merged-channel</id>
+            <properties>
+                <!-- set the WildFly target distribution to JBoss EAP -->
+                <intersmash.test.wildfly-target-distribution>jboss-eap-xp.merged-channel</intersmash.test.wildfly-target-distribution>
+            </properties>
+            <!-- Submodules which are built when testing JBoss EAP XP -->
+            <modules>
+                <module>wildfly-microprofile-reactive-messaging-kafka</module>
+            </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <!-- JBoss EAP XP tests are only executed on OpenShift -->
+                                <xtf.global_test_properties.path>global-test.jboss-eap-xp.openshift.properties</xtf.global_test_properties.path>
+                            </systemPropertyVariables>
+                            <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
+                            <excludedGroups>k8s</excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

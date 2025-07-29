@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.assertj.core.util.Strings;
 import org.jboss.intersmash.IntersmashConfig;
 import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
@@ -96,9 +97,16 @@ public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication
 				new EnvVarBuilder().withName("MAVEN_S2I_ARTIFACT_DIRS")
 						.withValue(applicationDir + "/target")
 						.build());
-
-		final String mavenAdditionalArgs = generateAdditionalMavenArgs()
+		String mavenAdditionalArgs = generateAdditionalMavenArgs()
 				.concat(" -pl " + applicationDir + " -am");
+		final String mavenMirrorUrl = this.getMavenMirrorUrl();
+		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
+			environmentVariables.add(
+					new EnvVarBuilder().withName("MAVEN_MIRROR_URL")
+							.withValue(mavenMirrorUrl)
+							.build());
+			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
+		}
 		environmentVariables.add(
 				new EnvVarBuilder().withName("MAVEN_ARGS_APPEND")
 						.withValue(mavenAdditionalArgs)
