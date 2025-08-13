@@ -28,11 +28,18 @@ The simplest test execution can be performed via a `mvn clean verify` command.
 
 ### Implemented tests
 
-#### [WildFly (JBoss EAP XP) MiroProfile Reactive Messaging + Kafka (Streams for ApacheKafka)](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT.java)
+#### [WildFly (JBoss EAP XP) MicroProfile Reactive Messaging + Kafka (Streams for Apache Kafka)](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP XP) MicroProfile Reactive
 Messaging application, which interacts with a remote Kafka (Streams for Apache Kafka) service.
-See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredTests](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT.java) class Javadoc for more details.
+See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT](testsuite/wildfly-microprofile-reactive-messaging-kafka/src/test/java/org/jboss/intersmash/tests/wildfly/microprofile/reactive/messaging/kafka/WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT.java) class Javadoc for more details.
+
+#### [WildFly (JBoss EAP and JBoss EAP XP) Elytron OIDC client + Keycloak (Red Hat Build of Keycloak)](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcClientIT.java)
+
+This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which 
+uses the `elytron-oidc-client` layer configuration to interact with a remote Keycloak (Red Hat Build of Keycloak) service 
+and secure resources via SSO.
+See the [WildflyWithElytronOidcClientIT](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcClientIT.java) class Javadoc for more details
 
 ## Profiles
 
