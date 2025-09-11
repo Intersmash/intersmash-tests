@@ -80,6 +80,7 @@
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
                 <module>wildfly-elytron-oidc-client-keycloak</module>
+                <module>wildfly-web-cache-offload-infinispan</module>
             </modules>
             <build>
                 <plugins>
@@ -106,6 +107,7 @@
             </properties>
             <modules>
                 <module>wildfly-elytron-oidc-client-keycloak</module>
+                <module>wildfly-web-cache-offload-infinispan</module>
             </modules>
             <build>
                 <plugins>
@@ -138,6 +140,7 @@
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
                 <module>wildfly-elytron-oidc-client-keycloak</module>
+                <module>wildfly-web-cache-offload-infinispan</module>
             </modules>
             <build>
                 <plugins>
@@ -166,6 +169,8 @@
             <!-- Submodules which are built when testing JBoss EAP XP -->
             <modules>
                 <module>wildfly-microprofile-reactive-messaging-kafka</module>
+                <module>wildfly-elytron-oidc-client-keycloak</module>
+                <module>wildfly-web-cache-offload-infinispan</module>
             </modules>
             <build>
                 <plugins>
