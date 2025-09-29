@@ -39,7 +39,13 @@ See the [WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT](testsuite/wi
 This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which 
 uses the `elytron-oidc-client` layer configuration to interact with a remote Keycloak (Red Hat Build of Keycloak) service 
 and secure resources via SSO.
-See the [WildflyWithElytronOidcClientIT](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcClientIT.java) class Javadoc for more details
+See the [WildflyWithElytronOidcClientIT](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcClientIT.java) class Javadoc for more details.
+
+#### [WildFly (JBoss EAP and JBoss EAP XP) Web cache offload + Infinispan (Red Hat Data Grid)](testsuite/wildfly-web-cache-offload-infinispan/src/test/java/org/jboss/intersmash/tests/wildfly/web/cache/offload/infinispan/WildflyWebCacheOffloadToInfinispanIT.java)
+
+This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which
+is configured to offload web cache data to a remote Infinispan (Red Hat Data Grid) service.
+See the [WildflyWebCacheOffloadToInfinispanIT](testsuite/wildfly-web-cache-offload-infinispan/src/test/java/org/jboss/intersmash/tests/wildfly/web/cache/offload/infinispan/WildflyWebCacheOffloadToInfinispanIT.java) class Javadoc for more details.
 
 ## Profiles
 

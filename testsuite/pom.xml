@@ -11,23 +11,14 @@
     </parent>
 
     <artifactId>intersmash-tests-testsuite</artifactId>
-    <packaging>pom</packaging>
     <name>Intersmash Tests :: Testsuite</name>
 
     <properties>
         <!-- Property to identify the tested WildFly applications target distribution (i.e. WildFly/JBoss EAP/JBoss EAP XP) -->
         <intersmash.test.wildfly-target-distribution>wildfly</intersmash.test.wildfly-target-distribution>
+
+        <version.net.sourceforge.htmlunit>2.70.0</version.net.sourceforge.htmlunit>
     </properties>
-
-    <modules>
-        <!--
-            Test related submodules are listed per profile, see below.
-
-            Those supported only by specific variants (e.g.: requiring MicroProfile integration) are defined in
-            relevant profiles, see below.
-            JBoss EAP does not support MicroProfile, therefore related test submodules are not defined here.
-        -->
-    </modules>
 
     <dependencies>
         <dependency>
@@ -39,6 +30,18 @@
             <groupId>org.jboss.intersmash.tests</groupId>
             <artifactId>intersmash-tests-core</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <version>${version.net.sourceforge.htmlunit}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -77,10 +80,6 @@
                 <!-- set the WildFly target distribution to WildFly -->
                 <intersmash.test.wildfly-target-distribution>wildfly</intersmash.test.wildfly-target-distribution>
             </properties>
-            <modules>
-                <module>wildfly-microprofile-reactive-messaging-kafka</module>
-                <module>wildfly-elytron-oidc-client-keycloak</module>
-            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -104,9 +103,6 @@
                 <!-- set the WildFly target distribution to JBoss EAP -->
                 <intersmash.test.wildfly-target-distribution>jboss-eap</intersmash.test.wildfly-target-distribution>
             </properties>
-            <modules>
-                <module>wildfly-elytron-oidc-client-keycloak</module>
-            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -134,11 +130,6 @@
                 <!-- set the WildFly target distribution to JBoss EAP -->
                 <intersmash.test.wildfly-target-distribution>jboss-eap-xp</intersmash.test.wildfly-target-distribution>
             </properties>
-            <!-- Submodules which are built when testing JBoss EAP XP -->
-            <modules>
-                <module>wildfly-microprofile-reactive-messaging-kafka</module>
-                <module>wildfly-elytron-oidc-client-keycloak</module>
-            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -163,10 +154,6 @@
                 <!-- set the WildFly target distribution to JBoss EAP -->
                 <intersmash.test.wildfly-target-distribution>jboss-eap-xp.merged-channel</intersmash.test.wildfly-target-distribution>
             </properties>
-            <!-- Submodules which are built when testing JBoss EAP XP -->
-            <modules>
-                <module>wildfly-microprofile-reactive-messaging-kafka</module>
-            </modules>
             <build>
                 <plugins>
                     <plugin>
