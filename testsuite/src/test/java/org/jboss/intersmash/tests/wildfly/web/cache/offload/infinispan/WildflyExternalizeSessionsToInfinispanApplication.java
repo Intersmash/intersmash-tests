@@ -18,31 +18,39 @@ package org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan;
 import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretBuilder;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.io.FileUtils;
 import org.assertj.core.util.Strings;
 import org.jboss.intersmash.IntersmashConfig;
 import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
 import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplication;
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
+import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.InfinispanCommandLineBasedKeystoreGenerator;
 
 /**
  * Application descriptor which represents a WildFly/JBoss EAP application which will be provisioned via WildFly/JBoss EAP image and that is
  * configured in order to externalize distributed sessions to Infinispan/Red Hat Data Grid using only Infinispan
  * subsystem.
  */
-public class WildflyOffloadingSessionsToInfinispanApplication
+public class WildflyExternalizeSessionsToInfinispanApplication
 		implements WildflyImageOpenShiftApplication, WildflyApplicationConfiguration {
 	public static final String WILDFLY_APP_NAME = "wildfly";
+	private static final String TLS_CERTIFICATE_DIR_NAME = "/etc/secrets";
 
 	private final BuildInput buildInput;
 	private final List<EnvVar> environmentVariables;
+	private final List<Secret> secrets = new ArrayList<>();
 
-	public WildflyOffloadingSessionsToInfinispanApplication() {
-
-		final String applicationDir = "wildfly/web-cache-offload-infinispan";
+	public WildflyExternalizeSessionsToInfinispanApplication() throws IOException {
+		final String applicationDir = "wildfly/distributed-sessions-infinispan";
 		buildInput = new BuildInputBuilder()
 				.uri(IntersmashConfig.deploymentsRepositoryUrl())
 				.ref(IntersmashConfig.deploymentsRepositoryRef())
@@ -50,9 +58,11 @@ public class WildflyOffloadingSessionsToInfinispanApplication
 
 		// setup environment variables
 		environmentVariables = new ArrayList<>();
-		environmentVariables.add(new EnvVarBuilder().withName("APP_NAME").withValue(WILDFLY_APP_NAME).build());
+		environmentVariables.add(new EnvVarBuilder().withName("APP_NAME")
+				.withValue(Infinispan2ReplicasCustomCertificateService.INFINISPAN_APP_NAME).build());
 		environmentVariables
-				.add(new EnvVarBuilder().withName("INFINISPAN_HOST").withValue("$(INFINISPAN_SERVICE_HOST)").build());
+				.add(new EnvVarBuilder().withName("INFINISPAN_HOST")
+						.withValue(Infinispan2ReplicasCustomCertificateService.INFINISPAN_APP_NAME).build());
 		environmentVariables
 				.add(new EnvVarBuilder().withName("INFINISPAN_PORT").withValue("$(INFINISPAN_SERVICE_PORT)").build());
 		// configure KUBE_PING, an invalidation-cache requires a functioning jgroups cluster.
@@ -60,11 +70,29 @@ public class WildflyOffloadingSessionsToInfinispanApplication
 				.withValue(OpenShifts.master().getNamespace()).build());
 		//	credentials from Infinispan/Red Hat Data Grid APP custom secret
 		environmentVariables.add(new EnvVarBuilder().withName("CACHE_USERNAME")
-				.withValue(Infinispan2ReplicasService.INFINISPAN_CUSTOM_CREDENTIALS_USERNAME).build());
+				.withValue(Infinispan2ReplicasCustomCertificateService.INFINISPAN_CUSTOM_CREDENTIALS_USERNAME).build());
 		environmentVariables.add(new EnvVarBuilder().withName("CACHE_PASSWORD")
-				.withValue(Infinispan2ReplicasService.INFINISPAN_CUSTOM_CREDENTIALS_PASSWORD).build());
+				.withValue(Infinispan2ReplicasCustomCertificateService.INFINISPAN_CUSTOM_CREDENTIALS_PASSWORD).build());
 		environmentVariables.add(new EnvVarBuilder().withName("TRUST_STORE_PATH")
-				.withValue("/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt").build());
+				.withValue(String.format("%s/%s", TLS_CERTIFICATE_DIR_NAME,
+						Infinispan2ReplicasCustomCertificateService.TLS_CERTIFICATE_FILE_NAME))
+				.build());
+
+		final InfinispanCommandLineBasedKeystoreGenerator.InfinispanCertificate infinispanCertificate = InfinispanCommandLineBasedKeystoreGenerator
+				.generateInfinispanCertificate(
+						OpenShifts.master().generateHostname(Infinispan2ReplicasCustomCertificateService.INFINISPAN_APP_NAME),
+						Infinispan2ReplicasCustomCertificateService.KEYALIAS,
+						Infinispan2ReplicasCustomCertificateService.STOREPASS);
+		Secret tlsCertificateSecret = new SecretBuilder()
+				.withNewMetadata()
+				.withName(Infinispan2ReplicasCustomCertificateService.TLS_CERTIFICATE_SECRET_NAME)
+				.withLabels(Collections.singletonMap("app", Infinispan2ReplicasCustomCertificateService.INFINISPAN_APP_NAME))
+				.endMetadata()
+				.addToData(Map.of(Infinispan2ReplicasCustomCertificateService.TLS_CERTIFICATE_FILE_NAME,
+						Base64.getEncoder()
+								.encodeToString(FileUtils.readFileToByteArray(infinispanCertificate.certificate.toFile()))))
+				.build();
+		secrets.add(tlsCertificateSecret);
 
 		environmentVariables.add(
 				new EnvVarBuilder().withName("MAVEN_S2I_ARTIFACT_DIRS")
@@ -99,5 +127,10 @@ public class WildflyOffloadingSessionsToInfinispanApplication
 	@Override
 	public List<EnvVar> getEnvVars() {
 		return Collections.unmodifiableList(environmentVariables);
+	}
+
+	@Override
+	public List<Secret> getSecrets() {
+		return Collections.unmodifiableList(secrets);
 	}
 }
