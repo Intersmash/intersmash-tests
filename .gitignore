@@ -13,3 +13,4 @@
 /testsuite/wildfly-web-cache-offload-infinispan/log/
 /testsuite/wildfly-web-cache-offload-infinispan/target/
 /testsuite/wildfly-web-cache-offload-infinispan/tmp/
+/testsuite/intersmash-tests-testsuite.iml
