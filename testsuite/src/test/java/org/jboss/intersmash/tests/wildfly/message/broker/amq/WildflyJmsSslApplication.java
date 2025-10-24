@@ -50,7 +50,7 @@ public class WildflyJmsSslApplication implements WildflyImageOpenShiftApplicatio
 	private static final String WILDFLY_TRUSTSTORE_FILE_NAME = "client.ts";
 
 	public WildflyJmsSslApplication() throws IOException {
-		final String applicationDir = "wildfly/amq-broker-ssl";
+		final String applicationDir = "wildfly/activemq-artemis-ssl";
 		buildInput = new BuildInputBuilder()
 				.uri(IntersmashConfig.deploymentsRepositoryUrl())
 				.ref(IntersmashConfig.deploymentsRepositoryRef())
