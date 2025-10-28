@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.message.broker.amq;
+package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonSyntaxException;
@@ -41,8 +41,8 @@ import org.jboss.intersmash.provision.operator.model.activemq.broker.spec.Accept
 import org.jboss.intersmash.provision.operator.model.activemq.broker.spec.ConsoleBuilder;
 import org.jboss.intersmash.provision.operator.model.activemq.broker.spec.DeploymentPlanBuilder;
 import org.jboss.intersmash.provision.operator.model.activemq.broker.spec.UpgradesBuilder;
-import org.jboss.intersmash.tests.wildfly.message.broker.amq.util.ArtemisCliOutputParser;
-import org.jboss.intersmash.tests.wildfly.message.broker.amq.util.JmsTestConstants;
+import org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl.util.ArtemisCliOutputParser;
+import org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl.util.JmsTestConstants;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +64,8 @@ import org.slf4j.LoggerFactory;
  * It exposes an SSL acceptor on port {@value #ARTEMIS_ACCEPTOR_PORT} for secure JMS client connections.
  * </p>
  */
-public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, OpenShiftApplication {
-	private static final Logger log = LoggerFactory.getLogger(AmqBrokerSslApplication.class);
+public class ActiveMQArtemisApplication implements ActiveMQOperatorApplication, OpenShiftApplication {
+	private static final Logger log = LoggerFactory.getLogger(ActiveMQArtemisApplication.class);
 
 	/**
 	 * Admin username for broker management and client authentication.
@@ -85,7 +85,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 	/**
 	 * The name of the broker deployment.
 	 */
-	static final String NAME = "amq-broker";
+	static final String NAME = "activemq-artemis";
 
 	/**
 	 * The name of the SSL acceptor configuration.
@@ -110,7 +110,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 	/**
 	 * Name of the Kubernetes secret containing the SSL acceptor certificates.
 	 */
-	public static final String AMQ_ACCEPTOR_SECRET_NAME = String.format("%s-acceptor-secret", ACCEPTOR_NAME);
+	public static final String AMQ_ACCEPTOR_SECRET_NAME = String.format("%s-secret", ACCEPTOR_NAME);
 
 	/**
 	 * Port number on which the Artemis SSL acceptor listens for client connections.
@@ -122,7 +122,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 	 * <p>
 	 * This constructor initializes the broker by:
 	 * <ul>
-	 *   <li>Generating SSL certificates (keystore and truststore) using the broker route hostname</li>
+	 *   <li>Generating SSL certificates (keystore and truststore) using the broker service hostname</li>
 	 *   <li>Creating a Kubernetes secret containing the SSL certificates and passwords</li>
 	 *   <li>Configuring the ActiveMQArtemis custom resource with SSL acceptor, deployment plan, and admin credentials</li>
 	 * </ul>
@@ -134,8 +134,8 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 	 *
 	 * @throws IOException if an error occurs while generating SSL certificates or reading certificate files
 	 */
-	public AmqBrokerSslApplication() throws IOException {
-		final SimpleCommandLineBasedKeystoreGenerator.CertificateInfo infinispanCertificate = SimpleCommandLineBasedKeystoreGenerator
+	public ActiveMQArtemisApplication() throws IOException {
+		final SimpleCommandLineBasedKeystoreGenerator.CertificateInfo certificateInfo = SimpleCommandLineBasedKeystoreGenerator
 				.generateCertificate(
 						getAcceptorServiceName(),
 						KEYALIAS,
@@ -150,8 +150,8 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 		    type: Opaque
 		    stringData:
 		      alias: server
-		      keyStorePassword: 1234PIPPOBAUDO
-		      trustStorePassword: 1234PIPPOBAUDO
+		      keyStorePassword: password
+		      trustStorePassword: password
 		    data:
 		      broker.ks: $(cat privatekey.pkcs12 | base64 -w 0)
 		      client.ts: $(cat truststore.pkcs12 | base64 -w 0)
@@ -166,10 +166,10 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 				.addToStringData("trustStorePassword", STOREPASS)
 				.addToData(Map.of("broker.ks",
 						Base64.getEncoder()
-								.encodeToString(FileUtils.readFileToByteArray(infinispanCertificate.keystore.toFile()))))
+								.encodeToString(FileUtils.readFileToByteArray(certificateInfo.keystore.toFile()))))
 				.addToData(Map.of("client.ts",
 						Base64.getEncoder()
-								.encodeToString(FileUtils.readFileToByteArray(infinispanCertificate.truststore.toFile()))))
+								.encodeToString(FileUtils.readFileToByteArray(certificateInfo.truststore.toFile()))))
 				.build();
 		secrets.add(sslAcceptorSecret);
 
@@ -182,7 +182,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 		    spec:
 		      properties:
 		        adminPassword: admin
-		        adminUser: 1234PIPPOBAUDO
+		        adminUser: password
 		      deploymentPlan:
 		        image: placeholder
 		        jolokiaAgentEnabled: false
@@ -202,7 +202,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 		        expose: true
 		 */
 
-		// Initialize amq-broker ActiveMQArtemis resource
+		// Initialize activemq-artemis ActiveMQArtemis resource
 		activeMQArtemis = new ActiveMQArtemisBuilder(NAME)
 				.deploymentPlan(new DeploymentPlanBuilder()
 						// these size & image are set by DeploymentPlanBuilder by default, set here as an API demonstration
@@ -221,7 +221,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 				  * Produce a final acceptor configured with SSL, e.g.:
 				  * <code>
 				  *     <acceptor name="sslacceptor">
-				  *         tcp://amq-broker-ss-0.amq-broker-hdls-svc.appsint-mgbr.svc.cluster.local:61617?
+				  *         tcp://activemq-artemis-ss-0.activemq-artemis-hdls-svc.appsint-mgbr.svc.cluster.local:61617?
 				  *             protocols=AMQP,CORE,HORNETQ,MQTT,OPENWIRE,STOMP;
 				  *             sslEnabled=true;
 				  *             keyStorePath=/etc/sslacceptor-acceptor-secret-volume/broker.ks;
@@ -273,7 +273,13 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 	/**
 	 * Returns the list of ActiveMQArtemisAddress resources for pre-configured addresses.
 	 * <p>
-	 * This application does not pre-configure any addresses; they are created dynamically by the broker.
+	 * This application does not pre-configure any addresses; they are created dynamically by the broker for
+	 * the mappings in the application, e.g.:
+	 * <pre>
+	 * {@code
+	 * @JMSDestinationDefinition(name = "java:/queue/testQueue", interfaceName = "jakarta.jms.Queue", destinationName = "test-queue")
+	 * }
+	 * </pre>
 	 * </p>
 	 *
 	 * @return an empty list
@@ -308,14 +314,14 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 	}
 
 	/**
-	 * Returns the Kubernetes service name for the AMQ Broker acceptor.
+	 * Returns the Kubernetes service name for the ActiveMQ Artemis Broker acceptor.
 	 * <p>
-	 * The service name follows the naming convention for automatically-created services in AMQ Broker on OpenShift.
+	 * The service name follows the naming convention for automatically-created services in ActiveMQ Artemis Broker on OpenShift.
 	 * The format is {@code <custom-resource-name>-<acceptor-name>-<broker-pod-ordinal>-svc}.
-	 * For example, {@code amq-broker-sslacceptor-0-svc}.
+	 * For example, {@code activemq-artemis-sslacceptor-0-svc}.
 	 * </p>
 	 *
-	 * @return the Kubernetes service name for the AMQ Broker acceptor
+	 * @return the Kubernetes service name for the ActiveMQ Artemis Broker acceptor
 	 */
 	public static String getAcceptorServiceName() {
 		return String.format("%s-%s-0-svc", NAME, ACCEPTOR_NAME);
@@ -347,7 +353,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 					pod.getStatus().getPodIP());
 			PodShellOutput queues = OpenShifts.master().podShell(pod).executeWithBash(cmdArtemis);
 			String cmdError = queues.getError();
-			if (!Strings.isNullOrEmpty(sanitazeShellOutput(cmdError))) {
+			if (!Strings.isNullOrEmpty(sanitizeShellOutput(cmdError))) {
 				log.warn(
 						"[getMessagesCount] Error getting queues stats from artemis with command \"{}\" on Pod {}: \nOutput: {}\nError: {}",
 						cmdArtemis, pod.getMetadata().getName(), queues.getOutput(), cmdError);
@@ -355,6 +361,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 			try {
 				int cnt = ArtemisCliOutputParser.sumMessageCounts(queues.getOutput(), queueName);
 				messagesCount += cnt;
+				log.info("[getMessagesCount] Messages for queue {} on POD {}: {}", queueName, pod.getMetadata().getName(), cnt);
 			} catch (NumberFormatException | JsonSyntaxException err) {
 				log.error("[getMessagesCount] Error parsing queues stats from artemis: \n{}\n", queues.getOutput(), err);
 			}
@@ -374,7 +381,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 			Map<String, Integer> queueInfo = new HashMap<>();
 			podInfo.put(pod.getMetadata().getName(), queueInfo);
 			// get queues on the broker pod
-			log.info("[getMessagesStatus] ");
+			log.info("[getMessagesStatus] pod: {}", pod.getMetadata().getName());
 			String cmdArtemis = String.format(
 					"/home/jboss/amq-broker/bin/artemis address show --user=%s --password='%s' --url=tcp://%s:61616",
 					ADMIN_USER,
@@ -382,14 +389,20 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 					pod.getStatus().getPodIP());
 			PodShellOutput queues = OpenShifts.master().podShell(pod).executeWithBash(cmdArtemis);
 			String cmdError = queues.getError();
-			if (!Strings.isNullOrEmpty(sanitazeShellOutput(cmdError))) {
+			if (!Strings.isNullOrEmpty(sanitizeShellOutput(cmdError))) {
 				log.warn(
 						"[getMessagesStatus] Error getting queues from artemis with command \"{}\" on Pod {}: \nOutput: {}\nError: {}",
 						cmdArtemis, pod.getMetadata().getName(), queues.getOutput(), cmdError);
 			} else {
 				for (String queue : queues.getOutputAsList()) {
+					log.info("[getMessagesStatus] pod {}, address show line: {}", pod.getMetadata().getName(), queue);
 					Integer count = 0;
-					if (Arrays.asList("testQueue", "inQueue", "outQueue").contains(queue)) {
+					if (Arrays.asList(JmsTestConstants.TEST_QUEUE, JmsTestConstants.IN_QUEUE, JmsTestConstants.OUT_QUEUE)
+							.contains(queue)
+							|| Arrays.asList(ArtemisCliOutputParser.convertCamelCaseToKebab(JmsTestConstants.TEST_QUEUE),
+									ArtemisCliOutputParser.convertCamelCaseToKebab(JmsTestConstants.IN_QUEUE),
+									ArtemisCliOutputParser.convertCamelCaseToKebab(JmsTestConstants.OUT_QUEUE))
+									.contains(queue)) {
 						// get messages on the queue
 						cmdArtemis = String.format(
 								"/home/jboss/amq-broker/bin/artemis browser --user=%s --password='%s' --destination=queue://%s --url=tcp://%s:61616",
@@ -399,7 +412,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 								pod.getStatus().getPodIP());
 						PodShellOutput messages = OpenShifts.master().podShell(pod).executeWithBash(cmdArtemis);
 						cmdError = messages.getError();
-						if (!Strings.isNullOrEmpty(sanitazeShellOutput(cmdError))) {
+						if (!Strings.isNullOrEmpty(sanitizeShellOutput(cmdError))) {
 							log.warn(
 									"[getMessagesStatus] Error getting messages from artemis's queue {} with command \"{}\" on Pod {}: \nOutput: {}\nError: {}",
 									queue, cmdArtemis, pod.getMetadata().getName(), queues.getOutput(), cmdError);
@@ -442,7 +455,7 @@ public class AmqBrokerSslApplication implements ActiveMQOperatorApplication, Ope
 	 * @param output the raw shell output to sanitize
 	 * @return the sanitized output with NOTE: lines removed
 	 */
-	private static String sanitazeShellOutput(String output) {
+	private static String sanitizeShellOutput(String output) {
 		return output.replaceAll("^NOTE:[^\\n]+[\\r\\n]*", "");
 	}
 }

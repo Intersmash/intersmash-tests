@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.message.broker.amq.util;
+package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl.util;
 
 /**
  * Enumeration of JMS test request types for testing messaging functionality.

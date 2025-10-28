@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.message.broker.amq;
+package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl;
 
 import static io.restassured.RestAssured.get;
 import static org.hamcrest.Matchers.containsString;
@@ -28,13 +28,13 @@ import org.jboss.intersmash.annotations.ServiceProvisioner;
 import org.jboss.intersmash.annotations.ServiceUrl;
 import org.jboss.intersmash.provision.openshift.OpenShiftProvisioner;
 import org.jboss.intersmash.provision.openshift.WildflyImageOpenShiftProvisioner;
-import org.jboss.intersmash.tests.junit.annotations.AmqTest;
+import org.jboss.intersmash.tests.junit.annotations.ActiveMQArtemisTest;
 import org.jboss.intersmash.tests.junit.annotations.EapTest;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
 import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
 import org.jboss.intersmash.tests.junit.annotations.WildflyTest;
-import org.jboss.intersmash.tests.wildfly.message.broker.amq.util.JmsTestConstants;
-import org.jboss.intersmash.tests.wildfly.message.broker.amq.util.JmsTestRequestType;
+import org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl.util.JmsTestConstants;
+import org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl.util.JmsTestRequestType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +49,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <p>
  * The test deploys two services:
  * <ul>
- *   <li>{@link AmqBrokerSslApplication} - ActiveMQ Artemis broker configured with SSL</li>
+ *   <li>{@link ActiveMQArtemisApplication} - ActiveMQ Artemis broker configured with SSL</li>
  *   <li>{@link WildflyJmsSslApplication} - WildFly/EAP application with JMS client configured for SSL</li>
  * </ul>
  * </p>
@@ -57,33 +57,33 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @WildflyTest
 @EapTest
 @EapXpTest
-@AmqTest
+@ActiveMQArtemisTest
 @OpenShiftTest
 @ExtendWith(ProjectCreator.class)
 @Slf4j
 @Intersmash({
-		@Service(AmqBrokerSslApplication.class),
+		@Service(ActiveMQArtemisApplication.class),
 		@Service(WildflyJmsSslApplication.class)
 })
-public class WildflyAmqBrokerSslIT {
+public class WildflyActiveMQArtemisSslIT {
 
 	/**
 	 * The URL of the WildFly/EAP application route for accessing the JMS test servlet.
 	 */
 	@ServiceUrl(WildflyJmsSslApplication.class)
-	private String eapRouteUrl;
+	private String wildFlyRouteUrl;
 
 	/**
 	 * Provisioner for the ActiveMQ Artemis broker application.
 	 */
-	@ServiceProvisioner(AmqBrokerSslApplication.class)
-	private OpenShiftProvisioner<AmqBrokerSslApplication> amqOpenShiftProvisioner;
+	@ServiceProvisioner(ActiveMQArtemisApplication.class)
+	private OpenShiftProvisioner<ActiveMQArtemisApplication> amqOpenShiftProvisioner;
 
 	/**
 	 * Provisioner for the WildFly/EAP JMS client application.
 	 */
 	@ServiceProvisioner(WildflyJmsSslApplication.class)
-	private WildflyImageOpenShiftProvisioner eapOpenShiftProvisioner;
+	private WildflyImageOpenShiftProvisioner wildflyOpenShiftProvisioner;
 
 	/**
 	 * Send/receive a message to/from remote ActiveMQ Artemis broker via test servlet using ActiveMQQueue.<br>
@@ -91,14 +91,14 @@ public class WildflyAmqBrokerSslIT {
 	 */
 	@Test
 	public void testSendReceiveMessageQueue() {
-		// produce message - a name of queue would be 'null' in case that EAP fails to create a connection
-		get(eapRouteUrl + "/jms-test?request=" + JmsTestRequestType.REQUEST_SEND.value())
+		// produce message - a name of queue would be 'null' in case that WildFly/EAP fails to create a connection
+		get(wildFlyRouteUrl + "/jms-test?request=" + JmsTestRequestType.REQUEST_SEND.value())
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
 				.assertThat()
 				.body(containsString(JmsTestConstants.QUEUE_SEND_RESPONSE));
-		get(eapRouteUrl + "/jms-test?request=" + JmsTestRequestType.REQUEST_CONSUME_MESSAGE.value())
+		get(wildFlyRouteUrl + "/jms-test?request=" + JmsTestRequestType.REQUEST_CONSUME_MESSAGE.value())
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -113,14 +113,14 @@ public class WildflyAmqBrokerSslIT {
 	 */
 	@Test
 	public void testQueueMdb() {
-		// produce message - a name of queue would be 'null' in case that EAP fails to create a connection
-		get(eapRouteUrl + "/jms-test?request=" + JmsTestRequestType.REQUEST_SEND_REQUEST_MESSAGE_FOR_MDB.value())
+		// produce message - a name of queue would be 'null' in case that WildFly/EAP fails to create a connection
+		get(wildFlyRouteUrl + "/jms-test?request=" + JmsTestRequestType.REQUEST_SEND_REQUEST_MESSAGE_FOR_MDB.value())
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
 				.assertThat()
 				.body(containsString(JmsTestConstants.QUEUE_MDB_SEND_RESPONSE));
-		get(eapRouteUrl + "/jms-test?request=" + JmsTestRequestType.REQUEST_CONSUME_REPLY_MESSAGE_FOR_MDB.value())
+		get(wildFlyRouteUrl + "/jms-test?request=" + JmsTestRequestType.REQUEST_CONSUME_REPLY_MESSAGE_FOR_MDB.value())
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -131,18 +131,18 @@ public class WildflyAmqBrokerSslIT {
 	/**
 	 * Send messages to queue and let them be consumed by MDB. MDB creates new message which is sent
 	 * to outQueue for each consumed message.<br>
-	 * When MDB is processing messages, kill EAP server.<br>
-	 * Wait for EAP server to be restarted by Openshift (statefulset) and wait for XA recovery and redelivery of the message.<br>
+	 * When MDB is processing messages, kill WildFly/EAP server.<br>
+	 * Wait for WildFly/EAP server to be restarted by Openshift (statefulset) and wait for XA recovery and redelivery of the message.<br>
 	 * Verify all messages can be consumed, note that we might not get all messages as recovery of XA transactions.
 	 */
 	@Test
 	public void testKillEapXaRecoveryMdb() {
-		eapOpenShiftProvisioner.scale(1, true);
+		wildflyOpenShiftProvisioner.scale(1, true);
 
 		final int numberOfMessages = 180;
 		// produce 180 messages for MDB to consume (they are moved from inQueue to outQueue),
-		// once 100th message is consumed by MDB, EAP/WF is killed
-		get(eapRouteUrl + "/jms-test?request="
+		// once 100th message is consumed by MDB, WildFly/EAP is killed
+		get(wildFlyRouteUrl + "/jms-test?request="
 				+ JmsTestRequestType.REQUEST_SEND_REQUEST_MESSAGE_FOR_MDB_AND_KILL_SERVER.value()
 				+ "&messageCount=" + numberOfMessages)
 				.then()
@@ -150,16 +150,16 @@ public class WildflyAmqBrokerSslIT {
 				.ifValidationFails(LogDetail.ALL, true)
 				.assertThat()
 				.body(containsString(numberOfMessages + " messages were sent into queue:"));
-		String beforeRestart = AmqBrokerSslApplication.getMessagesStatus();
+		String beforeRestart = ActiveMQArtemisApplication.getMessagesStatus();
 		// check that pod was restarted
-		OpenShiftWaiters.get(eapOpenShiftProvisioner.getOpenShift(), () -> false)
-				.havePodsBeenRestarted("name", eapOpenShiftProvisioner.getApplication().getName())
+		OpenShiftWaiters.get(wildflyOpenShiftProvisioner.getOpenShift(), () -> false)
+				.havePodsBeenRestarted("name", wildflyOpenShiftProvisioner.getApplication().getName())
 				.waitFor();
-		eapOpenShiftProvisioner.waitForReplicas(1);
-		String afterRestart = AmqBrokerSslApplication.getMessagesStatus();
+		wildflyOpenShiftProvisioner.waitForReplicas(1);
+		String afterRestart = ActiveMQArtemisApplication.getMessagesStatus();
 		// check that the sum of messages in the queues is equal to the total number of messages sent to the server
-		int numMessagesInQueueAfter = AmqBrokerSslApplication.getMessagesCount("inQueue");
-		int numMessagesOutQueueAfter = AmqBrokerSslApplication.getMessagesCount("outQueue");
+		int numMessagesInQueueAfter = ActiveMQArtemisApplication.getMessagesCount(JmsTestConstants.IN_QUEUE);
+		int numMessagesOutQueueAfter = ActiveMQArtemisApplication.getMessagesCount(JmsTestConstants.OUT_QUEUE);
 		log.info("[testKillEapXaRecoveryMdb] numMessagesInQueueAfter {}", numMessagesInQueueAfter);
 		log.info("[testKillEapXaRecoveryMdb] numMessagesOutQueueAfter {}", numMessagesOutQueueAfter);
 		log.info("[testKillEapXaRecoveryMdb] numberOfMessages {}", numberOfMessages);
@@ -172,11 +172,11 @@ public class WildflyAmqBrokerSslIT {
 		int numberOfReceivedMessages = 0;
 		while (numberOfReceivedMessages < numberOfMessages) {
 			numberOfReceivedMessages = numberOfReceivedMessages + Integer
-					.valueOf(get(eapRouteUrl + "/jms-test?request="
+					.valueOf(get(wildFlyRouteUrl + "/jms-test?request="
 							+ JmsTestRequestType.REQUEST_CONSUME_ALL_REPLY_MESSAGES_FOR_MDB.value())
 							.getBody().asString().trim());
 			if (System.currentTimeMillis() - startTime > timeout) {
-				String afterConsume = AmqBrokerSslApplication.getMessagesStatus();
+				String afterConsume = ActiveMQArtemisApplication.getMessagesStatus();
 				Assertions.fail("Number of replied messages was: " + numberOfReceivedMessages + " however " + numberOfMessages
 						+ " was expected.\n" +
 						"\nBefore restart:\n" + beforeRestart +
@@ -184,7 +184,7 @@ public class WildflyAmqBrokerSslIT {
 						"\nFinal status:\n" + afterConsume + "\n");
 			}
 		}
-		String afterConsume = AmqBrokerSslApplication.getMessagesStatus();
+		String afterConsume = ActiveMQArtemisApplication.getMessagesStatus();
 		log.info("Messages: \n\nBefore restart:\n{}\nAfter restart:\n{}\n\nFinal status:\n{}\n", beforeRestart, afterRestart,
 				afterConsume);
 	}

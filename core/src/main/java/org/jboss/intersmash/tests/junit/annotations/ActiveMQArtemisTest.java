@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Tag;
  * Mark test that tests ActiveMQ Artemis services.
  * Used per class.
  */
-@Tag("amq")
+@Tag("activemq-artemis")
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ java.lang.annotation.ElementType.TYPE })
-public @interface AmqTest {
+public @interface ActiveMQArtemisTest {
 }

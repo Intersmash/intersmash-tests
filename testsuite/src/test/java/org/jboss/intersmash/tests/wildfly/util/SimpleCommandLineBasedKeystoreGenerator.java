@@ -62,7 +62,7 @@ public class SimpleCommandLineBasedKeystoreGenerator {
 	 *         <li>Generating a PKCS12 truststore containing the self-signed certificate, e.g.:<br>
 	 *         <code>
 	 *             keytool -import -v -trustcacerts -noprompt -alias server -file hostname.crt
-	 *                     -keystore truststore.pkcs12 -storetype PKCS12 -storepass 1234PIPPOBAUDO
+	 *                     -keystore truststore.pkcs12 -storetype PKCS12 -storepass password
 	 *         </code>
 	 *         This produce a PKCS12 truststore;
 	 *         </li>

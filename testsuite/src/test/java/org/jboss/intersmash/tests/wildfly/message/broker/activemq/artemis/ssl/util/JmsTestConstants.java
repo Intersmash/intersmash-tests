@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.message.broker.amq.util;
+package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl.util;
 
 /**
  * Constants used for JMS testing with ActiveMQ message broker.
@@ -39,7 +39,7 @@ public class JmsTestConstants {
 	 * Response message template when a message is successfully sent to the MDB queue.
 	 * The actual queue name will be appended to this string.
 	 */
-	public static final String QUEUE_MDB_SEND_RESPONSE = "Sent a text message with to ";
+	public static final String QUEUE_MDB_SEND_RESPONSE = "Sent a text message for MDB to queue ";
 
 	/**
 	 * Default text content for test messages sent to be processed by the MDB.
@@ -50,4 +50,19 @@ public class JmsTestConstants {
 	 * Standard reply message text sent to the outQueue for each processed message.
 	 */
 	public static final String QUEUE_MDB_TEXT_REPLY_MESSAGE = "Hello MDB - reply message!";
+
+	/**
+	 * Name of the test queue used for basic JMS operations testing.
+	 */
+	public static final String TEST_QUEUE = "testQueue";
+
+	/**
+	 * Name of the input queue where messages are sent to be processed by the MDB.
+	 */
+	public static final String IN_QUEUE = "inQueue";
+
+	/**
+	 * Name of the output queue where the MDB sends reply messages after processing.
+	 */
+	public static final String OUT_QUEUE = "outQueue";
 }
