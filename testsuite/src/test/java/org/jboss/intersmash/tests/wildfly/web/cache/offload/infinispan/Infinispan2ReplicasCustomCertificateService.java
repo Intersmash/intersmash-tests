@@ -33,7 +33,7 @@ import org.infinispan.v1.infinispanspec.security.EndpointEncryptionBuilder;
 import org.infinispan.v2alpha1.Cache;
 import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.operator.InfinispanOperatorApplication;
-import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.InfinispanCommandLineBasedKeystoreGenerator;
+import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
 import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.InfinispanSecretUtils;
 
 /**
@@ -68,11 +68,12 @@ public class Infinispan2ReplicasCustomCertificateService implements InfinispanOp
 	}
 
 	public Infinispan2ReplicasCustomCertificateService() throws IOException {
-		final InfinispanCommandLineBasedKeystoreGenerator.InfinispanCertificate infinispanCertificate = InfinispanCommandLineBasedKeystoreGenerator
-				.generateInfinispanCertificate(
+		final SimpleCommandLineBasedKeystoreGenerator.CertificateInfo infinispanCertificate = SimpleCommandLineBasedKeystoreGenerator
+				.generateCertificate(
 						OpenShifts.master().generateHostname(INFINISPAN_APP_NAME),
 						KEYALIAS,
-						STOREPASS);
+						STOREPASS,
+						Collections.emptyList());
 
 		Secret tlsKeystoreSecret = new SecretBuilder()
 				.withNewMetadata()

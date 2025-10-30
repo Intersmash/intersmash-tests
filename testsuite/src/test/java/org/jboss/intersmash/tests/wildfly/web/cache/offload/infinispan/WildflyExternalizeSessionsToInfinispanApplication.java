@@ -33,7 +33,7 @@ import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
 import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplication;
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
-import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.InfinispanCommandLineBasedKeystoreGenerator;
+import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
 
 /**
  * Application descriptor which represents a WildFly/JBoss EAP application which will be provisioned via WildFly/JBoss EAP image and that is
@@ -78,11 +78,12 @@ public class WildflyExternalizeSessionsToInfinispanApplication
 						Infinispan2ReplicasCustomCertificateService.TLS_CERTIFICATE_FILE_NAME))
 				.build());
 
-		final InfinispanCommandLineBasedKeystoreGenerator.InfinispanCertificate infinispanCertificate = InfinispanCommandLineBasedKeystoreGenerator
-				.generateInfinispanCertificate(
+		final SimpleCommandLineBasedKeystoreGenerator.CertificateInfo infinispanCertificate = SimpleCommandLineBasedKeystoreGenerator
+				.generateCertificate(
 						OpenShifts.master().generateHostname(Infinispan2ReplicasCustomCertificateService.INFINISPAN_APP_NAME),
 						Infinispan2ReplicasCustomCertificateService.KEYALIAS,
-						Infinispan2ReplicasCustomCertificateService.STOREPASS);
+						Infinispan2ReplicasCustomCertificateService.STOREPASS,
+						Collections.emptyList());
 		Secret tlsCertificateSecret = new SecretBuilder()
 				.withNewMetadata()
 				.withName(Infinispan2ReplicasCustomCertificateService.TLS_CERTIFICATE_SECRET_NAME)

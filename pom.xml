@@ -54,6 +54,8 @@
         <version.commons-lang3>3.17.0</version.commons-lang3>
         <version.system-stubs-core>2.1.8</version.system-stubs-core>
         <version.slf4j>2.0.17</version.slf4j>
+        <version.gson>2.13.2</version.gson>
+        <version.lombok>1.18.36</version.lombok>
     </properties>
 
     <modules>
@@ -68,6 +70,19 @@
                 <groupId>org.jboss.intersmash</groupId>
                 <artifactId>intersmash-provisioners</artifactId>
                 <version>${version.intersmash}</version>
+                <exclusions>
+                    <!-- workaround for https://howtodoinjava.com/lombok/lombok-nosuchfielderror-error/ -->
+                    <exclusion>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- workaround for https://howtodoinjava.com/lombok/lombok-nosuchfielderror-error/ -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${version.lombok}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.intersmash.tests</groupId>
@@ -125,10 +140,22 @@
                 <version>${version.slf4j}</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${version.gson}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <!-- workaround for https://howtodoinjava.com/lombok/lombok-nosuchfielderror-error/ -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
         <!-- JUnit 5 Jupiter -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

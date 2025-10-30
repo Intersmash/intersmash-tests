@@ -20,3 +20,11 @@ interacts with a remote Infinispan/Red Hat Data Grid service.
 
 The application is configured to use an invalidation cache backed by the remote Infinispan/Red Hat Data Grid service,
 and environment variables are set conveniently in [the relevant application descriptor](src/test/java/org/jboss/intersmash/tests/wildfly/web/cache/offload/infinispan/WildflyOffloadingSessionsToInfinispanApplication.java). 
+
+## WildFly + ActiveMQ Artemis
+
+This tests validates an interoperability use case based on a WildFly/JBoss EAP/JBoss EAP XP application which
+interacts with a remote ActiveMQ Artemis messaging broker service.
+
+The application is configured to use TLS to secure the connection to the remote ActiveMQ Artemis messaging broker service,
+and environment variables are set conveniently in [the relevant application descriptor](src/test/java/org/jboss/intersmash/tests/wildfly/message/broker/activemq/artemis/ssl/WildflyJmsSslApplication.java). 
