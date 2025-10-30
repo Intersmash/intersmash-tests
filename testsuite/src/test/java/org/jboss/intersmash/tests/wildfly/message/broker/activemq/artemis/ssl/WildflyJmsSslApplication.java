@@ -115,7 +115,7 @@ public class WildflyJmsSslApplication implements WildflyImageOpenShiftApplicatio
 				.generateCertificate(
 						ActiveMQArtemisApplication.getAcceptorServiceName(),
 						ActiveMQArtemisApplication.KEYALIAS,
-						ActiveMQArtemisApplication.STOREPASS,
+						ActiveMQArtemisApplication.STOREPASS, null,
 						Collections.emptyList());
 		/*
 		    apiVersion: v1

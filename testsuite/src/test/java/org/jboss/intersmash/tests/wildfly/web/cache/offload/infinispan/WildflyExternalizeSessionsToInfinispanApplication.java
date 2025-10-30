@@ -82,7 +82,7 @@ public class WildflyExternalizeSessionsToInfinispanApplication
 				.generateCertificate(
 						OpenShifts.master().generateHostname(Infinispan2ReplicasCustomCertificateService.INFINISPAN_APP_NAME),
 						Infinispan2ReplicasCustomCertificateService.KEYALIAS,
-						Infinispan2ReplicasCustomCertificateService.STOREPASS,
+						Infinispan2ReplicasCustomCertificateService.STOREPASS, null,
 						Collections.emptyList());
 		Secret tlsCertificateSecret = new SecretBuilder()
 				.withNewMetadata()
