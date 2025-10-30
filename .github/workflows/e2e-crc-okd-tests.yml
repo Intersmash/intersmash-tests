@@ -175,7 +175,7 @@ jobs:
         run: |
           mvn clean verify -Dit.test=${{ inputs.test-name }} -Dfailsafe.failIfNoSpecifiedTests=false -B -Popenshift -Dxtf.log.streaming.enabled=${{ inputs.enable-logs-streaming }} -Dxtf.waiting.timeout=${{ inputs.xtf-waiting-timeout }}
       - name: Store test artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: openshift-e2e-tests-artifacts
           path: |
