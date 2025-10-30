@@ -72,7 +72,7 @@ public class Infinispan2ReplicasCustomCertificateService implements InfinispanOp
 				.generateCertificate(
 						OpenShifts.master().generateHostname(INFINISPAN_APP_NAME),
 						KEYALIAS,
-						STOREPASS,
+						STOREPASS, null,
 						Collections.emptyList());
 
 		Secret tlsKeystoreSecret = new SecretBuilder()

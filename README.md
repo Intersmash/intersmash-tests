@@ -41,6 +41,13 @@ uses the `elytron-oidc-client` layer configuration to interact with a remote Key
 and secure resources via SSO.
 See the [WildflyWithElytronOidcClientIT](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcClientIT.java) class Javadoc for more details.
 
+#### [WildFly (JBoss EAP and JBoss EAP XP) SAML Adapter client + Keycloak (Red Hat Build of Keycloak)](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyKeycloakSamlAdapterIT.java)
+
+This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which
+uses the `keycloak-saml` layer configuration to interact with a remote Keycloak (Red Hat Build of Keycloak) service
+and secure resources via SSO.
+See the [WildFlyKeycloakSamlAdapterIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyKeycloakSamlAdapterIT.java) class Javadoc for more details.
+
 #### [WildFly (JBoss EAP and JBoss EAP XP) Web cache offload + Infinispan (Red Hat Data Grid)](testsuite/wildfly-web-cache-offload-infinispan/src/test/java/org/jboss/intersmash/tests/wildfly/web/cache/offload/infinispan/WildflyWebCacheOffloadToInfinispanIT.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which
