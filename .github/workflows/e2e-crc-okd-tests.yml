@@ -181,4 +181,3 @@ jobs:
           path: |
             '${{ github.workspace }}/**/failsafe-reports/*.*'
             '${{ github.workspace }}/**/*.log'
-            
