@@ -139,7 +139,7 @@ public class ActiveMQArtemisApplication implements ActiveMQOperatorApplication, 
 				.generateCertificate(
 						getAcceptorServiceName(),
 						KEYALIAS,
-						STOREPASS,
+						STOREPASS, null,
 						Collections.emptyList());
 
 		/*

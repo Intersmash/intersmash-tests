@@ -13,6 +13,14 @@ which is configured to allow OIDC Single-sign-on in order to secure the applicat
 
 The deployed application descriptor sets the `SSO_APP_SERVICE` environment variable to the URL of the Keycloak service.
 
+## WildFly SAML Adapter client + Keycloak
+
+This tests validates an interoperability use case based on a WildFly/JBoss EAP/JBoss EAP XP application that
+uses the SAML Adapter client to connect to a remote Keycloak/Red Hat Build of Keycloak service,
+which is configured to allow SAML Single-sign-on in order to secure the application resources.
+
+The deployed application descriptor sets the necessary environment variables described in [keycloak/2.0/module.yaml](https://github.com/wildfly/wildfly-cekit-modules/blob/main/jboss/container/wildfly/launch/keycloak/2.0/module.yaml) to configure the connection to the Keycloak service and to trigger the automatic SAML Client registration.
+
 ## WildFly Web cache offload + Infinispan
 
 This tests validates an interoperability use case based on a WildFly/JBoss EAP/JBoss EAP XP application which
