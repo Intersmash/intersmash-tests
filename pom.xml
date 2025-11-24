@@ -50,7 +50,7 @@
         <version.junit-jupiter>5.11.1</version.junit-jupiter>
         <version.rest-assured>5.5.1</version.rest-assured>
         <version.junit-platform-launcher>1.11.3</version.junit-platform-launcher>
-        <version.spotless-maven-plugin>3.0.0</version.spotless-maven-plugin>
+        <version.spotless-maven-plugin>3.1.0</version.spotless-maven-plugin>
         <version.commons-lang3>3.17.0</version.commons-lang3>
         <version.system-stubs-core>2.1.8</version.system-stubs-core>
         <version.slf4j>2.0.17</version.slf4j>
