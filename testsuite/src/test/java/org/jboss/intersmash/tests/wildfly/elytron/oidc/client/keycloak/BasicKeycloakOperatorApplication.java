@@ -61,12 +61,19 @@ public class BasicKeycloakOperatorApplication implements KeycloakOperatorApplica
 	protected static final String WILDFLY_CLIENT_ELYTRON_NAME = "wildfly-basic-elytron-auth-service";
 	protected static final long KEYCLOAK_INSTANCES = 1;
 
-	private final Keycloak keycloak;
-	private final List<KeycloakRealmImport> keycloakRealmImports = new ArrayList<>();
-	private final List<Secret> secrets = new ArrayList<>();
+	protected final Keycloak keycloak;
+	protected final List<KeycloakRealmImport> keycloakRealmImports = new ArrayList<>();
+	protected final List<Secret> secrets = new ArrayList<>();
 	public static final String TLS_SECRET_NAME = "tls-secret";
 
+	public static final String OIDC_USER_NAME = "admin";
+	public static final String OIDC_USER_PASSWORD = "password";
+
 	public BasicKeycloakOperatorApplication() throws IOException {
+		this(null);
+	}
+
+	public BasicKeycloakOperatorApplication(final String wildflyWithElytronOidcClientRoute) throws IOException {
 		final String hostName = OpenShifts.master().generateHostname(APP_NAME);
 		final CommandLineBasedKeystoreGenerator.GeneratedPaths certPaths = CommandLineBasedKeystoreGenerator
 				.generateCerts(hostName);
@@ -120,9 +127,6 @@ public class BasicKeycloakOperatorApplication implements KeycloakOperatorApplica
 				.endSpec()
 				.build();
 
-		// TODO - more cases supported by the same Keycloak service here
-		final String wildflyWithElytronOidcClientRoute = WildflyWithElytronOidcClientApplication.getRoute();
-
 		keycloakRealmImports.add(
 				new KeycloakRealmImportBuilder()
 						.withNewMetadata()
@@ -151,11 +155,11 @@ public class BasicKeycloakOperatorApplication implements KeycloakOperatorApplica
 								.withEnabled(true)
 								.withDisplayName(REALM_NAME)
 								.withUsers(new UsersBuilder()
-										.withUsername("admin")
+										.withUsername(OIDC_USER_NAME)
 										.withEnabled(true)
 										.withCredentials(new CredentialsBuilder()
 												.withType("password")
-												.withValue("password")
+												.withValue(OIDC_USER_PASSWORD)
 												.build())
 										.withRealmRoles("user", "admin")
 										.withClientRoles(Map.of("realm-management", Arrays.asList("create-client")))
@@ -170,20 +174,25 @@ public class BasicKeycloakOperatorApplication implements KeycloakOperatorApplica
 												.withRealmRoles("admin")
 												.build())
 								.withClients(
+										wildflyWithElytronOidcClientRoute != null ?
 										// TODO - more cases supported by the same Keycloak service here
-										new ClientsBuilder()
-												.withClientId(WILDFLY_CLIENT_ELYTRON_NAME)
-												.withPublicClient(true)
-												.withStandardFlowEnabled(true)
-												.withEnabled(true)
-												.withRootUrl(String.format("http://%s/", wildflyWithElytronOidcClientRoute))
-												.withRedirectUris(
-														String.format("http://%s/*", wildflyWithElytronOidcClientRoute))
-												.withAdminUrl(String.format("http://%s/", wildflyWithElytronOidcClientRoute))
-												.withWebOrigins(String.format("http://%s/", wildflyWithElytronOidcClientRoute))
-												.withSecret("password")
-												.withFullScopeAllowed(true)
-												.build())
+												new ClientsBuilder()
+														.withClientId(WILDFLY_CLIENT_ELYTRON_NAME)
+														.withPublicClient(true)
+														.withStandardFlowEnabled(true)
+														.withEnabled(true)
+														.withRootUrl(
+																String.format("http://%s/", wildflyWithElytronOidcClientRoute))
+														.withRedirectUris(
+																String.format("http://%s/*", wildflyWithElytronOidcClientRoute))
+														.withAdminUrl(
+																String.format("http://%s/", wildflyWithElytronOidcClientRoute))
+														.withWebOrigins(
+																String.format("http://%s/", wildflyWithElytronOidcClientRoute))
+														.withSecret("password")
+														.withFullScopeAllowed(true)
+														.build()
+												: null)
 								.build())
 						.endSpec()
 						.build());
