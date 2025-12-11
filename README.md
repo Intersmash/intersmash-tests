@@ -41,6 +41,14 @@ uses the `elytron-oidc-client` layer configuration to interact with a remote Key
 and secure resources via SSO.
 See the [WildflyWithElytronOidcClientIT](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcClientIT.java) class Javadoc for more details.
 
+#### [WildFly (JBoss EAP and JBoss EAP XP) Elytron OIDC client + Keycloak (Red Hat Build of Keycloak) with Dynamic OIDC Client Registration](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcDynamicClientIT.java)
+
+This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which
+uses the `elytron-oidc-client` layer configuration to interact with a remote Keycloak (Red Hat Build of Keycloak) service
+and secure resources via SSO.
+This tests is a variation over [WildflyWithElytronOidcClientIT](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcClientIT.java) and introduces "Dynamic OIDC Client Registration" to automatically register an OIDC Client in Keycloak (see [oidc.sh](https://github.com/wildfly/wildfly-cekit-modules/blob/main/jboss/container/wildfly/launch/oidc/added/oidc.sh) and [oidc-keycloak-hooks.sh](https://github.com/wildfly/wildfly-cekit-modules/blob/main/jboss/container/wildfly/launch/oidc/added/oidc-keycloak-hooks.sh) for the details);
+See the [WildflyWithElytronOidcDynamicClientIT](testsuite/wildfly-elytron-oidc-client-keycloak/src/test/java/org/jboss/intersmash/tests/wildfly/elytron/oidc/client/keycloak/WildflyWithElytronOidcDynamicClientIT.java) class Javadoc for more details.
+
 #### [WildFly (JBoss EAP and JBoss EAP XP) SAML Adapter client + Keycloak (Red Hat Build of Keycloak)](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyKeycloakSamlAdapterIT.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which
