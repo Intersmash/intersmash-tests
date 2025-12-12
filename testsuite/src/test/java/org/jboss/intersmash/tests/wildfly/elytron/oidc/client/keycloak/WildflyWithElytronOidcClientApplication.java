@@ -31,6 +31,15 @@ import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 /**
  * WildFly image based OpenShift application descriptor that uses the wildfly-with-elytron-oidc-client
  * deployment.
+ *
+ *  You can configure the elytron-oidc-client subsystem in three different ways:
+ * <ul>
+ *     <li>Adding an oidc.json into your deployment.</li>
+ *     <li>Running a CLI script to configure the elytron-oidc-client subsystem.</li>
+ *     <li>Defining environment variables to configure an elytron-oidc-client subsystem on start of JBoss EAP server on OpenShift.</li>
+ * </ul>
+ *
+ * This class is used to verify the first option
  */
 public class WildflyWithElytronOidcClientApplication
 		implements WildflyImageOpenShiftApplication, WildflyApplicationConfiguration {
@@ -49,7 +58,7 @@ public class WildflyWithElytronOidcClientApplication
 				.build();
 		environmentVariables.add(new EnvVarBuilder()
 				.withName("SSO_APP_SERVICE")
-				.withValue(String.format("https://%s", BasicKeycloakOperatorApplication.getRoute()))
+				.withValue(String.format("https://%s", BasicKeycloakOperatorApplicationWithPreConfiguredOidcClient.getRoute()))
 				.build());
 
 		environmentVariables.add(

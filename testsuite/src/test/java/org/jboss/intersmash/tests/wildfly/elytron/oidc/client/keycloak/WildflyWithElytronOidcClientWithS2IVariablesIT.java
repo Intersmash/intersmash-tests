@@ -45,7 +45,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * WildFly/JBoss EAP 8.z application secured by Keycloak/RHBK.
  * The Keycloak client is provided to the WildFly/JBoss EAP 8.z application by the elytron-oidc-client layer.
  *
- * This test configures the elytron-oidc-client subsystem using the oidc.json file to secure the application with OIDC.
+ * This test configures the elytron-oidc-client subsystem using the environment variables to secure the application with
+ * OIDC: {@link WildflyWithElytronOidcClientWithS2IVariablesApplication} for details.
  */
 @KeycloakTest
 @WildflyTest
@@ -56,12 +57,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 @Intersmash({
 		@Service(KeycloakPostgresqlApplication.class),
-		@Service(BasicKeycloakOperatorApplicationWithPreConfiguredOidcClient.class),
-		@Service(WildflyWithElytronOidcClientApplication.class)
+		@Service(BasicKeycloakOperatorApplication.class),
+		@Service(WildflyWithElytronOidcClientWithS2IVariablesApplication.class)
 })
-public class WildflyWithElytronOidcClientIT {
+public class WildflyWithElytronOidcClientWithS2IVariablesIT {
 
-	@ServiceUrl(WildflyWithElytronOidcClientApplication.class)
+	@ServiceUrl(WildflyWithElytronOidcClientWithS2IVariablesApplication.class)
 	private String wildflyApplicationRouteUrl;
 
 	private static final String USER_NAME_WITH_CORRECT_ROLE = "admin";
