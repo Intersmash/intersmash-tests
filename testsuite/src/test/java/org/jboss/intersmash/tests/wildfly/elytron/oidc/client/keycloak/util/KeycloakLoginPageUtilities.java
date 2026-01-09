@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.fail;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.TextPage;
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
@@ -36,15 +38,20 @@ import org.hamcrest.MatcherAssert;
  */
 public class KeycloakLoginPageUtilities {
 
-	/** HTML ID of login form */
+	/** HTML ID of login form. */
 	private static final String FORM_LOGIN = "kc-form-login";
-	/** HTML name of input for username */
+	/** HTML name of input for username. */
 	private static final String FIELD_USERNAME = "username";
-	/** HTML name of input for password */
+	/** HTML name of input for password. */
 	private static final String FIELD_PASSWORD = "password";
-	/** HTML name of button for login */
+	/** HTML name of button for login. */
 	private static final String BTN_LOGIN_LOGIN_PAGE = "login";
 
+	/**
+	 * Asserts that the given page is a Keycloak login page with the expected form fields.
+	 *
+	 * @param page the HTML page to verify
+	 */
 	public static void assertIsLoginPage(HtmlPage page) {
 		try {
 			assertThat(statusCodeOf(page)).isEqualTo(HttpStatus.SC_OK);
@@ -57,6 +64,15 @@ public class KeycloakLoginPageUtilities {
 		}
 	}
 
+	/**
+	 * Performs login on a Keycloak login page with the provided credentials.
+	 *
+	 * @param loginPage the login page
+	 * @param user the username
+	 * @param password the password
+	 * @return the page returned after clicking the login button
+	 * @throws IOException if an I/O error occurs during the login process
+	 */
 	public static Page makeLogin(HtmlPage loginPage, String user, String password) throws IOException {
 		HtmlForm loginForm = loginPage.getHtmlElementById(FORM_LOGIN);
 		HtmlInput userNameInput = loginForm.getInputByName(FIELD_USERNAME);
@@ -67,15 +83,70 @@ public class KeycloakLoginPageUtilities {
 		return loginButton.click();
 	}
 
+	/**
+	 * Extracts the HTTP status code from a page response.
+	 *
+	 * @param response the page response
+	 * @return the HTTP status code
+	 */
 	public static int statusCodeOf(Page response) {
 		return response.getWebResponse().getStatusCode();
 	}
 
+	/**
+	 * Asserts that the given page displays the expected Keycloak realm name.
+	 *
+	 * @param page the HTML page to verify
+	 * @param realmName the expected realm name
+	 */
 	public static void assertIsExpectedRealm(HtmlPage page, String realmName) {
 		List<Object> foundObjects = page.getByXPath(
 				String.format("/html/body//div[contains(text(),'%s')]", realmName));
 		Optional<Object> first = foundObjects.stream().findFirst();
 		MatcherAssert.assertThat(String.format("The HTML 'DIV' element with text '%s' was not found", realmName),
 				!first.isEmpty());
+	}
+
+	/**
+	 * Requests a secured page which redirects to the Keycloak login page, then performs login.
+	 *
+	 * @param securedURL the URL of the secured resource
+	 * @param login the username for login
+	 * @param password the password for login
+	 * @return the page returned after successful or unsuccessful login
+	 * @throws IOException if an I/O error occurs during the request or login process
+	 */
+	public static Page requestSecuredPageAndLogin(String securedURL, String login, String password) throws IOException {
+		try (final WebClient webClient = new WebClient()) {
+			webClient.getOptions().setUseInsecureSSL(true);
+			webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+			HtmlPage loginPage = requestSecuredPage(securedURL, webClient);
+			KeycloakLoginPageUtilities.assertIsLoginPage(loginPage);
+			return KeycloakLoginPageUtilities.makeLogin(loginPage, login, password);
+		}
+	}
+
+	private static HtmlPage requestSecuredPage(String securedURL, WebClient webClient) throws IOException {
+		return webClient.getPage(securedURL);
+	}
+
+	/**
+	 * Extracts the content from a text page.
+	 *
+	 * @param securedPage the text page
+	 * @return the page content as a string
+	 */
+	public static String contentOf(TextPage securedPage) {
+		return securedPage.getContent();
+	}
+
+	/**
+	 * Extracts the text content from an HTML page body.
+	 *
+	 * @param securedPage the HTML page
+	 * @return the body text content as a string
+	 */
+	public static String contentOf(HtmlPage securedPage) {
+		return securedPage.getBody().getTextContent();
 	}
 }
