@@ -29,38 +29,78 @@ public class KeycloakPostgresqlApplication implements PostgreSQLImageOpenShiftAp
 	public static final String POSTGRESQL_PASSWORD = "keycloak-1234";
 	public static final String POSTGRESQL_USER = "user-keycloak";
 
+	/**
+	 * Get the application name.
+	 *
+	 * @return the application name
+	 */
 	@Override
 	public String getName() {
 		return POSTGRESQL_NAME;
 	}
 
+	/**
+	 * Get the database user.
+	 *
+	 * @return the database user
+	 */
 	@Override
 	public String getUser() {
 		return POSTGRESQL_USER;
 	}
 
+	/**
+	 * Get the database password.
+	 *
+	 * @return the database password
+	 */
 	@Override
 	public String getPassword() {
 		return POSTGRESQL_PASSWORD;
 	}
 
+	/**
+	 * Get the database name.
+	 *
+	 * @return the database name
+	 */
 	@Override
 	public String getDbName() {
 		return POSTGRESQL_DATABASE;
 	}
 
+	/**
+	 * Get the service name for the PostgreSQL database.
+	 *
+	 * @return the service name
+	 */
 	public static String getServiceName() {
 		return POSTGRESQL_NAME + "-service";
 	}
 
+	/**
+	 * Get the service port for the PostgreSQL database.
+	 *
+	 * @return the service port
+	 */
 	public static Long getServicePort() {
 		return 5432L;
 	}
 
+	/**
+	 * Get the service secret name for the PostgreSQL database credentials.
+	 *
+	 * @return the service secret name
+	 */
 	public static String getServiceSecretName() {
 		return POSTGRESQL_NAME + "-credentials";
 	}
 
+	/**
+	 * Get the service database name for the PostgreSQL database.
+	 *
+	 * @return the service database name
+	 */
 	public static String getServiceDbName() {
 		return POSTGRESQL_DATABASE;
 	}

@@ -43,7 +43,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * WildFly/JBoss EAP 8.z application secured by Keycloak/RHBK.
  * The Keycloak client is provided to the WildFly/JBoss EAP 8.z application by the elytron-oidc-client layer.
  *
- * This test configures the elytron-oidc-client subsystem using the oidc.json file to secure the application with OIDC.
+ * This test configures the elytron-oidc-client subsystem using the environment variables to secure the application with
+ * OIDC: {@link WildflyWithElytronOidcDynamicClientApplication} for details.
  */
 @KeycloakTest
 @WildflyTest
@@ -54,13 +55,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 @Intersmash({
 		@Service(KeycloakPostgresqlApplication.class),
-		@Service(BasicKeycloakOperatorApplication.class),
-		@Service(WildflyWithElytronOidcClientApplication.class)
+		@Service(BasicKeycloakOperatorDynamicClientApplication.class),
+		@Service(WildflyWithElytronOidcDynamicClientApplication.class)
 })
-public class WildflyWithElytronOidcClientIT {
+public class WildflyWithElytronOidcDynamicClientIT {
 
 	/** URL of the WildFly application route. */
-	@ServiceUrl(WildflyWithElytronOidcClientApplication.class)
+	@ServiceUrl(WildflyWithElytronOidcDynamicClientApplication.class)
 	private String wildflyApplicationRouteUrl;
 
 	/** Expected message when authentication is successful. */
@@ -88,8 +89,8 @@ public class WildflyWithElytronOidcClientIT {
 	public void testSuccess() throws IOException {
 		TextPage securedPage = (TextPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorApplication.USER_NAME_WITH_CORRECT_ROLE,
-				BasicKeycloakOperatorApplication.USER_PASSWORD_WITH_CORRECT_ROLE);
+				BasicKeycloakOperatorDynamicClientApplication.USER_NAME_WITH_CORRECT_ROLE,
+				BasicKeycloakOperatorDynamicClientApplication.USER_PASSWORD_WITH_CORRECT_ROLE);
 		assertThat(KeycloakLoginPageUtilities.statusCodeOf(securedPage)).isEqualTo(HttpStatus.SC_OK);
 		assertThat(KeycloakLoginPageUtilities.contentOf(securedPage)).contains(SUCCESS_EXPECTED_MESSAGE);
 	}
@@ -103,8 +104,8 @@ public class WildflyWithElytronOidcClientIT {
 	public void testForbidden() throws IOException {
 		HtmlPage securedPage = (HtmlPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorApplication.USER_NAME_WITH_WRONG_ROLE,
-				BasicKeycloakOperatorApplication.USER_PASSWORD_WITH_WRONG_ROLE);
+				BasicKeycloakOperatorDynamicClientApplication.USER_NAME_WITH_WRONG_ROLE,
+				BasicKeycloakOperatorDynamicClientApplication.USER_PASSWORD_WITH_WRONG_ROLE);
 		assertThat(KeycloakLoginPageUtilities.statusCodeOf(securedPage)).isEqualTo(HttpStatus.SC_FORBIDDEN);
 		assertThat(KeycloakLoginPageUtilities.contentOf(securedPage)).contains(FORBIDDEN_EXPECTED_MESSAGE);
 	}
@@ -118,7 +119,7 @@ public class WildflyWithElytronOidcClientIT {
 	public void testUnauthorized() throws IOException {
 		HtmlPage loginPage = (HtmlPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorApplication.USER_NAME_WITH_CORRECT_ROLE,
+				BasicKeycloakOperatorDynamicClientApplication.USER_NAME_WITH_CORRECT_ROLE,
 				"wrong_password");
 		KeycloakLoginPageUtilities.assertIsLoginPage(loginPage);
 	}
