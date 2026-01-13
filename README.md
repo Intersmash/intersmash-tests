@@ -54,7 +54,7 @@ This test validates an interoperability use case based on a WildFly (JBoss EAP a
 is configured to offload web cache data to a remote Infinispan (Red Hat Data Grid) service.
 See the [WildflyWebCacheOffloadToInfinispanIT](testsuite/wildfly-web-cache-offload-infinispan/src/test/java/org/jboss/intersmash/tests/wildfly/web/cache/offload/infinispan/WildflyWebCacheOffloadToInfinispanIT.java) class Javadoc for more details.
 
-### [WildFly (JBoss EAP and JBoss EAP XP) ActiveMQ Artemis SSL-secured Messaging](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/message/broker/activemq/artemis/ssl/WildflyActiveMQArtemisSslIT.java)
+#### [WildFly (JBoss EAP and JBoss EAP XP) ActiveMQ Artemis SSL-secured Messaging](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/message/broker/activemq/artemis/ssl/WildflyActiveMQArtemisSslIT.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which
 is configured to use an SSL-secured ActiveMQ Artemis message broker for encrypted messaging communication.
