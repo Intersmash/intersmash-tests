@@ -29,7 +29,7 @@ import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplicati
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 
 /**
- * WildFly image based OpenShift application descriptor that uses the wildfly-with-elytron-oidc-client
+ * WildFly image based OpenShift application descriptor that uses the <a href="https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/elytron-oidc-client-keycloak">elytron-oidc-client-keycloak</a>
  * deployment.
  *
  *  You can configure the elytron-oidc-client subsystem in three different ways:
@@ -64,7 +64,8 @@ public class WildflyWithElytronOidcClientApplication
 				.withValue(String.format("https://%s", BasicKeycloakOperatorApplication.getRoute()))
 				.build());
 
-		// On Keycloak we added a pre-configured OIDC client that can be accessed using this password (see file oidc.json)
+		// On Keycloak we added a pre-configured OIDC client that can be accessed using this password
+		// (see file https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/elytron-oidc-client-keycloak/src/main/webapp/WEB-INF/oidc.json)
 		environmentVariables.add(
 				new EnvVarBuilder().withName("OIDC_SECURE_DEPLOYMENT_SECRET")
 						.withValue(BasicKeycloakOperatorDynamicClientApplication.OIDC_SECURE_DEPLOYMENT_SECRET)

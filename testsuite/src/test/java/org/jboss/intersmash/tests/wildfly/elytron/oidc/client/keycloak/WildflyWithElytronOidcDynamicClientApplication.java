@@ -38,7 +38,7 @@ import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGen
 import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.OpenShiftBinaryClient;
 
 /**
- * WildFly image based OpenShift application descriptor that uses the wildfly-with-elytron-oidc-client
+ * WildFly image based OpenShift application descriptor that uses the <a href="https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/elytron-oidc-client-keycloak">elytron-oidc-client-keycloak</a>
  * deployment.
  *
  *  You can configure the elytron-oidc-client subsystem in three different ways:
@@ -224,6 +224,9 @@ public class WildflyWithElytronOidcDynamicClientApplication
 							.build());
 			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
 		}
+		/**
+		 * See maven profile "no-oidc-json" in <a href="https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/elytron-oidc-client-keycloak/pom.xml#L52">elytron-oidc-client-keycloak/pom.xml</a>
+		 */
 		environmentVariables.add(
 				new EnvVarBuilder().withName("MAVEN_ARGS_APPEND")
 						.withValue(mavenAdditionalArgs + " -Pno-oidc-json")

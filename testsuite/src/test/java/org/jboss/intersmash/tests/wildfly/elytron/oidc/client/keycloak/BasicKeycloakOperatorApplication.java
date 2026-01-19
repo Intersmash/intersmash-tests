@@ -16,7 +16,6 @@
 package org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak;
 
 import java.io.IOException;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.operator.KeycloakOperatorApplication;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Clients;
@@ -45,7 +44,7 @@ public class BasicKeycloakOperatorApplication extends BasicKeycloakOperatorDynam
 	 * @return the list of pre-configured OIDC Clients
 	 */
 	@Override
-	protected @NonNull Clients getClients(@NonNull String wildflyWithElytronOidcClientRoute) {
+	protected Clients getClients(String wildflyWithElytronOidcClientRoute) {
 		return new ClientsBuilder()
 				.withClientId(WILDFLY_CLIENT_ELYTRON_NAME)
 				.withPublicClient(true)

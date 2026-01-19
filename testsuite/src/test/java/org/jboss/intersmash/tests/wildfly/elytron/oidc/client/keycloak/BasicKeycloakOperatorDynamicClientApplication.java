@@ -26,12 +26,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.openshift.PostgreSQLImageOpenShiftApplication;
 import org.jboss.intersmash.application.operator.KeycloakOperatorApplication;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
-import org.jboss.intersmash.util.CommandLineBasedKeystoreGenerator;
 import org.keycloak.k8s.v2alpha1.Keycloak;
 import org.keycloak.k8s.v2alpha1.KeycloakBuilder;
 import org.keycloak.k8s.v2alpha1.KeycloakRealmImport;
@@ -114,8 +112,6 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 	 */
 	public BasicKeycloakOperatorDynamicClientApplication(final String wildflyWithElytronOidcClientRoute) throws IOException {
 		final String hostName = OpenShifts.master().generateHostname(APP_NAME);
-		final CommandLineBasedKeystoreGenerator.GeneratedPaths certPaths = CommandLineBasedKeystoreGenerator
-				.generateCerts(hostName);
 
 		// Private Key + Self-signed certificate to encrypt traffic to the Keycloak service
 		// https://www.keycloak.org/docs/latest/server_admin/index.html#loading-keys-from-a-java-keystore
@@ -245,7 +241,7 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 	 * Return the list of pre-configured OIDC Clients: we don't have any in this class
 	 * @return the list of pre-configured OIDC Clients
 	 */
-	protected @Nullable Clients getClients(@Nullable String wildflyWithElytronOidcClientRoute) {
+	protected Clients getClients(String wildflyWithElytronOidcClientRoute) {
 		return null;
 	}
 
