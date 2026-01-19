@@ -35,16 +35,16 @@ public class BasicKeycloakOperatorApplication extends BasicKeycloakOperatorDynam
 	 * @throws IOException if an I/O error occurs during certificate generation
 	 */
 	public BasicKeycloakOperatorApplication() throws IOException {
-		super(WildflyWithElytronOidcClientApplication.getRoute());
+		super();
 	}
 
 	/**
 	 * Return the list of pre-configured OIDC Clients
-	 * @param wildflyWithElytronOidcClientRoute URL of the remote OIDC Client
 	 * @return the list of pre-configured OIDC Clients
 	 */
 	@Override
-	protected Clients getClients(String wildflyWithElytronOidcClientRoute) {
+	protected Clients getClients() {
+		String wildflyWithElytronOidcClientRoute = WildflyWithElytronOidcClientApplication.getRoute();
 		return new ClientsBuilder()
 				.withClientId(WILDFLY_CLIENT_ELYTRON_NAME)
 				.withPublicClient(true)

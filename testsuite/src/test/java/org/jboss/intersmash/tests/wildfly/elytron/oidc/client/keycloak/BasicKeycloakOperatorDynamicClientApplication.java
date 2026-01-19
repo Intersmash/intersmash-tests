@@ -94,23 +94,11 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 	protected static final String USER_PASSWORD_WITH_WRONG_ROLE = "password2";
 
 	/**
-	 * Creates a new Keycloak instance without a pre-configured OIDC client; that is for cases when we use
-	 * dynamic client registration.
+	 * Creates a new Keycloak instance
 	 *
 	 * @throws IOException if an I/O error occurs during certificate generation
 	 */
 	public BasicKeycloakOperatorDynamicClientApplication() throws IOException {
-		this(null);
-	}
-
-	/**
-	 * Creates a new Keycloak instance with the specified WildFly OIDC client route.
-	 * If the route is provided, a pre-configured OIDC client will be created.
-	 *
-	 * @param wildflyWithElytronOidcClientRoute the route to the WildFly application, or null for dynamic client registration
-	 * @throws IOException if an I/O error occurs during certificate generation
-	 */
-	public BasicKeycloakOperatorDynamicClientApplication(final String wildflyWithElytronOidcClientRoute) throws IOException {
 		final String hostName = OpenShifts.master().generateHostname(APP_NAME);
 
 		// Private Key + Self-signed certificate to encrypt traffic to the Keycloak service
@@ -231,7 +219,7 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 												.withRealmRoles("admin")
 												.build())
 								.withClients(
-										getClients(wildflyWithElytronOidcClientRoute))
+										getClients())
 								.build())
 						.endSpec()
 						.build());
@@ -241,7 +229,7 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 	 * Return the list of pre-configured OIDC Clients: we don't have any in this class
 	 * @return the list of pre-configured OIDC Clients
 	 */
-	protected Clients getClients(String wildflyWithElytronOidcClientRoute) {
+	protected Clients getClients() {
 		return null;
 	}
 
