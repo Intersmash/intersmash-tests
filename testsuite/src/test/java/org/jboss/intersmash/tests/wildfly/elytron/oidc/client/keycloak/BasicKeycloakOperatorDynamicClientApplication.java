@@ -53,7 +53,7 @@ import org.keycloak.k8s.v2alpha1.keycloakspec.db.UsernameSecretBuilder;
 public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOperatorApplication, OpenShiftApplication {
 
 	/** Application name for the Keycloak service. */
-	public static final String APP_NAME = "sso-basic";
+	public static final String APP_NAME = "sso-basic-dc";
 	// operator creates route which is prefixed by "keycloak" while APP_NAME is not used for route.
 	/** Route name for the Keycloak service. */
 	public static final String KEYCLOAK_ROUTE = APP_NAME;
