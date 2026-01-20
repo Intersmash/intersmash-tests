@@ -13,6 +13,11 @@ which is configured to allow OIDC Single-sign-on in order to secure the applicat
 
 The deployed application descriptor sets the `SSO_APP_SERVICE` environment variable to the URL of the Keycloak service.
 
+We have two variations of this test:
+
+- one where the OIDC Client is programmatically registered in Keycloak through the `KeycloakRealmImport` CRD
+- one where the OIDC Client is automatically registered in Keycloak by setting the specific `OIDC_*` S2I env variables
+
 ## WildFly SAML Adapter client + Keycloak
 
 This tests validates an interoperability use case based on a WildFly/JBoss EAP/JBoss EAP XP application that
