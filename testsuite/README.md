@@ -26,6 +26,11 @@ which is configured to allow SAML Single-sign-on in order to secure the applicat
 
 The deployed application descriptor sets the necessary environment variables described in [keycloak/2.0/module.yaml](https://github.com/wildfly/wildfly-cekit-modules/blob/main/jboss/container/wildfly/launch/keycloak/2.0/module.yaml) to configure the connection to the Keycloak service and to trigger the automatic SAML Client registration.
 
+## WildFly EJB + SAML Adapter client + Keycloak
+
+This test is basically the same as [WildFly SAML Adapter client + Keycloak](#wildfly-saml-adapter-client--keycloak) and
+also tests that the EJB layer is correctly configured and authentication and authorization data is propagated to the EJB layer;
+
 ## WildFly Web cache offload + Infinispan
 
 This tests validates an interoperability use case based on a WildFly/JBoss EAP/JBoss EAP XP application which
