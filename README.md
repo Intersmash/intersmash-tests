@@ -56,6 +56,17 @@ uses the `keycloak-saml` layer configuration to interact with a remote Keycloak 
 and secure resources via SSO.
 See the [WildFlyKeycloakSamlAdapterIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyKeycloakSamlAdapterIT.java) class Javadoc for more details.
 
+#### [WildFly (JBoss EAP and JBoss EAP XP) EJB + SAML Adapter client + Keycloak (Red Hat Build of Keycloak)](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyKeycloakSamlAdapterEjbIT.java)
+
+This test is basically the same as [WildFly (JBoss EAP and JBoss EAP XP) SAML Adapter client + Keycloak (Red Hat Build of Keycloak)](#wildfly--jboss-eap-and-jboss-eap-xp--saml-adapter-client--keycloak--red-hat-build-of-keycloak-) and
+also tests that the EJB layer is correctly configured and authentication and authorization data is propagated to the EJB layer;
+See the [WildFlyKeycloakSamlAdapterEjbIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyKeycloakSamlAdapterEjbIT.java) class Javadoc for more details.
+
+#### [WildFly (JBoss EAP and JBoss EAP XP) EJB + Bootable Jar + SAML Adapter client + Keycloak (Red Hat Build of Keycloak)](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyBootableJarKeycloakSamlAdapterEjbHelmIT.java)
+
+This test is a simplified version of [WildFly (JBoss EAP and JBoss EAP XP) EJB + SAML Adapter client + Keycloak (Red Hat Build of Keycloak)](#wildfly--jboss-eap-and-jboss-eap-xp--ejb--saml-adapter-client--keycloak--red-hat-build-of-keycloak-) which removes signing for SAML requests and responses; it packages and deploys the application as a Bootable Jar; the peculiarity of this test is that the deployed application uses layer `keycloak-client-saml-ejb` which is meant for bare-metal usage not Kubernetes/OpenShift, and expects it to work since there is no reason why it should not;
+See the [WildFlyBootableJarKeycloakSamlAdapterEjbHelmIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyBootableJarKeycloakSamlAdapterEjbHelmIT.java) class Javadoc for more details.
+
 #### [WildFly (JBoss EAP and JBoss EAP XP) Web cache offload + Infinispan (Red Hat Data Grid)](testsuite/wildfly-web-cache-offload-infinispan/src/test/java/org/jboss/intersmash/tests/wildfly/web/cache/offload/infinispan/WildflyWebCacheOffloadToInfinispanIT.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which

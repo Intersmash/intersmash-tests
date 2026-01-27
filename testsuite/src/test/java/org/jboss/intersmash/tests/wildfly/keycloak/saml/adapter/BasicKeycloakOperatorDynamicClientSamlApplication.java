@@ -36,7 +36,9 @@ import org.keycloak.k8s.v2alpha1.KeycloakBuilder;
 import org.keycloak.k8s.v2alpha1.KeycloakRealmImport;
 import org.keycloak.k8s.v2alpha1.KeycloakRealmImportBuilder;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.RealmBuilder;
+import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Clients;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.RequiredActionsBuilder;
+import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Users;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.UsersBuilder;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.users.CredentialsBuilder;
 import org.keycloak.k8s.v2alpha1.keycloakspec.DbBuilder;
@@ -59,7 +61,7 @@ import org.keycloak.k8s.v2alpha1.keycloakspec.db.UsernameSecretBuilder;
  * </ul>
  * </p>
  */
-public class BasicKeycloakOperatorApplication implements KeycloakOperatorApplication, OpenShiftApplication {
+public class BasicKeycloakOperatorDynamicClientSamlApplication implements KeycloakOperatorApplication, OpenShiftApplication {
 	/** Application name used for labeling and resource identification. */
 	public static final String APP_NAME = "sso-basic";
 
@@ -111,7 +113,7 @@ public class BasicKeycloakOperatorApplication implements KeycloakOperatorApplica
 	private final List<Secret> secrets = new ArrayList<>();
 
 	/**
-	 * Constructs a new BasicKeycloakOperatorApplication.
+	 * Constructs a new BasicKeycloakOperatorDynamicClientSamlApplication.
 	 * <p>
 	 * This constructor initializes:
 	 * <ul>
@@ -124,7 +126,7 @@ public class BasicKeycloakOperatorApplication implements KeycloakOperatorApplica
 	 *
 	 * @throws IOException if certificate generation or file operations fail
 	 */
-	public BasicKeycloakOperatorApplication() throws IOException {
+	public BasicKeycloakOperatorDynamicClientSamlApplication() throws IOException {
 		// Private Key + Self-signed certificate to encrypt traffic to the Keycloak service
 		// https://www.keycloak.org/docs/latest/server_admin/index.html#loading-keys-from-a-java-keystore
 		final SimpleCommandLineBasedKeystoreGenerator.CertificateInfo keycloakCertificate = SimpleCommandLineBasedKeystoreGenerator
@@ -220,47 +222,75 @@ public class BasicKeycloakOperatorApplication implements KeycloakOperatorApplica
 								.withRealm(REALM_NAME)
 								.withEnabled(true)
 								.withDisplayName(REALM_NAME)
-								.withUsers(new UsersBuilder()
-										.withUsername(USER_NAME)
-										.withEnabled(true)
-										.withCredentials(new CredentialsBuilder()
-												.withType("password")
-												.withValue(USER_PASSWORD)
-												.build())
-										// this must match with the role defined in "keycloak-saml-adapter"'s web.xml
-										.withRealmRoles("user-role")
-										.build(),
-										new UsersBuilder()
-												.withUsername(ANOTHER_USER_NAME)
-												.withEnabled(true)
-												.withCredentials(new CredentialsBuilder()
-														.withType("password")
-														.withValue(ANOTHER_USER_PASSWORD)
-														.build())
-												.withRealmRoles("another-role")
-												.build(),
-										// user `client` is required for WildFly/JBoss EAP being able to register a new SAML client into Keycloak/RHBK
-										new UsersBuilder()
-												.withUsername(SSO_USERNAME)
-												.withEnabled(true)
-												.withCredentials(new CredentialsBuilder()
-														.withType("password")
-														.withValue(SSO_PASSWORD)
-														.build())
-												.withRealmRoles("admin")
-												.withClientRoles(
-														Map.of(
-																"realm-management",
-																List.of(
-																		"create-client",
-																		"manage-realm",
-																		"manage-clients")))
-												.build())
-								// No need to preconfigure a client: it will be created automatically by WildFly/JBoss EAP through user "client"
-								/*.clients(...)*/
+								.withUsers(getUsers())
+								// When no client is preconfigured, it's assumed it will be created automatically by WildFly/JBoss EAP
+								// through user "client" and making use of the "dynamic client registration" feature in the SAML feature pack
+								.withClients(
+										getClients())
 								.build())
 				.endSpec()
 				.build());
+	}
+
+	/**
+	 * Defines users for the Keycloak realm.
+	 * Specifically, this class also creates a used for registering SAML clients that is assigned to the following roles:
+	 * "create-client", "manage-realm", "manage-clients";
+	 *
+	 * @return users for the Keycloak realm
+	 */
+	protected Users[] getUsers() {
+		return new Users[] { new UsersBuilder()
+				.withUsername(USER_NAME)
+				.withEnabled(true)
+				.withCredentials(new CredentialsBuilder()
+						.withType("password")
+						.withValue(USER_PASSWORD)
+						.build())
+				// this must match with the role defined in "keycloak-saml-adapter"'s web.xml
+				.withRealmRoles("user-role")
+				.build(),
+				new UsersBuilder()
+						.withUsername(ANOTHER_USER_NAME)
+						.withEnabled(true)
+						.withCredentials(new CredentialsBuilder()
+								.withType("password")
+								.withValue(ANOTHER_USER_PASSWORD)
+								.build())
+						.withRealmRoles("another-role")
+						.build(),
+				// user `client` is required for WildFly/JBoss EAP being able to register a new SAML client into Keycloak/RHBK
+				new UsersBuilder()
+						.withUsername(SSO_USERNAME)
+						.withEnabled(true)
+						.withCredentials(new CredentialsBuilder()
+								.withType("password")
+								.withValue(SSO_PASSWORD)
+								.build())
+						.withRealmRoles("admin")
+						.withClientRoles(
+								Map.of(
+										"realm-management",
+										List.of(
+												"create-client",
+												"manage-realm",
+												"manage-clients")))
+						.build() };
+	}
+
+	/**
+	 * Returns the list of pre-configured SAML clients.
+	 * <p>
+	 * This implementation returns null, indicating that no SAML clients are pre-configured.
+	 * When using dynamic client registration, the WildFly/JBoss EAP application will
+	 * automatically register itself as a SAML client with Keycloak at runtime using
+	 * the 'client' user account with realm management permissions.
+	 * </p>
+	 *
+	 * @return null to indicate no pre-configured SAML clients
+	 */
+	protected Clients getClients() {
+		return null;
 	}
 
 	/**
