@@ -64,7 +64,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * SAML-secured WildFly/JBoss EAP application, verifying the entire authentication flow.
  * </p>
  */
-@OpenShiftRecorder(resourceNames = { BasicKeycloakOperatorApplication.APP_NAME,
+@OpenShiftRecorder(resourceNames = { BasicKeycloakOperatorDynamicClientApplication.APP_NAME,
 		WildflyWithKeycloakSamlAdapterApplication.APP_NAME })
 @KeycloakTest
 @WildflyTest
@@ -75,7 +75,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 @Intersmash({
 		@Service(KeycloakPostgresqlApplication.class),
-		@Service(BasicKeycloakOperatorApplication.class),
+		@Service(BasicKeycloakOperatorDynamicClientApplication.class),
 		@Service(WildflyWithKeycloakSamlAdapterApplication.class)
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -152,11 +152,12 @@ public class WildFlyKeycloakSamlAdapterIT {
 			webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
 
 			HtmlPage keycloakLoginPage = webClient.getPage(wildflySecuredPage);
-			KeycloakLoginPageUtilities.assertIsExpectedRealm(keycloakLoginPage, BasicKeycloakOperatorApplication.REALM_NAME);
+			KeycloakLoginPageUtilities.assertIsExpectedRealm(keycloakLoginPage,
+					BasicKeycloakOperatorDynamicClientApplication.REALM_NAME);
 
 			HtmlPage securedPage = (HtmlPage) KeycloakLoginPageUtilities.makeLogin(keycloakLoginPage,
-					BasicKeycloakOperatorApplication.USER_NAME,
-					BasicKeycloakOperatorApplication.USER_PASSWORD);
+					BasicKeycloakOperatorDynamicClientApplication.USER_NAME,
+					BasicKeycloakOperatorDynamicClientApplication.USER_PASSWORD);
 			// first we check we landed on the expected JSP page
 			assertIsSecuredPage(securedPage);
 			// then we check the JSP page received the expected security info
@@ -192,11 +193,12 @@ public class WildFlyKeycloakSamlAdapterIT {
 			webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
 
 			HtmlPage keycloakLoginPage = webClient.getPage(wildflySecuredPage);
-			KeycloakLoginPageUtilities.assertIsExpectedRealm(keycloakLoginPage, BasicKeycloakOperatorApplication.REALM_NAME);
+			KeycloakLoginPageUtilities.assertIsExpectedRealm(keycloakLoginPage,
+					BasicKeycloakOperatorDynamicClientApplication.REALM_NAME);
 
 			HtmlPage securedPage = (HtmlPage) KeycloakLoginPageUtilities.makeLogin(keycloakLoginPage,
-					BasicKeycloakOperatorApplication.ANOTHER_USER_NAME,
-					BasicKeycloakOperatorApplication.ANOTHER_USER_PASSWORD);
+					BasicKeycloakOperatorDynamicClientApplication.ANOTHER_USER_NAME,
+					BasicKeycloakOperatorDynamicClientApplication.ANOTHER_USER_PASSWORD);
 			assertIsForbidden(securedPage);
 		}
 	}
@@ -250,7 +252,7 @@ public class WildFlyKeycloakSamlAdapterIT {
 			HtmlElement username = securedPage.getHtmlElementById(htmlId);
 			assertThat(
 					String.format("The HTML element with ID (%s) does not contain expected %s value", htmlId,
-							BasicKeycloakOperatorApplication.USER_NAME),
+							BasicKeycloakOperatorDynamicClientApplication.USER_NAME),
 					username.getTextContent(), matchesPattern("G-[a-zA-Z0-9\\-]{36}"));
 		} catch (ElementNotFoundException exception) {
 			fail("The element with id " + exception.getAttributeValue() + " was not found");

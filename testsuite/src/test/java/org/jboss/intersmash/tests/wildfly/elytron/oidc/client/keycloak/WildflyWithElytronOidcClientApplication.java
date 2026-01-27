@@ -61,7 +61,7 @@ public class WildflyWithElytronOidcClientApplication
 				.build();
 		environmentVariables.add(new EnvVarBuilder()
 				.withName("SSO_APP_SERVICE")
-				.withValue(String.format("https://%s", BasicKeycloakOperatorApplication.getRoute()))
+				.withValue(String.format("https://%s", BasicKeycloakOperatorDynamicClientApplication.getRoute()))
 				.build());
 
 		// On Keycloak we added a pre-configured OIDC client that can be accessed using this password
