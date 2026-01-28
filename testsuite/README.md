@@ -31,6 +31,10 @@ The deployed application descriptor sets the necessary environment variables des
 This test is basically the same as [WildFly SAML Adapter client + Keycloak](#wildfly-saml-adapter-client--keycloak) and
 also tests that the EJB layer is correctly configured and authentication and authorization data is propagated to the EJB layer;
 
+## WildFly EJB + Bootable Jar + SAML Adapter client + Keycloak
+
+This test is a simplified version of [WildFly EJB + SAML Adapter client + Keycloak](#wildfly-ejb--saml-adapter-client--keycloak) which removes signing for SAML requests and responses; it packages and deploys the application as a Bootable Jar; the peculiarity of this test is that the deployed application uses layer `keycloak-client-saml-ejb` which is meant for bare-metal usage not Kubernetes/OpenShift, and expects it to work since there is no reason why it should not;
+
 ## WildFly Web cache offload + Infinispan
 
 This tests validates an interoperability use case based on a WildFly/JBoss EAP/JBoss EAP XP application which
