@@ -17,7 +17,7 @@ package org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.gargoylesoftware.htmlunit.TextPage;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import cz.xtf.core.http.Https;
 import cz.xtf.junit5.listeners.ProjectCreator;
@@ -87,7 +87,7 @@ public class WildflyWithElytronOidcDynamicClientIT {
 	 */
 	@Test
 	public void testSuccess() throws IOException {
-		TextPage securedPage = (TextPage) LoginUtil.requestSecuredPageAndLogin(
+		Page securedPage = LoginUtil.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
 				BasicKeycloakOperatorDynamicClientOidcApplication.USER_NAME_WITH_CORRECT_ROLE,
 				BasicKeycloakOperatorDynamicClientOidcApplication.USER_PASSWORD_WITH_CORRECT_ROLE);
@@ -102,7 +102,7 @@ public class WildflyWithElytronOidcDynamicClientIT {
 	 */
 	@Test
 	public void testForbidden() throws IOException {
-		HtmlPage securedPage = (HtmlPage) LoginUtil.requestSecuredPageAndLogin(
+		Page securedPage = LoginUtil.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
 				BasicKeycloakOperatorDynamicClientOidcApplication.USER_NAME_WITH_WRONG_ROLE,
 				BasicKeycloakOperatorDynamicClientOidcApplication.USER_PASSWORD_WITH_WRONG_ROLE);
@@ -117,10 +117,11 @@ public class WildflyWithElytronOidcDynamicClientIT {
 	 */
 	@Test
 	public void testUnauthorized() throws IOException {
-		HtmlPage loginPage = (HtmlPage) LoginUtil.requestSecuredPageAndLogin(
+		Page page = LoginUtil.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
 				BasicKeycloakOperatorDynamicClientOidcApplication.USER_NAME_WITH_CORRECT_ROLE,
 				"wrong_password");
-		LoginUtil.assertIsLoginPage(loginPage);
+		assertThat(page).isInstanceOf(HtmlPage.class);
+		LoginUtil.assertIsLoginPage((HtmlPage) page);
 	}
 }

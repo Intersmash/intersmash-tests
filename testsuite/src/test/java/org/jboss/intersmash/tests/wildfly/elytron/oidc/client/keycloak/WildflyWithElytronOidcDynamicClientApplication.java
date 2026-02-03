@@ -59,7 +59,7 @@ import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.Open
  *   <li>NOTE: the certificate presented by the "/protocol/openid-connect/token" and "/clients-registrations/default" Keycloak endpoints,
  *     is verified using the truststore specified by the OIDC_PROVIDER_TRUSTSTORE variables (Keycloak certificate
  *     verification can be skipped by setting OIDC_DISABLE_SSL_CERTIFICATE_VALIDATION="true")</li>
- *   <li>the OIDC client is registered with the password specified in the OIDC_SECURE_DEPLOYMENT_SECRET variable</li>
+ *   <li>the OIDC client is registered with the password specified in the SSO_OIDC_CLIENT_SECRET variable</li>
  * </ul>
  */
 @Slf4j
@@ -87,7 +87,7 @@ public class WildflyWithElytronOidcDynamicClientApplication
 	 * </ul>
 	 * </p>
 	 * <p>
-	 * Without these permissions, JGroups clustering and the SAML adapter's route discovery
+	 * Without these permissions, JGroups clustering and the OIDC adapter's route discovery
 	 * feature will not function properly.
 	 * </p>
 	 *
@@ -136,21 +136,20 @@ public class WildflyWithElytronOidcDynamicClientApplication
 				.ref(IntersmashConfig.deploymentsRepositoryRef())
 				.build();
 		environmentVariables.add(new EnvVarBuilder()
-				.withName("SSO_APP_SERVICE")
+				.withName("SSO_OIDC_KEYCLOAK_URL")
 				.withValue(String.format("https://%s", BasicKeycloakOperatorDynamicClientOidcApplication.getRoute()))
 				.build());
-
-		// still set to "rh-sso" here, see
-		// https://docs.redhat.com/it/documentation/red_hat_jboss_enterprise_application_platform/8.1/html-single/using_jboss_eap_on_openshift_container_platform/index#ref_environment-variable-based-configuration_assembly_using-openid-connect-to-secure-jboss-eap-applications-on-openshift
-		// should be "keycloak" or "rh-sso"
 		environmentVariables.add(new EnvVarBuilder()
-				.withName("OIDC_PROVIDER_NAME")
-				.withValue("rh-sso")
+				.withName("SSO_OIDC_KEYCLOAK_REALM")
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.REALM_NAME)
 				.build());
 		environmentVariables.add(new EnvVarBuilder()
-				.withName("OIDC_PROVIDER_URL")
-				.withValue(String.format("https://%s/realms/%s", BasicKeycloakOperatorDynamicClientOidcApplication.getRoute(),
-						"basic-auth"))
+				.withName("SSO_OIDC_CLIENT_ID")
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.WILDFLY_CLIENT_ELYTRON_NAME)
+				.build());
+		environmentVariables.add(new EnvVarBuilder()
+				.withName("SSO_OIDC_CLIENT_SECRET")
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.SSO_OIDC_CLIENT_SECRET)
 				.build());
 
 		// We need to trust Keycloak certificate when communicating over HTTPS (alternatively we can set
@@ -174,6 +173,22 @@ public class WildflyWithElytronOidcDynamicClientApplication
 				.build();
 		secrets.add(keystoreAndTruststoreSecret);
 
+		/** The two following variables are required by the dynamic registration of clients feature: they are used to
+		 * automatically perform client registration */
+
+		// still set to "rh-sso" here, see
+		// https://docs.redhat.com/it/documentation/red_hat_jboss_enterprise_application_platform/8.1/html-single/using_jboss_eap_on_openshift_container_platform/index#ref_environment-variable-based-configuration_assembly_using-openid-connect-to-secure-jboss-eap-applications-on-openshift
+		// should be "keycloak" or "rh-sso"
+		environmentVariables.add(new EnvVarBuilder()
+				.withName("OIDC_PROVIDER_NAME")
+				.withValue("rh-sso")
+				.build());
+		environmentVariables.add(new EnvVarBuilder()
+				.withName("OIDC_PROVIDER_URL")
+				.withValue(String.format("https://%s/realms/%s", BasicKeycloakOperatorDynamicClientOidcApplication.getRoute(),
+						"basic-auth"))
+				.build());
+
 		// Set truststore for the SP (the WildFly/JBoss EAP application)
 		environmentVariables.add(
 				new EnvVarBuilder().withName("OIDC_PROVIDER_TRUSTSTORE")
@@ -195,19 +210,15 @@ public class WildflyWithElytronOidcDynamicClientApplication
 		/** in case the env variable APPLICATION_NAME is set the client-id is prefixed by the value */
 		environmentVariables.add(new EnvVarBuilder().withName("APPLICATION_NAME")
 				.withValue(APP_NAME).build());
-
-		/** The two following variables are required by the dynamic registration of clients feature: they are used to
-		 * authenticate to the registration service and actually perform client registration */
 		environmentVariables.add(new EnvVarBuilder().withName("OIDC_USER_NAME")
 				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.OIDC_USER_NAME).build());
 		environmentVariables.add(new EnvVarBuilder().withName("OIDC_USER_PASSWORD")
 				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.OIDC_USER_PASSWORD).build());
 
-		/** This env variable is required in case of dynamic client registration: it's the password that is set for the
-		 * OIDC client during dynamic client registration */
+		/** MUST match the value in SSO_OIDC_CLIENT_SECRET */
 		environmentVariables.add(new EnvVarBuilder()
 				.withName("OIDC_SECURE_DEPLOYMENT_SECRET")
-				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.OIDC_SECURE_DEPLOYMENT_SECRET)
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.SSO_OIDC_CLIENT_SECRET)
 				.build());
 
 		environmentVariables.add(
@@ -286,7 +297,7 @@ public class WildflyWithElytronOidcDynamicClientApplication
 	 * <p>
 	 * The secrets include:
 	 * <ul>
-	 *   <li>SAML keystore for encryption and signing</li>
+	 *   <li>OIDC keystore for encryption and signing</li>
 	 *   <li>HTTPS truststore for secure communication with Keycloak</li>
 	 * </ul>
 	 * </p>

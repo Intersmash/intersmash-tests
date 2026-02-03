@@ -25,8 +25,15 @@ import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.ClientsBuilder;
  * Deploys one basic Keycloak instance with a realm with users and a client.
  * This can be re-used and extended with other realms and/or clients for different applications.
  */
-public class BasicKeycloakOperatorOidcApplication extends BasicKeycloakOperatorDynamicClientOidcApplication
+public class BasicKeycloakOperatorOidcHttpsApplication
+		extends BasicKeycloakOperatorDynamicClientOidcApplication
 		implements KeycloakOperatorApplication, OpenShiftApplication {
+
+	/** The OIDC client identifier used for authentication with Keycloak. */
+	public static final String SSO_OIDC_CLIENT_ID = "elytron-oidc-client-id";
+
+	/** The OIDC client secret used for authentication with Keycloak. */
+	public static final String SSO_OIDC_CLIENT_SECRET = "3up7r37cr7doidccli7ntpa33word";
 
 	/**
 	 * Creates a new Keycloak instance which is pre-configured with an OIDC Client; that is for cases when we DON'T use
@@ -34,7 +41,7 @@ public class BasicKeycloakOperatorOidcApplication extends BasicKeycloakOperatorD
 	 *
 	 * @throws IOException if an I/O error occurs during certificate generation
 	 */
-	public BasicKeycloakOperatorOidcApplication() throws IOException {
+	public BasicKeycloakOperatorOidcHttpsApplication() throws IOException {
 		super();
 	}
 
@@ -44,20 +51,20 @@ public class BasicKeycloakOperatorOidcApplication extends BasicKeycloakOperatorD
 	 */
 	@Override
 	protected Clients getClients() {
-		String wildflyWithElytronOidcClientRoute = WildflyWithElytronOidcClientApplication.getRoute();
+		String route = WildflyBootableJarWithElytronOidcClientApplication.getRoute();
 		return new ClientsBuilder()
-				.withClientId(WILDFLY_CLIENT_ELYTRON_NAME)
+				.withClientId(SSO_OIDC_CLIENT_ID)
 				.withPublicClient(true)
 				.withStandardFlowEnabled(true)
 				.withEnabled(true)
 				.withRootUrl(
-						String.format("http://%s/", wildflyWithElytronOidcClientRoute))
+						String.format("https://%s/", route))
 				.withRedirectUris(
-						String.format("http://%s/*", wildflyWithElytronOidcClientRoute))
+						String.format("https://%s/*", route))
 				.withAdminUrl(
-						String.format("http://%s/", wildflyWithElytronOidcClientRoute))
+						String.format("https://%s/", route))
 				.withWebOrigins(
-						String.format("http://%s/", wildflyWithElytronOidcClientRoute))
+						String.format("https://%s/", route))
 				.withSecret(SSO_OIDC_CLIENT_SECRET)
 				.withFullScopeAllowed(true)
 				.build();

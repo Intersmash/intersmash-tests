@@ -60,15 +60,23 @@ public class WildflyWithElytronOidcClientApplication
 				.ref(IntersmashConfig.deploymentsRepositoryRef())
 				.build();
 		environmentVariables.add(new EnvVarBuilder()
-				.withName("SSO_APP_SERVICE")
+				.withName("SSO_OIDC_KEYCLOAK_URL")
 				.withValue(String.format("https://%s", BasicKeycloakOperatorOidcApplication.getRoute()))
+				.build());
+		environmentVariables.add(new EnvVarBuilder()
+				.withName("SSO_OIDC_KEYCLOAK_REALM")
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.REALM_NAME)
+				.build());
+		environmentVariables.add(new EnvVarBuilder()
+				.withName("SSO_OIDC_CLIENT_ID")
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.WILDFLY_CLIENT_ELYTRON_NAME)
 				.build());
 
 		// On Keycloak we added a pre-configured OIDC client that can be accessed using this password
 		// (see file https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/elytron-oidc-client-keycloak/src/main/webapp/WEB-INF/oidc.json)
 		environmentVariables.add(
-				new EnvVarBuilder().withName("OIDC_SECURE_DEPLOYMENT_SECRET")
-						.withValue(BasicKeycloakOperatorOidcApplication.OIDC_SECURE_DEPLOYMENT_SECRET)
+				new EnvVarBuilder().withName("SSO_OIDC_CLIENT_SECRET")
+						.withValue(BasicKeycloakOperatorOidcApplication.SSO_OIDC_CLIENT_SECRET)
 						.build());
 
 		environmentVariables.add(
