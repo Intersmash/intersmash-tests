@@ -129,9 +129,6 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 		String mavenAdditionalArgs = "-Denforcer.skip=true";
 		// let's add configurable deployment additional args:
 		mavenAdditionalArgs = mavenAdditionalArgs.concat(generateAdditionalMavenArgs());
-		// let's pass the profile for building the deployment too...
-		mavenAdditionalArgs = mavenAdditionalArgs
-				.concat(" " + WildflyApplicationConfiguration.getWildflyApplicationTargetDistributionProfile());
 
 		// =======================================
 		//  BUILD

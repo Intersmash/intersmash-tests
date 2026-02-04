@@ -17,10 +17,13 @@ package org.jboss.intersmash.tests.wildfly.keycloak.saml.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.matchesPattern;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -131,5 +134,61 @@ public class KeycloakLoginPageUtilities {
 				String.format("The HTML 'DIV' element with text '%s' was not found in: %n----%n%s%n----%n", realmName,
 						page.getBody().asXml()),
 				!first.isEmpty());
+	}
+
+	/**
+	 * Asserts that the page displays a "Forbidden" message.
+	 * <p>
+	 * This method verifies that access was denied to a resource,
+	 * typically due to insufficient permissions or missing required roles.
+	 * </p>
+	 *
+	 * @param securedPage the page to check for forbidden access
+	 * @throws AssertionError if the page does not contain the "Forbidden" message
+	 */
+	public static void assertIsForbidden(HtmlPage securedPage) {
+		MatcherAssert.assertThat("The HTML page is not the expected Forbidden page!",
+				securedPage.getByXPath("//body//text()").get(0).toString().equalsIgnoreCase("Forbidden"));
+	}
+
+	/**
+	 * Asserts that the page is the expected secured page (profile.jsp).
+	 * <p>
+	 * This method verifies that after successful authentication, the user
+	 * was redirected to the correct protected resource.
+	 * </p>
+	 *
+	 * @param securedPage the page to verify
+	 * @throws AssertionError if the page URL does not contain "profile.jsp"
+	 */
+	public static void assertIsSecuredPage(HtmlPage securedPage) {
+		MatcherAssert.assertThat(
+				"The page the client was redirected to, isn't the one expected",
+				securedPage.getUrl().toString(), containsStringIgnoringCase("profile.jsp"));
+	}
+
+	/**
+	 * Asserts that the secured page contains the authenticated user principal.
+	 * <p>
+	 * This method verifies that the HTML element with the specified ID contains
+	 * a valid user principal value matching the expected GUID pattern (G-[UUID]).
+	 * This confirms that the SAML authentication was successful and the user
+	 * identity was properly propagated to the application.
+	 * </p>
+	 *
+	 * @param securedPage the secured page containing user information
+	 * @param htmlId the HTML element ID that should contain the username
+	 * @throws AssertionError if the element is not found or doesn't match the expected pattern
+	 */
+	public static void assertIsUserPrincipal(HtmlPage securedPage, String htmlId) {
+		try {
+			HtmlElement username = securedPage.getHtmlElementById(htmlId);
+			MatcherAssert.assertThat(
+					String.format("The HTML element with ID (%s) does not contain expected %s value", htmlId,
+							BasicKeycloakOperatorDynamicClientSamlApplication.USER_NAME),
+					username.getTextContent(), matchesPattern("G-[a-zA-Z0-9\\-]{36}"));
+		} catch (ElementNotFoundException exception) {
+			fail("The element with id " + exception.getAttributeValue() + " was not found");
+		}
 	}
 }

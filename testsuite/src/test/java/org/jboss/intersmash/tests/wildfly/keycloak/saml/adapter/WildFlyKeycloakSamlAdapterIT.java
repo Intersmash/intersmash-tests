@@ -15,15 +15,9 @@
 */
 package org.jboss.intersmash.tests.wildfly.keycloak.saml.adapter;
 
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import cz.xtf.core.http.Https;
 import cz.xtf.core.openshift.OpenShifts;
@@ -159,9 +153,9 @@ public class WildFlyKeycloakSamlAdapterIT {
 					BasicKeycloakOperatorDynamicClientSamlApplication.USER_NAME,
 					BasicKeycloakOperatorDynamicClientSamlApplication.USER_PASSWORD);
 			// first we check we landed on the expected JSP page
-			assertIsSecuredPage(securedPage);
+			KeycloakLoginPageUtilities.assertIsSecuredPage(securedPage);
 			// then we check the JSP page received the expected security info
-			assertIsUserPrincipal(securedPage, HTML_ID_WITH_USERNAME);
+			KeycloakLoginPageUtilities.assertIsUserPrincipal(securedPage, HTML_ID_WITH_USERNAME);
 		}
 	}
 
@@ -199,63 +193,7 @@ public class WildFlyKeycloakSamlAdapterIT {
 			HtmlPage securedPage = (HtmlPage) KeycloakLoginPageUtilities.makeLogin(keycloakLoginPage,
 					BasicKeycloakOperatorDynamicClientSamlApplication.ANOTHER_USER_NAME,
 					BasicKeycloakOperatorDynamicClientSamlApplication.ANOTHER_USER_PASSWORD);
-			assertIsForbidden(securedPage);
-		}
-	}
-
-	/**
-	 * Asserts that the page displays a "Forbidden" message.
-	 * <p>
-	 * This method verifies that access was denied to a resource,
-	 * typically due to insufficient permissions or missing required roles.
-	 * </p>
-	 *
-	 * @param securedPage the page to check for forbidden access
-	 * @throws AssertionError if the page does not contain the "Forbidden" message
-	 */
-	protected void assertIsForbidden(HtmlPage securedPage) {
-		assertThat("The HTML page is not the expected Forbidden page!",
-				securedPage.getByXPath("//body//text()").get(0).toString().equalsIgnoreCase("Forbidden"));
-	}
-
-	/**
-	 * Asserts that the page is the expected secured page (profile.jsp).
-	 * <p>
-	 * This method verifies that after successful authentication, the user
-	 * was redirected to the correct protected resource.
-	 * </p>
-	 *
-	 * @param securedPage the page to verify
-	 * @throws AssertionError if the page URL does not contain "profile.jsp"
-	 */
-	protected void assertIsSecuredPage(HtmlPage securedPage) {
-		assertThat(
-				"The page the client was redirected to, isn't the one expected",
-				securedPage.getUrl().toString(), containsStringIgnoringCase("profile.jsp"));
-	}
-
-	/**
-	 * Asserts that the secured page contains the authenticated user principal.
-	 * <p>
-	 * This method verifies that the HTML element with the specified ID contains
-	 * a valid user principal value matching the expected GUID pattern (G-[UUID]).
-	 * This confirms that the SAML authentication was successful and the user
-	 * identity was properly propagated to the application.
-	 * </p>
-	 *
-	 * @param securedPage the secured page containing user information
-	 * @param htmlId the HTML element ID that should contain the username
-	 * @throws AssertionError if the element is not found or doesn't match the expected pattern
-	 */
-	protected void assertIsUserPrincipal(HtmlPage securedPage, String htmlId) {
-		try {
-			HtmlElement username = securedPage.getHtmlElementById(htmlId);
-			assertThat(
-					String.format("The HTML element with ID (%s) does not contain expected %s value", htmlId,
-							BasicKeycloakOperatorDynamicClientSamlApplication.USER_NAME),
-					username.getTextContent(), matchesPattern("G-[a-zA-Z0-9\\-]{36}"));
-		} catch (ElementNotFoundException exception) {
-			fail("The element with id " + exception.getAttributeValue() + " was not found");
+			KeycloakLoginPageUtilities.assertIsForbidden(securedPage);
 		}
 	}
 }
