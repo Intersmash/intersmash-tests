@@ -22,7 +22,7 @@ import org.jboss.intersmash.provision.helm.wildfly.WildFlyHelmChartReleaseAdapte
 import org.jboss.intersmash.provision.helm.wildfly.WildflyHelmChartRelease;
 import org.jboss.intersmash.provision.helm.wildfly.eap81.Eap81HelmChartReleaseAdapter;
 import org.jboss.intersmash.provision.helm.wildfly.xp6.EapXp6HelmChartReleaseAdapter;
-import org.jboss.intersmash.tests.junit.annotations.TargetReleaSesensitive;
+import org.jboss.intersmash.tests.junit.annotations.TargetReleaseSensitive;
 
 public class WildFlyHelmChartsConfiguration {
 
@@ -30,7 +30,7 @@ public class WildFlyHelmChartsConfiguration {
 		return System.getProperty("wildfly-target-distribution", "wildfly");
 	}
 
-	@TargetReleaSesensitive
+	@TargetReleaseSensitive
 	public static WildflyHelmChartRelease getHelmChartRelease() {
 		String targetDistribution = getWildflyTargetDistribution();
 		if (targetDistribution.startsWith("jboss-eap-xp")) {

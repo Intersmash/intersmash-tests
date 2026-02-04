@@ -24,7 +24,7 @@ import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.ClientsBuilder;
 /**
  * Keycloak Operator Application with pre-configured SAML client for adapter testing.
  * <p>
- * This application extends {@link BasicKeycloakOperatorDynamicClientApplication} and
+ * This application extends {@link BasicKeycloakOperatorDynamicClientSamlApplication} and
  * pre-configures a SAML client instead of relying on dynamic client registration.
  * </p>
  * <p>
@@ -46,7 +46,7 @@ import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.ClientsBuilder;
  * </ul>
  * </p>
  */
-public class BasicKeycloakOperatorApplication extends BasicKeycloakOperatorDynamicClientApplication
+public class BasicKeycloakOperatorSamlApplication extends BasicKeycloakOperatorDynamicClientSamlApplication
 		implements KeycloakOperatorApplication, OpenShiftApplication {
 
 	/**
@@ -60,7 +60,7 @@ public class BasicKeycloakOperatorApplication extends BasicKeycloakOperatorDynam
 	 *
 	 * @throws IOException if an I/O error occurs during certificate generation
 	 */
-	public BasicKeycloakOperatorApplication() throws IOException {
+	public BasicKeycloakOperatorSamlApplication() throws IOException {
 		super();
 	}
 

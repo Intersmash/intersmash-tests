@@ -173,19 +173,19 @@ public class WildflyWithKeycloakSamlAdapterApplication
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("SSO_URL")
-						.withValue("https://" + BasicKeycloakOperatorDynamicClientApplication.getRoute())
+						.withValue("https://" + BasicKeycloakOperatorDynamicClientSamlApplication.getRoute())
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("SSO_REALM")
-						.withValue(BasicKeycloakOperatorDynamicClientApplication.REALM_NAME)
+						.withValue(BasicKeycloakOperatorDynamicClientSamlApplication.REALM_NAME)
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("SSO_USERNAME")
-						.withValue(BasicKeycloakOperatorDynamicClientApplication.SSO_USERNAME)
+						.withValue(BasicKeycloakOperatorDynamicClientSamlApplication.SSO_USERNAME)
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("SSO_PASSWORD")
-						.withValue(BasicKeycloakOperatorDynamicClientApplication.SSO_PASSWORD)
+						.withValue(BasicKeycloakOperatorDynamicClientSamlApplication.SSO_PASSWORD)
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("SSO_SAML_LOGOUT_PAGE")
@@ -219,10 +219,10 @@ public class WildflyWithKeycloakSamlAdapterApplication
 		// We need to trust Keycloak certificate when communicating over HTTPS
 		final SimpleCommandLineBasedKeystoreGenerator.CertificateInfo keycloakCertificate = SimpleCommandLineBasedKeystoreGenerator
 				.generateCertificate(
-						OpenShifts.master().generateHostname(BasicKeycloakOperatorDynamicClientApplication.APP_NAME),
-						BasicKeycloakOperatorDynamicClientApplication.HTTPS_CERTIFICATE_NAME,
-						BasicKeycloakOperatorDynamicClientApplication.HTTPS_KEYSTORE_PASSWORD,
-						BasicKeycloakOperatorDynamicClientApplication.HTTPS_KEYSTORE_PASSWORD,
+						OpenShifts.master().generateHostname(BasicKeycloakOperatorDynamicClientSamlApplication.APP_NAME),
+						BasicKeycloakOperatorDynamicClientSamlApplication.HTTPS_CERTIFICATE_NAME,
+						BasicKeycloakOperatorDynamicClientSamlApplication.HTTPS_KEYSTORE_PASSWORD,
+						BasicKeycloakOperatorDynamicClientSamlApplication.HTTPS_KEYSTORE_PASSWORD,
 						Collections.emptyList());
 
 		Secret keystoreAndTruststoreSecret = new SecretBuilder()
@@ -270,11 +270,11 @@ public class WildflyWithKeycloakSamlAdapterApplication
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("SSO_TRUSTSTORE_CERTIFICATE_ALIAS")
-						.withValue(BasicKeycloakOperatorDynamicClientApplication.HTTPS_CERTIFICATE_NAME)
+						.withValue(BasicKeycloakOperatorDynamicClientSamlApplication.HTTPS_CERTIFICATE_NAME)
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("SSO_TRUSTSTORE_PASSWORD")
-						.withValue(BasicKeycloakOperatorDynamicClientApplication.HTTPS_KEYSTORE_PASSWORD)
+						.withValue(BasicKeycloakOperatorDynamicClientSamlApplication.HTTPS_KEYSTORE_PASSWORD)
 						.build());
 	}
 

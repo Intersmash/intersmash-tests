@@ -59,7 +59,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * SAML-secured WildFly/JBoss EAP application, verifying the entire authentication flow.
  * </p>
  */
-@OpenShiftRecorder(resourceNames = { BasicKeycloakOperatorApplication.APP_NAME,
+@OpenShiftRecorder(resourceNames = { BasicKeycloakOperatorSamlApplication.APP_NAME,
 		WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication.APP_NAME })
 @KeycloakTest
 @WildflyTest
@@ -72,7 +72,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 @Intersmash({
 		@Service(KeycloakPostgresqlApplication.class),
-		@Service(BasicKeycloakOperatorApplication.class),
+		@Service(BasicKeycloakOperatorSamlApplication.class),
 		@Service(WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication.class)
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -152,10 +152,10 @@ public class WildFlyBootableJarKeycloakSamlAdapterEjbHelmIT {
 
 			HtmlPage loginPage = webClient.getPage(eapSecuredPage);
 			LoginUtil.assertIsLoginPage(loginPage);
-			LoginUtil.assertIsExpectedRealm(loginPage, BasicKeycloakOperatorApplication.REALM_NAME);
+			LoginUtil.assertIsExpectedRealm(loginPage, BasicKeycloakOperatorSamlApplication.REALM_NAME);
 
-			TextPage securedPage = (TextPage) LoginUtil.makeLogin(loginPage, BasicKeycloakOperatorApplication.USER_NAME,
-					BasicKeycloakOperatorApplication.USER_PASSWORD);
+			TextPage securedPage = (TextPage) LoginUtil.makeLogin(loginPage, BasicKeycloakOperatorSamlApplication.USER_NAME,
+					BasicKeycloakOperatorSamlApplication.USER_PASSWORD);
 			// first we check we landed on the expected secured page
 			assertIsSecuredPage(securedPage);
 			// check the user have expected role assigned
@@ -190,10 +190,11 @@ public class WildFlyBootableJarKeycloakSamlAdapterEjbHelmIT {
 
 			HtmlPage loginPage = webClient.getPage(eapSecuredPage);
 			LoginUtil.assertIsLoginPage(loginPage);
-			LoginUtil.assertIsExpectedRealm(loginPage, BasicKeycloakOperatorApplication.REALM_NAME);
+			LoginUtil.assertIsExpectedRealm(loginPage, BasicKeycloakOperatorSamlApplication.REALM_NAME);
 
-			HtmlPage securedPage = (HtmlPage) LoginUtil.makeLogin(loginPage, BasicKeycloakOperatorApplication.ANOTHER_USER_NAME,
-					BasicKeycloakOperatorApplication.ANOTHER_USER_PASSWORD);
+			HtmlPage securedPage = (HtmlPage) LoginUtil.makeLogin(loginPage,
+					BasicKeycloakOperatorSamlApplication.ANOTHER_USER_NAME,
+					BasicKeycloakOperatorSamlApplication.ANOTHER_USER_PASSWORD);
 			assertIsForbidden(securedPage);
 		}
 	}

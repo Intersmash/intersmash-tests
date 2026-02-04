@@ -42,7 +42,6 @@ import org.jboss.intersmash.tests.wildfly.util.WildFlyHelmChartsConfiguration;
  *   <li>Uses the Keycloak SAML adapter for securing web resources</li>
  *   <li>Configures keystores and truststores for SAML encryption and signing</li>
  *   <li>Connects to an external Keycloak/RHBK service for authentication</li>
- *   <li>Automatically registers as a SAML client with the Keycloak realm</li>
  *   <li>Supports HTTPS communication with the Keycloak service</li>
  * </ul>
  * </p>
@@ -69,7 +68,6 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 	 * This method configures:
 	 * <ul>
 	 *   <li>The 'view' role for the default service account (required for KUBE_PING clustering)</li>
-	 *   <li>A 'routeview' role with permissions to list routes (required for route discovery)</li>
 	 * </ul>
 	 * </p>
 	 * <p>
@@ -127,30 +125,6 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 		//  WILDFLY HELM CHARTS
 		// =======================================
 
-		/*
-			build:
-			  enabled: true
-			  mode: "bootable-jar"
-			  # uri and ref will be specified via Helm --set arguments
-			  contextDir: "wildfly/keycloak-saml-adapter-ejb-bootable-jar"
-			  s2i:
-				kind: "ImageStreamTag"
-				buildApplicationImage: true
-				# builderImage and runtimeImage will be specified via the WildFly Helm Chart application descriptor APIs
-			deploy:
-			  enabled: true
-			  replicas: 1
-			  env: []
-			  envFrom: []
-			  volumeMounts: []
-			  volumes: []
-			  initContainers: []
-			  extraContainers: []
-			  'imagePullSecrets:': []
-		 */
-
-		//TODO: probably "wildfly-helm-values.yaml" is fine for every TestExecutionProfile (prod/community) and release (WF, EAP8, EAP8.1, EAP XP5 , EAP XP6)
-
 		// let's compute some additional maven args for our s2i build to happen on a Pod
 		String mavenAdditionalArgs = "-Denforcer.skip=true";
 		// let's add configurable deployment additional args:
@@ -181,9 +155,9 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 				String.format("http://%s", OpenShifts.master().generateHostname(APP_NAME)));
 		// TEST_KEYCLOAK_ROUTE
 		buildEnvironmentVariables.put("TEST_KEYCLOAK_ROUTE",
-				String.format("https://%s", BasicKeycloakOperatorApplication.getRoute()));
+				String.format("https://%s", BasicKeycloakOperatorSamlApplication.getRoute()));
 		// TEST_KEYCLOAK_REALM
-		buildEnvironmentVariables.put("TEST_KEYCLOAK_REALM", BasicKeycloakOperatorApplication.REALM_NAME);
+		buildEnvironmentVariables.put("TEST_KEYCLOAK_REALM", BasicKeycloakOperatorSamlApplication.REALM_NAME);
 
 		// =======================================
 		// DEPLOY
@@ -201,9 +175,9 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 				String.format("http://%s", OpenShifts.master().generateHostname(APP_NAME)));
 		// TEST_KEYCLOAK_ROUTE
 		deploymentEnvironmentVariables.put("TEST_KEYCLOAK_ROUTE",
-				String.format("https://%s", BasicKeycloakOperatorApplication.getRoute()));
+				String.format("https://%s", BasicKeycloakOperatorSamlApplication.getRoute()));
 		// TEST_KEYCLOAK_REALM
-		deploymentEnvironmentVariables.put("TEST_KEYCLOAK_REALM", BasicKeycloakOperatorApplication.REALM_NAME);
+		deploymentEnvironmentVariables.put("TEST_KEYCLOAK_REALM", BasicKeycloakOperatorSamlApplication.REALM_NAME);
 
 		// =======================================
 		// APPLICATION

@@ -18,5 +18,5 @@ package org.jboss.intersmash.tests.junit.annotations;
 /**
  * Marker interface for identifying code that is sensitive to the target release (e.g. WildFly-39 / WildFly-40 )
  */
-public @interface TargetReleaSesensitive {
+public @interface TargetReleaseSensitive {
 }

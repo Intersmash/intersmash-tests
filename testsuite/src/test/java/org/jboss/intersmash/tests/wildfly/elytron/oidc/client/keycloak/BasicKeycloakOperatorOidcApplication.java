@@ -25,7 +25,7 @@ import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.ClientsBuilder;
  * Deploys one basic Keycloak instance with a realm with users and a client.
  * This can be re-used and extended with other realms and/or clients for different applications.
  */
-public class BasicKeycloakOperatorApplication extends BasicKeycloakOperatorDynamicClientApplication
+public class BasicKeycloakOperatorOidcApplication extends BasicKeycloakOperatorDynamicClientOidcApplication
 		implements KeycloakOperatorApplication, OpenShiftApplication {
 
 	/**
@@ -34,7 +34,7 @@ public class BasicKeycloakOperatorApplication extends BasicKeycloakOperatorDynam
 	 *
 	 * @throws IOException if an I/O error occurs during certificate generation
 	 */
-	public BasicKeycloakOperatorApplication() throws IOException {
+	public BasicKeycloakOperatorOidcApplication() throws IOException {
 		super();
 	}
 

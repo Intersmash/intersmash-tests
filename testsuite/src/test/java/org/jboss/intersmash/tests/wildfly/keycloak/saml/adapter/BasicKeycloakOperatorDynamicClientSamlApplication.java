@@ -13,22 +13,23 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak;
+package org.jboss.intersmash.tests.wildfly.keycloak.saml.adapter;
 
 import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.openshift.PostgreSQLImageOpenShiftApplication;
 import org.jboss.intersmash.application.operator.KeycloakOperatorApplication;
+import org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak.KeycloakPostgresqlApplication;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
 import org.keycloak.k8s.v2alpha1.Keycloak;
 import org.keycloak.k8s.v2alpha1.KeycloakBuilder;
@@ -47,60 +48,84 @@ import org.keycloak.k8s.v2alpha1.keycloakspec.db.PasswordSecretBuilder;
 import org.keycloak.k8s.v2alpha1.keycloakspec.db.UsernameSecretBuilder;
 
 /**
- * Deploys one basic Keycloak instance with a realm with users and a client.
- * This can be re-used and extended with other realms and/or clients for different applications.
+ * Basic Keycloak Operator Application for SAML adapter testing.
+ * <p>
+ * This application configures a Keycloak instance with:
+ * <ul>
+ *   <li>PostgreSQL database backend</li>
+ *   <li>HTTPS support with self-signed certificates</li>
+ *   <li>A pre-configured realm for SAML authentication</li>
+ *   <li>Test users with appropriate roles</li>
+ *   <li>Truststore configuration for SAML client certificates</li>
+ * </ul>
+ * </p>
  */
-public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOperatorApplication, OpenShiftApplication {
+public class BasicKeycloakOperatorDynamicClientSamlApplication implements KeycloakOperatorApplication, OpenShiftApplication {
+	/** Application name used for labeling and resource identification. */
+	public static final String APP_NAME = "sso-basic";
 
-	/** Application name for the Keycloak service. */
-	public static final String APP_NAME = "sso-basic-dc";
-	// operator creates route which is prefixed by "keycloak" while APP_NAME is not used for route.
-	/** Route name for the Keycloak service. */
-	public static final String KEYCLOAK_ROUTE = APP_NAME;
+	/** Username for the SSO client creator user with realm management permissions. */
+	public static final String SSO_USERNAME = "client";
 
-	/** Name of the Keycloak realm for authentication. */
-	protected static final String REALM_NAME = "basic-auth";
-	/** Client ID for the WildFly Elytron OIDC service. */
-	protected static final String WILDFLY_CLIENT_ELYTRON_NAME = "wildfly-basic-elytron-auth-service";
+	/** Password for the SSO client creator user. */
+	protected static final String SSO_PASSWORD = "creator";
+
+	/** Username for the first test user with user-role permissions. */
+	protected static final String USER_NAME = "user";
+
+	/** Password for the first test user. */
+	protected static final String USER_PASSWORD = "password";
+
+	/** Username for the second test user with another-role permissions. */
+	protected static final String ANOTHER_USER_NAME = "another-user";
+
+	/** Password for the second test user. */
+	protected static final String ANOTHER_USER_PASSWORD = "another-password";
+
+	/** Name of the Keycloak realm used for SAML authentication. */
+	protected static final String REALM_NAME = "basic-auth-realm";
+
 	/** Number of Keycloak instances to deploy. */
 	protected static final long KEYCLOAK_INSTANCES = 1;
-	/** Shared secret for OIDC client authentication. */
-	protected static final String OIDC_SECURE_DEPLOYMENT_SECRET = "3up7r37cr7doidccli7ntpa33word";
-
-	/** The Keycloak instance custom resource. */
-	protected final Keycloak keycloak;
-	/** List of Keycloak realm import custom resources. */
-	protected final List<KeycloakRealmImport> keycloakRealmImports = new ArrayList<>();
-	/** List of Kubernetes secrets for certificates and credentials. */
-	protected final List<Secret> secrets = new ArrayList<>();
-
-	/** Username for the admin user with client registration permissions. */
-	public static final String OIDC_USER_NAME = "admin";
-	/** Password for the admin user with client registration permissions. */
-	public static final String OIDC_USER_PASSWORD = "admin1234pa33word";
 
 	/** Certificate name used for HTTPS encryption. */
 	public static final String HTTPS_CERTIFICATE_NAME = APP_NAME;
+
 	/** Keystore password for HTTPS certificates. */
 	public static final String HTTPS_KEYSTORE_PASSWORD = "1234password";
 
-	/** Username for test user with the correct role assignment. */
-	protected static final String USER_NAME_WITH_CORRECT_ROLE = "user1";
-	/** Password for test user with the correct role assignment. */
-	protected static final String USER_PASSWORD_WITH_CORRECT_ROLE = "password1";
-	/** Username for test user with incorrect role assignment. */
-	protected static final String USER_NAME_WITH_WRONG_ROLE = "admin2";
-	/** Password for test user with incorrect role assignment. */
-	protected static final String USER_PASSWORD_WITH_WRONG_ROLE = "password2";
+	/** Environment variable name for the Keycloak service host. */
+	public static final String SSO_BASIC_SERVICE_SERVICE_HOST = String.format("%s_SERVICE_SERVICE_HOST",
+			APP_NAME.toUpperCase(Locale.ROOT).replaceAll("-", "_"));
+
+	/** Environment variable name for the Keycloak service port. */
+	public static final String SSO_BASIC_SERVICE_SERVICE_PORT = String.format("%s_SERVICE_SERVICE_PORT",
+			APP_NAME.toUpperCase(Locale.ROOT).replaceAll("-", "_"));
+
+	/** The Keycloak custom resource configuration. */
+	private final Keycloak keycloak;
+
+	/** List of Keycloak realm imports containing realm configurations and users. */
+	private final List<KeycloakRealmImport> keycloakRealmImports = new ArrayList<>();
+
+	/** List of Kubernetes secrets for certificates and keystores. */
+	private final List<Secret> secrets = new ArrayList<>();
 
 	/**
-	 * Creates a new Keycloak instance
+	 * Constructs a new BasicKeycloakOperatorDynamicClientSamlApplication.
+	 * <p>
+	 * This constructor initializes:
+	 * <ul>
+	 *   <li>Self-signed certificates for SAML client and HTTPS encryption</li>
+	 *   <li>Kubernetes secrets for truststores and keystores</li>
+	 *   <li>Keycloak custom resource with database, ingress, and TLS configuration</li>
+	 *   <li>Keycloak realm import with users and required actions</li>
+	 * </ul>
+	 * </p>
 	 *
-	 * @throws IOException if an I/O error occurs during certificate generation
+	 * @throws IOException if certificate generation or file operations fail
 	 */
-	public BasicKeycloakOperatorDynamicClientApplication() throws IOException {
-		final String hostName = OpenShifts.master().generateHostname(APP_NAME);
-
+	public BasicKeycloakOperatorDynamicClientSamlApplication() throws IOException {
 		// Private Key + Self-signed certificate to encrypt traffic to the Keycloak service
 		// https://www.keycloak.org/docs/latest/server_admin/index.html#loading-keys-from-a-java-keystore
 		final SimpleCommandLineBasedKeystoreGenerator.CertificateInfo keycloakCertificate = SimpleCommandLineBasedKeystoreGenerator
@@ -125,6 +150,7 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 				.build();
 		secrets.add(httpsSecret);
 
+		final String hostName = OpenShifts.master().generateHostname(APP_NAME);
 		keycloak = new KeycloakBuilder()
 				.withNewMetadata()
 				.withName(APP_NAME)
@@ -149,12 +175,18 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 				.withHostname(new HostnameBuilder()
 						.withHostname(hostName)
 						.build())
+				// TLS passthrough is enabled when you associate a tlsSecret with the http configuration and leave
+				// Ingress enabled without specifying a tlsSecret on it
+				// (see https://www.keycloak.org/operator/basic-deployment#_deploying_keycloak)
 				.withHttp(
 						new HttpBuilder()
 								.withTlsSecret(httpsSecret.getMetadata().getName())
 								.build())
-				// On OCP 4.12+ .spec.ingress.className must be set
-				.withIngress(new IngressBuilder().withClassName("openshift-default").build())
+				// On OCP 4.12+ .spec.ingress.className must be set (see https://www.keycloak.org/operator/basic-deployment#_accessing_the_keycloak_deployment)
+				.withIngress(
+						new IngressBuilder()
+								.withClassName("openshift-default")
+								.build())
 				// The Intersmash Keycloak provisioner sets the keycloak image for the Keycloak CRs, when it is defined
 				// via configuration properties. In such a case, as the Keycloak documentation recommends,
 				// .spec.startOptimized must be set to false.
@@ -162,15 +194,15 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 				.endSpec()
 				.build();
 
-		keycloakRealmImports.add(
-				new KeycloakRealmImportBuilder()
-						.withNewMetadata()
-						.withName(REALM_NAME)
-						.withLabels(Collections.singletonMap("app", APP_NAME))
-						.endMetadata()
-						.withNewSpec()
-						.withKeycloakCRName(keycloak.getMetadata().getName())
-						.withRealm(new RealmBuilder()
+		keycloakRealmImports.add(new KeycloakRealmImportBuilder()
+				.withNewMetadata()
+				.withName(REALM_NAME)
+				.withLabels(Collections.singletonMap("app", APP_NAME))
+				.endMetadata()
+				.withNewSpec()
+				.withKeycloakCRName(keycloak.getMetadata().getName())
+				.withRealm(
+						new RealmBuilder()
 								.withRequiredActions(
 										new RequiredActionsBuilder().withAlias("CONFIGURE_TOTP").withEnabled(false).build(),
 										new RequiredActionsBuilder().withAlias("TERMS_AND_CONDITIONS").withEnabled(false)
@@ -189,54 +221,74 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 								.withRealm(REALM_NAME)
 								.withEnabled(true)
 								.withDisplayName(REALM_NAME)
-								.withUsers(
+								.withUsers(new UsersBuilder()
+										.withUsername(USER_NAME)
+										.withEnabled(true)
+										.withCredentials(new CredentialsBuilder()
+												.withType("password")
+												.withValue(USER_PASSWORD)
+												.build())
+										// this must match with the role defined in "keycloak-saml-adapter"'s web.xml
+										.withRealmRoles("user-role")
+										.build(),
 										new UsersBuilder()
-												.withUsername(OIDC_USER_NAME)
+												.withUsername(ANOTHER_USER_NAME)
 												.withEnabled(true)
 												.withCredentials(new CredentialsBuilder()
 														.withType("password")
-														.withValue(OIDC_USER_PASSWORD)
+														.withValue(ANOTHER_USER_PASSWORD)
 														.build())
-												.withRealmRoles("user", "admin")
-												.withClientRoles(Map.of("realm-management", Arrays.asList("create-client")))
+												.withRealmRoles("another-role")
 												.build(),
+										// user `client` is required for WildFly/JBoss EAP being able to register a new SAML client into Keycloak/RHBK
 										new UsersBuilder()
-												.withUsername(USER_NAME_WITH_CORRECT_ROLE)
+												.withUsername(SSO_USERNAME)
 												.withEnabled(true)
 												.withCredentials(new CredentialsBuilder()
 														.withType("password")
-														.withValue(USER_PASSWORD_WITH_CORRECT_ROLE)
-														.build())
-												.withRealmRoles("user")
-												.build(),
-										new UsersBuilder()
-												.withUsername(USER_NAME_WITH_WRONG_ROLE)
-												.withEnabled(true)
-												.withCredentials(new CredentialsBuilder()
-														.withType("password")
-														.withValue(USER_PASSWORD_WITH_WRONG_ROLE)
+														.withValue(SSO_PASSWORD)
 														.build())
 												.withRealmRoles("admin")
+												.withClientRoles(
+														Map.of(
+																"realm-management",
+																List.of(
+																		"create-client",
+																		"manage-realm",
+																		"manage-clients")))
 												.build())
+								// When no client is preconfigured, it's assumed it will be created automatically by WildFly/JBoss EAP
+								// through user "client" and making use of the "dynamic client registration" feature in the SAML feature pack
 								.withClients(
 										getClients())
 								.build())
-						.endSpec()
-						.build());
+				.endSpec()
+				.build());
 	}
 
 	/**
-	 * Return the list of pre-configured OIDC Clients: we don't have any in this class
-	 * @return the list of pre-configured OIDC Clients
+	 * Returns the list of pre-configured SAML clients.
+	 * <p>
+	 * This implementation returns null, indicating that no SAML clients are pre-configured.
+	 * When using dynamic client registration, the WildFly/JBoss EAP application will
+	 * automatically register itself as a SAML client with Keycloak at runtime using
+	 * the 'client' user account with realm management permissions.
+	 * </p>
+	 *
+	 * @return null to indicate no pre-configured SAML clients
 	 */
 	protected Clients getClients() {
 		return null;
 	}
 
 	/**
-	 * Get the Keycloak realm imports for this application.
+	 * Returns the list of Keycloak realm imports.
+	 * <p>
+	 * The realm imports contain the realm configuration including users, roles, and required actions
+	 * for SAML authentication testing.
+	 * </p>
 	 *
-	 * @return the list of Keycloak realm imports
+	 * @return list of Keycloak realm imports
 	 */
 	@Override
 	public List<KeycloakRealmImport> getKeycloakRealmImports() {
@@ -244,9 +296,9 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 	}
 
 	/**
-	 * Get the Keycloak instance for this application.
+	 * Returns the Keycloak custom resource.
 	 *
-	 * @return the Keycloak instance
+	 * @return the Keycloak custom resource configuration
 	 */
 	@Override
 	public Keycloak getKeycloak() {
@@ -254,7 +306,7 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 	}
 
 	/**
-	 * Get the application name.
+	 * Returns the application name.
 	 *
 	 * @return the application name
 	 */
@@ -264,16 +316,23 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 	}
 
 	/**
-	 * Get a route to Keycloak.
+	 * Returns the route to access the Keycloak instance.
 	 *
-	 * @return route to Keycloak
+	 * @return the Keycloak route hostname
 	 */
 	public static String getRoute() {
-		return OpenShifts.master().generateHostname(KEYCLOAK_ROUTE);
+		return OpenShifts.master().generateHostname(APP_NAME);
 	}
 
 	/**
-	 * Get the Kubernetes secrets for this application.
+	 * Returns an unmodifiable list of Kubernetes secrets.
+	 * <p>
+	 * The secrets include:
+	 * <ul>
+	 *   <li>Truststore secret containing SAML client certificates</li>
+	 *   <li>Keystore secret containing HTTPS encryption certificates</li>
+	 * </ul>
+	 * </p>
 	 *
 	 * @return unmodifiable list of Kubernetes secrets
 	 */
