@@ -54,7 +54,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 @Intersmash({
 		@Service(KeycloakPostgresqlApplication.class),
-		@Service(BasicKeycloakOperatorApplication.class),
+		@Service(BasicKeycloakOperatorOidcApplication.class),
 		@Service(WildflyWithElytronOidcClientApplication.class)
 })
 public class WildflyWithElytronOidcClientIT {
@@ -88,8 +88,8 @@ public class WildflyWithElytronOidcClientIT {
 	public void testSuccess() throws IOException {
 		TextPage securedPage = (TextPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorApplication.USER_NAME_WITH_CORRECT_ROLE,
-				BasicKeycloakOperatorApplication.USER_PASSWORD_WITH_CORRECT_ROLE);
+				BasicKeycloakOperatorOidcApplication.USER_NAME_WITH_CORRECT_ROLE,
+				BasicKeycloakOperatorOidcApplication.USER_PASSWORD_WITH_CORRECT_ROLE);
 		assertThat(KeycloakLoginPageUtilities.statusCodeOf(securedPage)).isEqualTo(HttpStatus.SC_OK);
 		assertThat(KeycloakLoginPageUtilities.contentOf(securedPage)).contains(SUCCESS_EXPECTED_MESSAGE);
 	}
@@ -103,8 +103,8 @@ public class WildflyWithElytronOidcClientIT {
 	public void testForbidden() throws IOException {
 		HtmlPage securedPage = (HtmlPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorApplication.USER_NAME_WITH_WRONG_ROLE,
-				BasicKeycloakOperatorApplication.USER_PASSWORD_WITH_WRONG_ROLE);
+				BasicKeycloakOperatorOidcApplication.USER_NAME_WITH_WRONG_ROLE,
+				BasicKeycloakOperatorOidcApplication.USER_PASSWORD_WITH_WRONG_ROLE);
 		assertThat(KeycloakLoginPageUtilities.statusCodeOf(securedPage)).isEqualTo(HttpStatus.SC_FORBIDDEN);
 		assertThat(KeycloakLoginPageUtilities.contentOf(securedPage)).contains(FORBIDDEN_EXPECTED_MESSAGE);
 	}
@@ -118,7 +118,7 @@ public class WildflyWithElytronOidcClientIT {
 	public void testUnauthorized() throws IOException {
 		HtmlPage loginPage = (HtmlPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorApplication.USER_NAME_WITH_CORRECT_ROLE,
+				BasicKeycloakOperatorOidcApplication.USER_NAME_WITH_CORRECT_ROLE,
 				"wrong_password");
 		KeycloakLoginPageUtilities.assertIsLoginPage(loginPage);
 	}

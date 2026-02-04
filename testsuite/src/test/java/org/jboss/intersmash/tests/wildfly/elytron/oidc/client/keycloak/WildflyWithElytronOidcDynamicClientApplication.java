@@ -137,7 +137,7 @@ public class WildflyWithElytronOidcDynamicClientApplication
 				.build();
 		environmentVariables.add(new EnvVarBuilder()
 				.withName("SSO_APP_SERVICE")
-				.withValue(String.format("https://%s", BasicKeycloakOperatorDynamicClientApplication.getRoute()))
+				.withValue(String.format("https://%s", BasicKeycloakOperatorDynamicClientOidcApplication.getRoute()))
 				.build());
 
 		// still set to "rh-sso" here, see
@@ -149,7 +149,7 @@ public class WildflyWithElytronOidcDynamicClientApplication
 				.build());
 		environmentVariables.add(new EnvVarBuilder()
 				.withName("OIDC_PROVIDER_URL")
-				.withValue(String.format("https://%s/realms/%s", BasicKeycloakOperatorDynamicClientApplication.getRoute(),
+				.withValue(String.format("https://%s/realms/%s", BasicKeycloakOperatorDynamicClientOidcApplication.getRoute(),
 						"basic-auth"))
 				.build());
 
@@ -157,10 +157,10 @@ public class WildflyWithElytronOidcDynamicClientApplication
 		// OIDC_DISABLE_SSL_CERTIFICATE_VALIDATION=true and remove all the OIDC_PROVIDER_* variables)
 		final SimpleCommandLineBasedKeystoreGenerator.CertificateInfo keycloakCertificate = SimpleCommandLineBasedKeystoreGenerator
 				.generateCertificate(
-						OpenShifts.master().generateHostname(BasicKeycloakOperatorDynamicClientApplication.APP_NAME),
-						BasicKeycloakOperatorDynamicClientApplication.HTTPS_CERTIFICATE_NAME,
-						BasicKeycloakOperatorDynamicClientApplication.HTTPS_KEYSTORE_PASSWORD,
-						BasicKeycloakOperatorDynamicClientApplication.HTTPS_KEYSTORE_PASSWORD,
+						OpenShifts.master().generateHostname(BasicKeycloakOperatorDynamicClientOidcApplication.APP_NAME),
+						BasicKeycloakOperatorDynamicClientOidcApplication.HTTPS_CERTIFICATE_NAME,
+						BasicKeycloakOperatorDynamicClientOidcApplication.HTTPS_KEYSTORE_PASSWORD,
+						BasicKeycloakOperatorDynamicClientOidcApplication.HTTPS_KEYSTORE_PASSWORD,
 						Collections.emptyList());
 
 		Secret keystoreAndTruststoreSecret = new SecretBuilder()
@@ -185,11 +185,11 @@ public class WildflyWithElytronOidcDynamicClientApplication
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("OIDC_PROVIDER_TRUSTSTORE_CERTIFICATE_ALIAS")
-						.withValue(BasicKeycloakOperatorDynamicClientApplication.HTTPS_CERTIFICATE_NAME)
+						.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.HTTPS_CERTIFICATE_NAME)
 						.build());
 		environmentVariables.add(
 				new EnvVarBuilder().withName("OIDC_PROVIDER_TRUSTSTORE_PASSWORD")
-						.withValue(BasicKeycloakOperatorDynamicClientApplication.HTTPS_KEYSTORE_PASSWORD)
+						.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.HTTPS_KEYSTORE_PASSWORD)
 						.build());
 
 		/** in case the env variable APPLICATION_NAME is set the client-id is prefixed by the value */
@@ -199,15 +199,15 @@ public class WildflyWithElytronOidcDynamicClientApplication
 		/** The two following variables are required by the dynamic registration of clients feature: they are used to
 		 * authenticate to the registration service and actually perform client registration */
 		environmentVariables.add(new EnvVarBuilder().withName("OIDC_USER_NAME")
-				.withValue(BasicKeycloakOperatorDynamicClientApplication.OIDC_USER_NAME).build());
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.OIDC_USER_NAME).build());
 		environmentVariables.add(new EnvVarBuilder().withName("OIDC_USER_PASSWORD")
-				.withValue(BasicKeycloakOperatorDynamicClientApplication.OIDC_USER_PASSWORD).build());
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.OIDC_USER_PASSWORD).build());
 
 		/** This env variable is required in case of dynamic client registration: it's the password that is set for the
 		 * OIDC client during dynamic client registration */
 		environmentVariables.add(new EnvVarBuilder()
 				.withName("OIDC_SECURE_DEPLOYMENT_SECRET")
-				.withValue(BasicKeycloakOperatorDynamicClientApplication.OIDC_SECURE_DEPLOYMENT_SECRET)
+				.withValue(BasicKeycloakOperatorDynamicClientOidcApplication.OIDC_SECURE_DEPLOYMENT_SECRET)
 				.build());
 
 		environmentVariables.add(
