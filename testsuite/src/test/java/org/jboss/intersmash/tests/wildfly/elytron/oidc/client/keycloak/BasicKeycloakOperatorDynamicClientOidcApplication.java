@@ -37,6 +37,7 @@ import org.keycloak.k8s.v2alpha1.KeycloakRealmImportBuilder;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.RealmBuilder;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Clients;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.RequiredActionsBuilder;
+import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Users;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.UsersBuilder;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.users.CredentialsBuilder;
 import org.keycloak.k8s.v2alpha1.keycloakspec.DbBuilder;
@@ -50,7 +51,7 @@ import org.keycloak.k8s.v2alpha1.keycloakspec.db.UsernameSecretBuilder;
  * Deploys one basic Keycloak instance with a realm with users and a client.
  * This can be re-used and extended with other realms and/or clients for different applications.
  */
-public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOperatorApplication, OpenShiftApplication {
+public class BasicKeycloakOperatorDynamicClientOidcApplication implements KeycloakOperatorApplication, OpenShiftApplication {
 
 	/** Application name for the Keycloak service. */
 	public static final String APP_NAME = "sso-basic-dc";
@@ -98,7 +99,7 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 	 *
 	 * @throws IOException if an I/O error occurs during certificate generation
 	 */
-	public BasicKeycloakOperatorDynamicClientApplication() throws IOException {
+	public BasicKeycloakOperatorDynamicClientOidcApplication() throws IOException {
 		final String hostName = OpenShifts.master().generateHostname(APP_NAME);
 
 		// Private Key + Self-signed certificate to encrypt traffic to the Keycloak service
@@ -190,39 +191,50 @@ public class BasicKeycloakOperatorDynamicClientApplication implements KeycloakOp
 								.withEnabled(true)
 								.withDisplayName(REALM_NAME)
 								.withUsers(
-										new UsersBuilder()
-												.withUsername(OIDC_USER_NAME)
-												.withEnabled(true)
-												.withCredentials(new CredentialsBuilder()
-														.withType("password")
-														.withValue(OIDC_USER_PASSWORD)
-														.build())
-												.withRealmRoles("user", "admin")
-												.withClientRoles(Map.of("realm-management", Arrays.asList("create-client")))
-												.build(),
-										new UsersBuilder()
-												.withUsername(USER_NAME_WITH_CORRECT_ROLE)
-												.withEnabled(true)
-												.withCredentials(new CredentialsBuilder()
-														.withType("password")
-														.withValue(USER_PASSWORD_WITH_CORRECT_ROLE)
-														.build())
-												.withRealmRoles("user")
-												.build(),
-										new UsersBuilder()
-												.withUsername(USER_NAME_WITH_WRONG_ROLE)
-												.withEnabled(true)
-												.withCredentials(new CredentialsBuilder()
-														.withType("password")
-														.withValue(USER_PASSWORD_WITH_WRONG_ROLE)
-														.build())
-												.withRealmRoles("admin")
-												.build())
+										getUsers())
 								.withClients(
 										getClients())
 								.build())
 						.endSpec()
 						.build());
+	}
+
+	/**
+	 * Defines users for the Keycloak realm.
+	 * Specifically, this class also creates a used for registering OIDC clients that is assigned to the following roles:
+	 * "create-client", "manage-realm", "manage-clients";
+	 *
+	 * @return users for the Keycloak realm
+	 */
+	private static Users[] getUsers() {
+		return new Users[] { new UsersBuilder()
+				.withUsername(OIDC_USER_NAME)
+				.withEnabled(true)
+				.withCredentials(new CredentialsBuilder()
+						.withType("password")
+						.withValue(OIDC_USER_PASSWORD)
+						.build())
+				.withRealmRoles("user", "admin")
+				.withClientRoles(Map.of("realm-management", Arrays.asList("create-client")))
+				.build(),
+				new UsersBuilder()
+						.withUsername(USER_NAME_WITH_CORRECT_ROLE)
+						.withEnabled(true)
+						.withCredentials(new CredentialsBuilder()
+								.withType("password")
+								.withValue(USER_PASSWORD_WITH_CORRECT_ROLE)
+								.build())
+						.withRealmRoles("user")
+						.build(),
+				new UsersBuilder()
+						.withUsername(USER_NAME_WITH_WRONG_ROLE)
+						.withEnabled(true)
+						.withCredentials(new CredentialsBuilder()
+								.withType("password")
+								.withValue(USER_PASSWORD_WITH_WRONG_ROLE)
+								.build())
+						.withRealmRoles("admin")
+						.build() };
 	}
 
 	/**

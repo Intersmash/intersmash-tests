@@ -32,7 +32,7 @@ import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
 import org.jboss.intersmash.tests.junit.annotations.KeycloakTest;
 import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
 import org.jboss.intersmash.tests.junit.annotations.WildflyTest;
-import org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak.util.KeycloakLoginPageUtilities;
+import org.jboss.intersmash.tests.wildfly.util.LoginUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +55,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 @Intersmash({
 		@Service(KeycloakPostgresqlApplication.class),
-		@Service(BasicKeycloakOperatorDynamicClientApplication.class),
+		@Service(BasicKeycloakOperatorDynamicClientOidcApplication.class),
 		@Service(WildflyWithElytronOidcDynamicClientApplication.class)
 })
 public class WildflyWithElytronOidcDynamicClientIT {
@@ -87,12 +87,12 @@ public class WildflyWithElytronOidcDynamicClientIT {
 	 */
 	@Test
 	public void testSuccess() throws IOException {
-		TextPage securedPage = (TextPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
+		TextPage securedPage = (TextPage) LoginUtil.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorDynamicClientApplication.USER_NAME_WITH_CORRECT_ROLE,
-				BasicKeycloakOperatorDynamicClientApplication.USER_PASSWORD_WITH_CORRECT_ROLE);
-		assertThat(KeycloakLoginPageUtilities.statusCodeOf(securedPage)).isEqualTo(HttpStatus.SC_OK);
-		assertThat(KeycloakLoginPageUtilities.contentOf(securedPage)).contains(SUCCESS_EXPECTED_MESSAGE);
+				BasicKeycloakOperatorDynamicClientOidcApplication.USER_NAME_WITH_CORRECT_ROLE,
+				BasicKeycloakOperatorDynamicClientOidcApplication.USER_PASSWORD_WITH_CORRECT_ROLE);
+		assertThat(LoginUtil.statusCodeOf(securedPage)).isEqualTo(HttpStatus.SC_OK);
+		assertThat(LoginUtil.contentOf(securedPage)).contains(SUCCESS_EXPECTED_MESSAGE);
 	}
 
 	/**
@@ -102,12 +102,12 @@ public class WildflyWithElytronOidcDynamicClientIT {
 	 */
 	@Test
 	public void testForbidden() throws IOException {
-		HtmlPage securedPage = (HtmlPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
+		HtmlPage securedPage = (HtmlPage) LoginUtil.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorDynamicClientApplication.USER_NAME_WITH_WRONG_ROLE,
-				BasicKeycloakOperatorDynamicClientApplication.USER_PASSWORD_WITH_WRONG_ROLE);
-		assertThat(KeycloakLoginPageUtilities.statusCodeOf(securedPage)).isEqualTo(HttpStatus.SC_FORBIDDEN);
-		assertThat(KeycloakLoginPageUtilities.contentOf(securedPage)).contains(FORBIDDEN_EXPECTED_MESSAGE);
+				BasicKeycloakOperatorDynamicClientOidcApplication.USER_NAME_WITH_WRONG_ROLE,
+				BasicKeycloakOperatorDynamicClientOidcApplication.USER_PASSWORD_WITH_WRONG_ROLE);
+		assertThat(LoginUtil.statusCodeOf(securedPage)).isEqualTo(HttpStatus.SC_FORBIDDEN);
+		assertThat(LoginUtil.contentOf(securedPage)).contains(FORBIDDEN_EXPECTED_MESSAGE);
 	}
 
 	/**
@@ -117,10 +117,10 @@ public class WildflyWithElytronOidcDynamicClientIT {
 	 */
 	@Test
 	public void testUnauthorized() throws IOException {
-		HtmlPage loginPage = (HtmlPage) KeycloakLoginPageUtilities.requestSecuredPageAndLogin(
+		HtmlPage loginPage = (HtmlPage) LoginUtil.requestSecuredPageAndLogin(
 				wildflyApplicationRouteUrl + SECURED_CONTENT,
-				BasicKeycloakOperatorDynamicClientApplication.USER_NAME_WITH_CORRECT_ROLE,
+				BasicKeycloakOperatorDynamicClientOidcApplication.USER_NAME_WITH_CORRECT_ROLE,
 				"wrong_password");
-		KeycloakLoginPageUtilities.assertIsLoginPage(loginPage);
+		LoginUtil.assertIsLoginPage(loginPage);
 	}
 }

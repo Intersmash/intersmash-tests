@@ -20,12 +20,15 @@ import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.operator.KeycloakOperatorApplication;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Clients;
 import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.ClientsBuilder;
+import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Users;
+import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.UsersBuilder;
+import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.users.CredentialsBuilder;
 
 /**
  * Deploys one basic Keycloak instance with a realm with users and a client.
  * This can be re-used and extended with other realms and/or clients for different applications.
  */
-public class BasicKeycloakOperatorApplication extends BasicKeycloakOperatorDynamicClientApplication
+public class BasicKeycloakOperatorOidcApplication extends BasicKeycloakOperatorDynamicClientOidcApplication
 		implements KeycloakOperatorApplication, OpenShiftApplication {
 
 	/**
@@ -34,8 +37,35 @@ public class BasicKeycloakOperatorApplication extends BasicKeycloakOperatorDynam
 	 *
 	 * @throws IOException if an I/O error occurs during certificate generation
 	 */
-	public BasicKeycloakOperatorApplication() throws IOException {
+	public BasicKeycloakOperatorOidcApplication() throws IOException {
 		super();
+	}
+
+	/**
+	 * Defines users for the Keycloak realm.
+	 *
+	 * @return users for the Keycloak realm
+	 */
+	protected Users[] getUsers() {
+		return new Users[] {
+				new UsersBuilder()
+						.withUsername(USER_NAME_WITH_CORRECT_ROLE)
+						.withEnabled(true)
+						.withCredentials(new CredentialsBuilder()
+								.withType("password")
+								.withValue(USER_PASSWORD_WITH_CORRECT_ROLE)
+								.build())
+						.withRealmRoles("user")
+						.build(),
+				new UsersBuilder()
+						.withUsername(USER_NAME_WITH_WRONG_ROLE)
+						.withEnabled(true)
+						.withCredentials(new CredentialsBuilder()
+								.withType("password")
+								.withValue(USER_PASSWORD_WITH_WRONG_ROLE)
+								.build())
+						.withRealmRoles("admin")
+						.build() };
 	}
 
 	/**

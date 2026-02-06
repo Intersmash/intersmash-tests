@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2025 Red Hat, Inc.
+* Copyright (C) 2026 Red Hat, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,14 +13,19 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.keycloak.saml.adapter;
+package org.jboss.intersmash.tests.wildfly.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.matchesPattern;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.TextPage;
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -42,7 +47,7 @@ import org.hamcrest.MatcherAssert;
  * </ul>
  * </p>
  */
-public class KeycloakLoginPageUtilities {
+public class LoginUtil {
 
 	/** HTML ID of login form */
 	private static final String FORM_LOGIN = "kc-form-login";
@@ -131,5 +136,104 @@ public class KeycloakLoginPageUtilities {
 				String.format("The HTML 'DIV' element with text '%s' was not found in: %n----%n%s%n----%n", realmName,
 						page.getBody().asXml()),
 				!first.isEmpty());
+	}
+
+	/**
+	 * Asserts that the page displays a "Forbidden" message.
+	 * <p>
+	 * This method verifies that access was denied to a resource,
+	 * typically due to insufficient permissions or missing required roles.
+	 * </p>
+	 *
+	 * @param securedPage the page to check for forbidden access
+	 * @throws AssertionError if the page does not contain the "Forbidden" message
+	 */
+	public static void assertIsForbidden(HtmlPage securedPage) {
+		MatcherAssert.assertThat("The HTML page is not the expected Forbidden page!",
+				securedPage.getByXPath("//body//text()").get(0).toString().equalsIgnoreCase("Forbidden"));
+	}
+
+	/**
+	 * Asserts that the page is the expected secured page (profile.jsp).
+	 * <p>
+	 * This method verifies that after successful authentication, the user
+	 * was redirected to the correct protected resource.
+	 * </p>
+	 *
+	 * @param securedPage the page to verify
+	 * @throws AssertionError if the page URL does not contain "profile.jsp"
+	 */
+	public static void assertIsSecuredPage(HtmlPage securedPage) {
+		MatcherAssert.assertThat(
+				"The page the client was redirected to, isn't the one expected",
+				securedPage.getUrl().toString(), containsStringIgnoringCase("profile.jsp"));
+	}
+
+	/**
+	 * Asserts that the secured page contains the authenticated user principal.
+	 * <p>
+	 * This method verifies that the HTML element with the specified ID contains
+	 * a valid user principal value matching the expected GUID pattern (G-[UUID]).
+	 * This confirms that the SAML authentication was successful and the user
+	 * identity was properly propagated to the application.
+	 * </p>
+	 *
+	 * @param securedPage the secured page containing user information
+	 * @param htmlId the HTML element ID that should contain the username
+	 * @throws AssertionError if the element is not found or doesn't match the expected pattern
+	 */
+	public static void assertIsUserPrincipal(HtmlPage securedPage, String htmlId, String userName) {
+		try {
+			HtmlElement username = securedPage.getHtmlElementById(htmlId);
+			MatcherAssert.assertThat(
+					String.format("The HTML element with ID (%s) does not contain expected %s value", htmlId,
+							userName),
+					username.getTextContent(), matchesPattern("G-[a-zA-Z0-9\\-]{36}"));
+		} catch (ElementNotFoundException exception) {
+			fail("The element with id " + exception.getAttributeValue() + " was not found");
+		}
+	}
+
+	/**
+	 * Requests a secured page which redirects to the Keycloak login page, then performs login.
+	 *
+	 * @param securedURL the URL of the secured resource
+	 * @param login the username for login
+	 * @param password the password for login
+	 * @return the page returned after successful or unsuccessful login
+	 * @throws IOException if an I/O error occurs during the request or login process
+	 */
+	public static Page requestSecuredPageAndLogin(String securedURL, String login, String password) throws IOException {
+		try (final WebClient webClient = new WebClient()) {
+			webClient.getOptions().setUseInsecureSSL(true);
+			webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+			HtmlPage loginPage = requestSecuredPage(securedURL, webClient);
+			assertIsLoginPage(loginPage);
+			return makeLogin(loginPage, login, password);
+		}
+	}
+
+	private static HtmlPage requestSecuredPage(String securedURL, WebClient webClient) throws IOException {
+		return webClient.getPage(securedURL);
+	}
+
+	/**
+	 * Extracts the content from a text page.
+	 *
+	 * @param securedPage the text page
+	 * @return the page content as a string
+	 */
+	public static String contentOf(TextPage securedPage) {
+		return securedPage.getContent();
+	}
+
+	/**
+	 * Extracts the text content from an HTML page body.
+	 *
+	 * @param securedPage the HTML page
+	 * @return the body text content as a string
+	 */
+	public static String contentOf(HtmlPage securedPage) {
+		return securedPage.getBody().getTextContent();
 	}
 }
