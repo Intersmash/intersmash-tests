@@ -47,7 +47,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <version.intersmash>0.0.3</version.intersmash>
-        <version.junit-jupiter>5.11.1</version.junit-jupiter>
+        <version.junit-jupiter>6.0.3</version.junit-jupiter>
         <version.rest-assured>5.5.1</version.rest-assured>
         <version.junit-platform-launcher>1.11.3</version.junit-platform-launcher>
         <version.spotless-maven-plugin>3.1.0</version.spotless-maven-plugin>
