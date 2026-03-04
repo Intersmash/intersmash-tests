@@ -53,9 +53,9 @@ public class SimpleCommandLineBasedKeystoreGenerator {
 	private static final Logger log = LoggerFactory.getLogger(SimpleCommandLineBasedKeystoreGenerator.class);
 	private static final Path TMP_DIRECTORY = Paths.get("tmp").toAbsolutePath()
 			.resolve(SimpleCommandLineBasedKeystoreGenerator.class.getSimpleName());
-	private static final String KEYSTORE_FILE_NAME = "keystore.pkcs12";
+	public static final String KEYSTORE_FILE_NAME = "keystore.pkcs12";
 	private static final String CERTIFICATE_FILE_NAME = "certificate.crt";
-	private static final String TRUSTSTORE_FILE_NAME = "truststore.pkcs12";
+	public static final String TRUSTSTORE_FILE_NAME = "truststore.pkcs12";
 	private static final String PRIVATEKEY_FILE_NAME = "privatekey.pem";
 
 	/**
