@@ -63,8 +63,11 @@ public class WildflyOffloadingSessionsToInfinispanApplication
 				.withValue(Infinispan2ReplicasService.INFINISPAN_CUSTOM_CREDENTIALS_USERNAME).build());
 		environmentVariables.add(new EnvVarBuilder().withName("CACHE_PASSWORD")
 				.withValue(Infinispan2ReplicasService.INFINISPAN_CUSTOM_CREDENTIALS_PASSWORD).build());
-		environmentVariables.add(new EnvVarBuilder().withName("TRUST_STORE_PATH")
+		// See https://infinispan.org/docs/stable/apidocs/org/infinispan/client/hotrod/configuration/package-summary.html
+		environmentVariables.add(new EnvVarBuilder().withName("TRUST_STORE_FILE_NAME")
 				.withValue("/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt").build());
+		environmentVariables.add(new EnvVarBuilder().withName("TRUST_STORE_TYPE")
+				.withValue("PEM").build());
 
 		environmentVariables.add(
 				new EnvVarBuilder().withName("MAVEN_S2I_ARTIFACT_DIRS")
