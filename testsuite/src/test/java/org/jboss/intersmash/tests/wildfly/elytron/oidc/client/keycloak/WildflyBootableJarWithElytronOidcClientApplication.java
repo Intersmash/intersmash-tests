@@ -183,7 +183,6 @@ public class WildflyBootableJarWithElytronOidcClientApplication
 				.withBuildMode(WildflyHelmChartRelease.BuildMode.BOOTABLE_JAR)
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())
 				.withSourceRepositoryRef(IntersmashConfig.deploymentsRepositoryRef())
-				// TODO: check why jdk17 / jdk21 in `intersmash.bootable.jar.image=registry.access.redhat.com/ubi8/openjdk-17` and `intersmash.wildfly.image=quay.io/wildfly/wildfly-s2i:2.1.0-jdk21`
 				.withJdk17BuilderImage(IntersmashConfig.wildflyImageURL())
 				.withJdk17RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
