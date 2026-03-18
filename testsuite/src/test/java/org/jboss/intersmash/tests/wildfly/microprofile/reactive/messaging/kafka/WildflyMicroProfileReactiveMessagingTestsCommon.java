@@ -16,6 +16,8 @@
 package org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka;
 
 import io.restassured.RestAssured;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.config.SSLConfig;
 import io.restassured.filter.log.LogDetail;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,10 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 
 	protected abstract String getApplicationRouteUrl();
 
+	protected boolean useHttps() {
+		return true;
+	}
+
 	/**
 	 * Verify that custom data serializers (<i>PersonSerializer</i>) and
 	 * deserializers (<i>PersonDeserializer</i>) can be successfully used with a Kafka/Streams for Apache
@@ -40,7 +46,12 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testSerializer() {
-		RestAssured.get(getApplicationRouteUrl() + "/serializer")
+		RestAssured.useRelaxedHTTPSValidation();
+		RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get(
+						(useHttps() ? getApplicationRouteUrl().replace("http:/", "https:/") : getApplicationRouteUrl())
+								+ "/serializer")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -69,7 +80,10 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testTx() {
-		RestAssured.get(getApplicationRouteUrl() + "/tx")
+		RestAssured.useRelaxedHTTPSValidation();
+		RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get((useHttps() ? getApplicationRouteUrl().replace("http:/", "https:/") : getApplicationRouteUrl()) + "/tx")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -94,7 +108,11 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testMetadata() {
-		RestAssured.get(getApplicationRouteUrl() + "/metadata")
+		RestAssured.useRelaxedHTTPSValidation();
+		RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get((useHttps() ? getApplicationRouteUrl().replace("http:/", "https:/") : getApplicationRouteUrl())
+						+ "/metadata")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -120,7 +138,11 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testPartitionsMetadata() {
-		RestAssured.get(getApplicationRouteUrl() + "/partitionsMetadata")
+		RestAssured.useRelaxedHTTPSValidation();
+		RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get((useHttps() ? getApplicationRouteUrl().replace("http:/", "https:/") : getApplicationRouteUrl())
+						+ "/partitionsMetadata")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
