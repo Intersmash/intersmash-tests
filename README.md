@@ -67,6 +67,27 @@ See the [WildFlyKeycloakSamlAdapterEjbIT](testsuite/src/test/java/org/jboss/inte
 This test is a simplified version of [WildFly (JBoss EAP and JBoss EAP XP) EJB + SAML Adapter client + Keycloak (Red Hat Build of Keycloak)](#wildfly--jboss-eap-and-jboss-eap-xp--ejb--saml-adapter-client--keycloak--red-hat-build-of-keycloak-) which removes signing for SAML requests and responses; it packages and deploys the application as a Bootable Jar; the peculiarity of this test is that the deployed application uses layer `keycloak-client-saml-ejb` which is meant for bare-metal usage not Kubernetes/OpenShift, and expects it to work since there is no reason why it should not;
 See the [WildFlyBootableJarKeycloakSamlAdapterEjbHelmIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/keycloak/saml/adapter/WildFlyBootableJarKeycloakSamlAdapterEjbHelmIT.java) class Javadoc for more details.
 
+#### [WildFly (JBoss EAP and JBoss EAP XP) PostgreSQL EJB Timer](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/postgresql/WildflyPostgresqlTimerIT.java)
+
+This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application configured
+with EJB timers backed by a PostgreSQL database. The test creates an EJB timer and verifies that the timestamp stored
+in the database has the correct time format (zero milliseconds).
+See the [WildflyPostgresqlTimerIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/postgresql/WildflyPostgresqlTimerIT.java) class Javadoc for more details.
+
+#### [WildFly (JBoss EAP and JBoss EAP XP) PostgreSQL EJB Timer Service Fails](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/postgresql/WildflyPostgresqlTimerServiceFailsIT.java)
+
+This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application configured
+with EJB timers backed by a PostgreSQL database. The test terminates the PostgreSQL pod, then calls the EJB TimerService
+and verifies that no `NullPointerException` is thrown when the timer service fails.
+See the [WildflyPostgresqlTimerServiceFailsIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/postgresql/WildflyPostgresqlTimerServiceFailsIT.java) class Javadoc for more details.
+
+#### [WildFly (JBoss EAP and JBoss EAP XP) PostgreSQL EJB Timer Terminated](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/postgresql/WildflyPostgresqlTimerTerminatedIT.java)
+
+This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application configured
+with EJB timers backed by a PostgreSQL database. The test terminates the PostgreSQL pod and verifies that no
+`NullPointerException` is thrown in the WildFly application logs.
+See the [WildflyPostgresqlTimerTerminatedIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/postgresql/WildflyPostgresqlTimerTerminatedIT.java) class Javadoc for more details.
+
 #### [WildFly (JBoss EAP and JBoss EAP XP) Web cache offload + Infinispan (Red Hat Data Grid)](testsuite/wildfly-web-cache-offload-infinispan/src/test/java/org/jboss/intersmash/tests/wildfly/web/cache/offload/infinispan/WildflyWebCacheOffloadToInfinispanIT.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which

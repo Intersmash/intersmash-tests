@@ -1,0 +1,77 @@
+/**
+* Copyright (C) 2026 Red Hat, Inc.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*         http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.jboss.intersmash.tests.wildfly.postgresql;
+
+import cz.xtf.core.openshift.OpenShiftWaiters;
+import cz.xtf.core.openshift.OpenShifts;
+import cz.xtf.junit5.listeners.ProjectCreator;
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.intersmash.annotations.Intersmash;
+import org.jboss.intersmash.annotations.Service;
+import org.jboss.intersmash.annotations.ServiceProvisioner;
+import org.jboss.intersmash.annotations.ServiceUrl;
+import org.jboss.intersmash.provision.openshift.OpenShiftProvisioner;
+import org.jboss.intersmash.tests.junit.annotations.EapTest;
+import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
+import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
+import org.jboss.intersmash.tests.junit.annotations.PostgreSqlTest;
+import org.jboss.intersmash.tests.junit.annotations.WildflyTest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+/**
+ * WildFly (JBoss EAP) + PostgreSQL interoperability test.
+ *
+ * <p>This test case terminates the PostgreSQL pod and checks that no
+ * {@code NullPointerException} is thrown in the WildFly application logs.</p>
+ *
+ */
+@PostgreSqlTest
+@Slf4j
+@WildflyTest
+@EapTest
+@EapXpTest
+@OpenShiftTest
+@ExtendWith(ProjectCreator.class)
+@Intersmash({
+		@Service(PostgresqlService.class),
+		@Service(WildflyPostgresqlTimerApplication.class)
+})
+public class WildflyPostgresqlTimerTerminatedIT {
+
+	@ServiceUrl(WildflyPostgresqlTimerApplication.class)
+	private String appUrl;
+
+	@ServiceProvisioner(PostgresqlService.class)
+	private OpenShiftProvisioner postgresqlProvisioner;
+
+	/**
+	 * Terminates the PostgreSQL pod and checks that no NPE is being thrown in the WildFly application logs.
+	 */
+	@Test
+	public void testTerminatePostgresql() {
+		// shutdown the Postgresql pod
+		postgresqlProvisioner.scale(0, false);
+
+		// wait till the Postgresql pod is completely terminated
+		OpenShiftWaiters.get(OpenShifts.master(), () -> false).areNoPodsPresent("postgresql").waitFor();
+
+		Assertions.assertFalse(postgresqlProvisioner.getOpenShift()
+				.getPodLog(WildflyPostgresqlTimerApplication.NAME)
+				.contains("java.lang.NullPointerException"));
+	}
+}
