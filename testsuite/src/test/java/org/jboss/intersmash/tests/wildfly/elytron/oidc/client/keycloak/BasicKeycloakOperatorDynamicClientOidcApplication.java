@@ -66,7 +66,7 @@ public class BasicKeycloakOperatorDynamicClientOidcApplication implements Keyclo
 	/** Number of Keycloak instances to deploy. */
 	protected static final long KEYCLOAK_INSTANCES = 1;
 	/** Shared secret for OIDC client authentication. */
-	protected static final String OIDC_SECURE_DEPLOYMENT_SECRET = "3up7r37cr7doidccli7ntpa33word";
+	protected static final String SSO_OIDC_CLIENT_SECRET = "3up7r37cr7doidccli7ntpa33word";
 
 	/** The Keycloak instance custom resource. */
 	protected final Keycloak keycloak;

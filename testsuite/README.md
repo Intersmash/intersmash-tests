@@ -11,7 +11,7 @@ This tests validates an interoperability use case based on a WildFly/JBoss EAP/J
 uses the Elytron subsystem to configure an OIDC client for a remote Keycloak/Red Hat Build of Keycloak service,
 which is configured to allow OIDC Single-sign-on in order to secure the application resources.
 
-The deployed application descriptor sets the `SSO_APP_SERVICE` environment variable to the URL of the Keycloak service.
+The deployed application descriptor sets the `SSO_OIDC_KEYCLOAK_URL` environment variable to the URL of the Keycloak service.
 
 We have two variations of this test:
 

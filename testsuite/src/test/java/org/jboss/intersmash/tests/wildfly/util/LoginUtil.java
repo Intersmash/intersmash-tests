@@ -218,22 +218,17 @@ public class LoginUtil {
 	}
 
 	/**
-	 * Extracts the content from a text page.
+	 * Extracts the text content from a page.
 	 *
-	 * @param securedPage the text page
+	 * @param page the page (can be {@link TextPage} or {@link HtmlPage})
 	 * @return the page content as a string
 	 */
-	public static String contentOf(TextPage securedPage) {
-		return securedPage.getContent();
-	}
-
-	/**
-	 * Extracts the text content from an HTML page body.
-	 *
-	 * @param securedPage the HTML page
-	 * @return the body text content as a string
-	 */
-	public static String contentOf(HtmlPage securedPage) {
-		return securedPage.getBody().getTextContent();
+	public static String contentOf(Page page) {
+		if (page instanceof TextPage) {
+			return ((TextPage) page).getContent();
+		} else if (page instanceof HtmlPage) {
+			return ((HtmlPage) page).getBody().getTextContent();
+		}
+		throw new IllegalArgumentException("Unsupported page type: " + page.getClass().getName());
 	}
 }
