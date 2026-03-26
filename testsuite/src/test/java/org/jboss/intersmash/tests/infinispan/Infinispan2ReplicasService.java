@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan;
+package org.jboss.intersmash.tests.infinispan;
 
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
@@ -28,7 +28,6 @@ import org.infinispan.v1.InfinispanBuilder;
 import org.infinispan.v2alpha1.Cache;
 import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.operator.InfinispanOperatorApplication;
-import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.InfinispanSecretUtils;
 
 /**
  * Application descriptor that represents an Infinispan/Red Hat Data Grid service deployed by the related Operator, and

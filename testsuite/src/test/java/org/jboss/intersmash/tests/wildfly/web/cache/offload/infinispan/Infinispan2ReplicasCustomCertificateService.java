@@ -33,8 +33,9 @@ import org.infinispan.v1.infinispanspec.security.EndpointEncryptionBuilder;
 import org.infinispan.v2alpha1.Cache;
 import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.operator.InfinispanOperatorApplication;
+import org.jboss.intersmash.tests.infinispan.Infinispan2ReplicasService;
+import org.jboss.intersmash.tests.infinispan.InfinispanSecretUtils;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
-import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.InfinispanSecretUtils;
 
 /**
  * Application descriptor that represents an Infinispan/Red Hat Data Grid service deployed by the related Operator,
