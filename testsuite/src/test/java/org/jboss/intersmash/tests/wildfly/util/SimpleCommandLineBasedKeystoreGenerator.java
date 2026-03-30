@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,7 @@ public class SimpleCommandLineBasedKeystoreGenerator {
 	private static final String CERTIFICATE_FILE_NAME = "certificate.crt";
 	public static final String TRUSTSTORE_FILE_NAME = "truststore.pkcs12";
 	private static final String PRIVATEKEY_FILE_NAME = "privatekey.pem";
+	public static final String STORE_TYPE = "PKCS12";
 
 	/**
 	 * Generates a complete certificate infrastructure for the specified hostname.
@@ -133,23 +135,25 @@ public class SimpleCommandLineBasedKeystoreGenerator {
 				processCall(finalDir, "keytool", "-genkeypair", "-noprompt", "-alias", keyAlias, "-keyalg", "RSA",
 						"-keysize", "2048", "-sigalg", "SHA256withRSA", "-dname", "CN=" + hostName,
 						"-validity", "365", "-keystore", KEYSTORE_FILE_NAME, "-storepass", storepass, "-storetype",
-						"PKCS12", "-keypass", keypass, "-ext", "bc=ca:true", "-ext",
+						STORE_TYPE, "-keypass", keypass, "-ext", "bc=ca:true", "-ext",
 						formatSubjectAlternativeNames(hostName, subjectAlternativeNames));
 			} else {
 				processCall(finalDir, "keytool", "-genkeypair", "-noprompt", "-alias", keyAlias, "-keyalg", "RSA",
 						"-keysize", "2048", "-sigalg", "SHA256withRSA", "-dname", "CN=" + hostName,
 						"-validity", "365", "-keystore", KEYSTORE_FILE_NAME, "-storepass", storepass, "-storetype",
-						"PKCS12", "-ext", "bc=ca:true", "-ext",
+						STORE_TYPE, "-ext", "bc=ca:true", "-ext",
 						formatSubjectAlternativeNames(hostName, subjectAlternativeNames));
 			}
 			// Extracts the self-signed certificate from the keystore
 			processCall(finalDir, "keytool", "-exportcert", "-noprompt", "-rfc", "-alias", keyAlias, "-file",
-					CERTIFICATE_FILE_NAME, "-keystore", KEYSTORE_FILE_NAME, "-storepass", storepass, "-storetype", "PKCS12");
+					CERTIFICATE_FILE_NAME, "-keystore", KEYSTORE_FILE_NAME, "-storepass", storepass, "-storetype", STORE_TYPE);
 			// Generate a truststore containing the self-signed certificate
 			processCall(finalDir, "keytool", "-import", "-v", "-trustcacerts", "-noprompt", "-alias", keyAlias, "-file",
-					CERTIFICATE_FILE_NAME, "-keystore", TRUSTSTORE_FILE_NAME, "-storepass", storepass, "-storetype", "PKCS12");
+					CERTIFICATE_FILE_NAME, "-keystore", TRUSTSTORE_FILE_NAME, "-storepass", storepass, "-storetype",
+					STORE_TYPE);
 			// Extract the private key in PEM format
-			processCall(finalDir, "openssl", "pkcs12", "-in", KEYSTORE_FILE_NAME, "-nocerts", "-nodes", "-out",
+			processCall(finalDir, "openssl", STORE_TYPE.toLowerCase(Locale.ROOT), "-in", KEYSTORE_FILE_NAME, "-nocerts",
+					"-nodes", "-out",
 					PRIVATEKEY_FILE_NAME, "-passin", String.format("pass:%s", storepass));
 		}
 		if (!certificateInfo.keystore.toFile().exists()) {
