@@ -50,3 +50,12 @@ interacts with a remote ActiveMQ Artemis messaging broker service.
 
 The application is configured to use TLS to secure the connection to the remote ActiveMQ Artemis messaging broker service,
 and environment variables are set conveniently in [the relevant application descriptor](src/test/java/org/jboss/intersmash/tests/wildfly/message/broker/activemq/artemis/ssl/WildflyJmsSslApplication.java). 
+
+## WildFly + ActiveMQ Artemis JMS Bridge
+
+This test validates an interoperability use case based on a WildFly/JBoss EAP/JBoss EAP XP application which
+is configured with a JMS bridge that forwards messages from a local queue to a remote ActiveMQ Artemis (AMQ Broker)
+service.
+
+The test verifies that messages are correctly delivered through the JMS bridge and that the bridge handles
+broker unavailability gracefully by reconnecting and delivering parked messages once the broker is restored.

@@ -100,6 +100,14 @@ This test validates an interoperability use case based on a WildFly (JBoss EAP a
 is configured to use an SSL-secured ActiveMQ Artemis message broker for encrypted messaging communication.
 See the [WildflyActiveMQArtemisSslIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/message/broker/activemq/artemis/ssl/WildflyActiveMQArtemisSslIT.java) class Javadoc for more details.
 
+#### [WildFly (JBoss EAP and JBoss EAP XP) ActiveMQ Artemis JMS Bridge](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/message/broker/activemq/artemis/jmsbridge/WildflyActiveMQArtemisJmsBridgeIT.java)
+
+This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application, which
+is configured with a JMS bridge that forwards messages from a local queue to a remote ActiveMQ Artemis (AMQ Broker)
+service. The test verifies that messages are correctly delivered through the JMS bridge and that the bridge handles
+broker unavailability gracefully by reconnecting and delivering parked messages once the broker is restored.
+See the [WildflyActiveMQArtemisJmsBridgeIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/message/broker/activemq/artemis/jmsbridge/WildflyActiveMQArtemisJmsBridgeIT.java) class Javadoc for more details.
+
 ## Profiles
 
 ### Executing tests based on target platform
