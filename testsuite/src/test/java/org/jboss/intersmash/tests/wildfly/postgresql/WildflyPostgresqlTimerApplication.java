@@ -82,6 +82,8 @@ public class WildflyPostgresqlTimerApplication
 				.withName("POSTGRESQL_USER").withValue(PostgresqlService.POSTGRESQL_USER).build());
 		environmentVariables.add(new EnvVarBuilder()
 				.withName("POSTGRESQL_PASSWORD").withValue(PostgresqlService.POSTGRESQL_PASSWORD).build());
+		environmentVariables.add(new EnvVarBuilder().withName("POSTGRESQL_DRIVER_VERSION").withValue("42.7.10")
+				.build());
 
 		this.envVars = Collections.unmodifiableList(environmentVariables);
 	}
