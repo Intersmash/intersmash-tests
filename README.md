@@ -74,6 +74,15 @@ with EJB timers backed by a PostgreSQL database. The test creates an EJB timer a
 in the database has the correct time format (zero milliseconds).
 See the [WildflyPostgresqlTimerIT](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/postgresql/WildflyPostgresqlTimerIT.java) class Javadoc for more details.
 
+---
+**NOTE**
+
+When building with the `eap` profile, the `-Dorg.jboss.eap.datasources.postgresql.driver.version` system property or the
+`POSTGRESQL_DRIVER_VERSION` environment variable must be set in order for the productized `wildfly-datasources-galleon-pack`
+feature pack to be used successfully by the EAP Maven Plugin, see https://github.com/jbossas/eap-datasources-galleon-pack/blob/main/doc/postgresql/README.md#required-configuration.
+
+---
+
 #### [WildFly (JBoss EAP and JBoss EAP XP) PostgreSQL EJB Timer Service Fails](testsuite/src/test/java/org/jboss/intersmash/tests/wildfly/postgresql/WildflyPostgresqlTimerServiceFailsIT.java)
 
 This test validates an interoperability use case based on a WildFly (JBoss EAP and JBoss EAP XP) application configured

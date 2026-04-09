@@ -18,6 +18,7 @@
         <intersmash.test.wildfly-target-distribution>wildfly</intersmash.test.wildfly-target-distribution>
 
         <version.net.sourceforge.htmlunit>2.70.0</version.net.sourceforge.htmlunit>
+        <org.jboss.eap.datasources.postgresql.driver.version>42.7.10</org.jboss.eap.datasources.postgresql.driver.version>
     </properties>
 
     <dependencies>
@@ -122,6 +123,7 @@
                             <systemPropertyVariables>
                                 <!-- JBoss EAP tests are only executed on OpenShift -->
                                 <xtf.global_test_properties.path>global-test.jboss-eap.openshift.properties</xtf.global_test_properties.path>
+                                <org.jboss.eap.datasources.postgresql.driver.version>${org.jboss.eap.datasources.postgresql.driver.version}</org.jboss.eap.datasources.postgresql.driver.version>
                             </systemPropertyVariables>
                             <!--
                                 Exclude tests that shouldn't be executed when dealing JBoss EAP, i.e. Bootable JAR tests
@@ -149,6 +151,7 @@
                             <systemPropertyVariables>
                                 <!-- JBoss EAP XP tests are only executed on OpenShift -->
                                 <xtf.global_test_properties.path>global-test.jboss-eap-xp.openshift.properties</xtf.global_test_properties.path>
+                                <org.jboss.eap.datasources.postgresql.driver.version>${org.jboss.eap.datasources.postgresql.driver.version}</org.jboss.eap.datasources.postgresql.driver.version>
                             </systemPropertyVariables>
                             <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
                             <excludedGroups>k8s</excludedGroups>
@@ -173,6 +176,7 @@
                             <systemPropertyVariables>
                                 <!-- JBoss EAP XP tests are only executed on OpenShift -->
                                 <xtf.global_test_properties.path>global-test.jboss-eap-xp.openshift.properties</xtf.global_test_properties.path>
+                                <org.jboss.eap.datasources.postgresql.driver.version>${org.jboss.eap.datasources.postgresql.driver.version}</org.jboss.eap.datasources.postgresql.driver.version>
                             </systemPropertyVariables>
                             <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
                             <excludedGroups>k8s</excludedGroups>
