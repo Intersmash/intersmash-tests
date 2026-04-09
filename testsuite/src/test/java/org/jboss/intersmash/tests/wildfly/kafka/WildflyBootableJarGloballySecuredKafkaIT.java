@@ -48,8 +48,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <br>
  * In this use case, the Elytron SSL context name is configured <i>globally</i> via the
  * {@code MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_WILDFLY_ELYTRON_SSL_CONTEXT} environment variable, as opposed to
- * the per-connector configuration used by
- * {@link org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka.WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT}.
+ * the per-connector configuration used by {@link WildflyBootableJarPerConnectorSecuredKafkaIT}.
  * <br>
  * Actual test implementations are placed in {@link WildflyMicroProfileReactiveMessagingTestsCommon}
  */
