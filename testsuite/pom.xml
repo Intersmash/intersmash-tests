@@ -18,6 +18,7 @@
         <intersmash.test.wildfly-target-distribution>wildfly</intersmash.test.wildfly-target-distribution>
 
         <version.net.sourceforge.htmlunit>2.70.0</version.net.sourceforge.htmlunit>
+        <org.jboss.eap.datasources.postgresql.driver.version>42.7.10</org.jboss.eap.datasources.postgresql.driver.version>
     </properties>
 
     <dependencies>
@@ -98,6 +99,7 @@
                         <configuration>
                             <systemPropertyVariables>
                                 <xtf.global_test_properties.path>global-test.openshift.properties</xtf.global_test_properties.path>
+                                <org.jboss.eap.datasources.postgresql.driver.version>${org.jboss.eap.datasources.postgresql.driver.version}</org.jboss.eap.datasources.postgresql.driver.version>
                             </systemPropertyVariables>
                             <!-- Exclude Kubernetes tests, when the profile for running tests on OpenShift is enabled  -->
                             <excludedGroups>k8s</excludedGroups>
