@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.intersmash.annotations.Intersmash;
 import org.jboss.intersmash.annotations.Service;
 import org.jboss.intersmash.annotations.ServiceUrl;
-import org.jboss.intersmash.tests.junit.annotations.EapTest;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
 import org.jboss.intersmash.tests.junit.annotations.KeycloakTest;
 import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
@@ -65,7 +64,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @WildflyTest
 // EAP 8.1: Bootable jar is not supported on OpenShift Container Platform.
 // See https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/8.1/html-single/provisioning_jboss_eap/index
-@EapTest
 @EapXpTest
 @OpenShiftTest
 @ExtendWith(ProjectCreator.class)
