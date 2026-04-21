@@ -57,7 +57,7 @@ public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication
 
 	public WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication() {
 		// Set up the Reactive-messaging deployment.
-		String applicationDir = "wildfly/microprofile-reactive-messaging-kafka";
+		String applicationDir = "wildfly/kafka-application";
 		buildInput = new BuildInputBuilder()
 				.uri(IntersmashConfig.deploymentsRepositoryUrl())
 				.ref(IntersmashConfig.deploymentsRepositoryRef())
@@ -98,7 +98,7 @@ public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication
 						.withValue(applicationDir + "/target")
 						.build());
 		String mavenAdditionalArgs = generateAdditionalMavenArgs()
-				.concat(" -pl " + applicationDir + " -am");
+				.concat(" -Ps2i -pl " + applicationDir + " -am");
 		final String mavenMirrorUrl = this.getMavenMirrorUrl();
 		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
 			environmentVariables.add(
