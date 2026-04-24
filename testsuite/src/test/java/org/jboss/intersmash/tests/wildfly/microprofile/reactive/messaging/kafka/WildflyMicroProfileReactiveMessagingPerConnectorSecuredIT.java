@@ -30,15 +30,15 @@ import org.jboss.intersmash.tests.junit.annotations.WildflyTest;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * WildFly/JBoss EAP XP + Kafka/Streams for Apache Kafka interoperability tests.
+ * WildFly/JBoss EAP + Kafka/Streams for Apache Kafka interoperability tests.
  *
- * Verify the interoperability between JBoss EAP XP and Kafka/Streams for Apache Kafka on OpenShift.
+ * Verify the interoperability between WildFly/JBoss EAP and Kafka/Streams for Apache Kafka on OpenShift.
  * <br>
  * This test application is built via the WildFly/JBoss EAP s2i features, but it <i>cannot</i> be executed against
  * JBoss EAP 8.z, since it does not contain MicroProfile specs, including Reactive Messaging.
  * <br>
  * The Strimzi/Streams for Apache Kafka operator is used to provide a Kafka/Streams for Apache Kafka instance.
- * The WildFly/JBoss EAP XP application includes the MicroProfile Reactive Messaging Galleon feature pack.
+ * The WildFly/JBoss EAP application includes the MicroProfile Reactive Messaging Galleon feature pack.
  * <br>
  * This application sends messages to a Kafka/Streams for Apache Kafka service and, at the same time, listens to
  * different topic in order to read data.
@@ -67,7 +67,7 @@ public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT
 	}
 
 	@ServiceProvisioner(KafkaMicroProfileReactiveMessagingApplication.class)
-	private OpenShiftProvisioner<KafkaMicroProfileReactiveMessagingApplication> amqStreamsOpenShiftProvisioner;
+	private OpenShiftProvisioner<KafkaMicroProfileReactiveMessagingApplication> kafkaOpenShiftProvisioner;
 
 	@ServiceProvisioner(WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication.class)
 	private WildflyImageOpenShiftProvisioner eapOpenShiftProvisioner;

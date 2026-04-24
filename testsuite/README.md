@@ -2,7 +2,7 @@
 
 ## WildFly MicroProfile Reactive Messaging + Kafka
 
-This tests validates an interoperability use case based on a WildFly/JBoss EAP XP MicroProfile Reactive
+This tests validates an interoperability use case based on a WildFly/JBoss EAP MicroProfile Reactive
 Messaging interacting with a remote Kafka/Streams for Apache Kafka service.
 
 ## WildFly Elytron OIDC client + Keycloak

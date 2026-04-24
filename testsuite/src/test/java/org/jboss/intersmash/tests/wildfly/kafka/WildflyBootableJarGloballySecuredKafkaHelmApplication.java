@@ -110,7 +110,7 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 	 * </ul>
 	 * </p>
 	 *
-	 * @param release the WildFly Helm chart release to configure
+	 * @param release the Helm chart release to configure
 	 * @return the configured Helm chart release
 	 * @throws IOException if configuration loading fails
 	 */
@@ -123,7 +123,7 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 		String mavenAdditionalArgs = "-Denforcer.skip=true";
 		// let's add configurable deployment additional args:
 		mavenAdditionalArgs = mavenAdditionalArgs.concat(generateAdditionalMavenArgs());
-		// to speed up the build process we target a specific module; we also skip generating the "*-sources.jar" to disambiguate the S2I artifact to deploy (having both "*-sources.jar" and "*-bootable.jar" would fail the deployment)
+		// to speed up the build process we target a specific module; we also skip generating the "*-sources.jar" to disambiguate the artifact to deploy when using S2I (having both "*-sources.jar" and "*-bootable.jar" would fail the deployment)
 		mavenAdditionalArgs = mavenAdditionalArgs
 				.concat(getBuildSpecificMavenArgs() + " -Dmaven.source.skip -pl " + APP_MODULE_DIRECTORY + " -am ");
 
@@ -175,6 +175,7 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 					ca.password: b0QybzJ3T2czUUpm
 				type: Opaque
 		 * }
+		 * see https://docs.redhat.com/en/documentation/red_hat_amq/7.7/html-single/using_amq_streams_on_openshift/index#cluster_ca_secrets
 		 */
 
 		Secret clientSecret = OpenShifts.master().getSecret("amq-streams-cluster-ca-cert");
@@ -199,7 +200,6 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 				.withBuildMode(getBuildMode())
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())
 				.withSourceRepositoryRef(IntersmashConfig.deploymentsRepositoryRef())
-				// TODO: check why jdk17 / jdk21 in `intersmash.bootable.jar.image=registry.access.redhat.com/ubi8/openjdk-17` and `intersmash.wildfly.image=quay.io/wildfly/wildfly-s2i:2.1.0-jdk21`
 				.withJdk17BuilderImage(IntersmashConfig.wildflyImageURL())
 				.withJdk17RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)

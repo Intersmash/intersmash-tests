@@ -33,18 +33,16 @@ import org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka.
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * WildFly/JBoss EAP XP + Kafka/Streams for Apache Kafka interoperability tests using a bootable JAR.
+ * WildFly/JBoss EAP + Kafka/Streams for Apache Kafka interoperability tests using a bootable JAR.
  *
- * Verify the interoperability between JBoss EAP XP and Kafka/Streams for Apache Kafka on OpenShift.
+ * Verify the interoperability between WildFly/JBoss EAP and Kafka/Streams for Apache Kafka on OpenShift.
  * <br>
  * The Strimzi/Streams for Apache Kafka operator is used to provide a Kafka/Streams for Apache Kafka instance.
- * The WildFly/JBoss EAP XP application is built as a bootable JAR with the MicroProfile Reactive Messaging
+ * The WildFly/JBoss EAP application is built as a bootable JAR with the MicroProfile Reactive Messaging
  * Galleon feature pack.
  * <br>
  * This application sends messages to a Kafka/Streams for Apache Kafka service and, at the same time, listens to
  * different topic in order to read data.
- * Connections are performed both as not secured (plaintext) and secured via SSL with SSLContext too, leveraging
- * Elytron based SSLContext configuration.
  * <br>
  * In this use case, the Elytron SSL context name is configured <i>globally</i> via the
  * {@code MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_WILDFLY_ELYTRON_SSL_CONTEXT} environment variable, as opposed to
@@ -69,7 +67,7 @@ public class WildflyBootableJarGloballySecuredKafkaIT extends WildflyMicroProfil
 	private String applicationRouteUrl;
 
 	@ServiceProvisioner(KafkaMicroProfileReactiveMessagingApplication.class)
-	private OpenShiftProvisioner<KafkaMicroProfileReactiveMessagingApplication> amqStreamsOpenShiftProvisioner;
+	private OpenShiftProvisioner<KafkaMicroProfileReactiveMessagingApplication> kafkaOpenShiftProvisioner;
 
 	@ServiceProvisioner(WildflyBootableJarGloballySecuredKafkaHelmApplication.class)
 	private WildflyHelmChartOpenShiftProvisioner wildflyHelmChartOpenShiftProvisioner;

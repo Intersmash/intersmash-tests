@@ -33,12 +33,12 @@ import org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka.
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * WildFly/JBoss EAP XP + Kafka/Streams for Apache Kafka interoperability tests using S2I deployment.
+ * WildFly/JBoss EAP + Kafka/Streams for Apache Kafka interoperability tests using S2I deployment.
  * <p>
- * Verify the interoperability between JBoss EAP XP and Kafka/Streams for Apache Kafka on OpenShift.
+ * Verify the interoperability between WildFly/JBoss EAP and Kafka/Streams for Apache Kafka on OpenShift.
  * <br>
  * The Strimzi/Streams for Apache Kafka operator is used to provide a Kafka/Streams for Apache Kafka instance.
- * The WildFly/JBoss EAP XP application is built via S2I (server provisioning + WAR deployment) using
+ * The WildFly/JBoss EAP application is built via S2I (server provisioning + WAR deployment) using
  * the {@code wildfly/kafka-application} module with the {@code s2i} Maven profile activated to disable
  * bootable JAR packaging.
  * <br>
@@ -74,7 +74,7 @@ public class WildflyS2iPerConnectorSecuredKafkaIT extends WildflyMicroProfileRea
 	private String applicationRouteUrl;
 
 	@ServiceProvisioner(KafkaMicroProfileReactiveMessagingApplication.class)
-	private OpenShiftProvisioner<KafkaMicroProfileReactiveMessagingApplication> amqStreamsOpenShiftProvisioner;
+	private OpenShiftProvisioner<KafkaMicroProfileReactiveMessagingApplication> kafkaOpenShiftProvisioner;
 
 	@ServiceProvisioner(WildflyS2iPerConnectorSecuredKafkaHelmApplication.class)
 	private WildflyHelmChartOpenShiftProvisioner wildflyHelmChartOpenShiftProvisioner;
