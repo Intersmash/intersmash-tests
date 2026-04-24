@@ -33,13 +33,13 @@ import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplicati
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 
 /**
- * Set up an WildFly/JBoss EAP XP s2i application that starts a configured (during the app build) server which
+ * Set up an WildFly/JBoss EAP s2i application that starts a configured (during the app build) server which
  * uses MicroProfile Reactive Messaging with a connection to a remote AMQ Streams (Kafka) instance.
  * <p>
  * Connections are performed both as not secured (plaintext) and secured via SSL with
  * SSLContext configured via Elytron too, {@link WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT}.
  * <br>
- * Regarding the SSL connections, the Kafka connector on the WildFly/JBoss EAP XP side (client with respect to Kafka) is
+ * Regarding the SSL connections, the Kafka connector on the WildFly/JBoss EAP side (client with respect to Kafka) is
  * secured via MicroProfile Config properties that automatically set the Elytron SSL client context.
  * In this use case, the Elytron SSL context name is configured <i>per-connection</i>, see the
  * <a href="https://github.com/wildfly/wildfly/blob/main/testsuite/integration/microprofile/src/test/java/org/wildfly/test/integration/microprofile/reactive/messaging/kafka/ssl/microprofile-config-ssl-connection.properties">WildFLy testsuite version</a>
@@ -57,7 +57,7 @@ public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication
 
 	public WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication() {
 		// Set up the Reactive-messaging deployment.
-		String applicationDir = "wildfly/microprofile-reactive-messaging-kafka";
+		String applicationDir = "wildfly/kafka-application";
 		buildInput = new BuildInputBuilder()
 				.uri(IntersmashConfig.deploymentsRepositoryUrl())
 				.ref(IntersmashConfig.deploymentsRepositoryRef())
@@ -98,7 +98,7 @@ public class WildflyMicroProfileReactiveMessagingPerConnectorSecuredApplication
 						.withValue(applicationDir + "/target")
 						.build());
 		String mavenAdditionalArgs = generateAdditionalMavenArgs()
-				.concat(" -pl " + applicationDir + " -am");
+				.concat(" -Ps2i -pl " + applicationDir + " -am");
 		final String mavenMirrorUrl = this.getMavenMirrorUrl();
 		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
 			environmentVariables.add(
