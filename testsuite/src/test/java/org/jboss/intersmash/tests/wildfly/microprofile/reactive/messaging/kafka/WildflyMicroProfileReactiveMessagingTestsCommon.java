@@ -16,6 +16,8 @@
 package org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka;
 
 import io.restassured.RestAssured;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.config.SSLConfig;
 import io.restassured.filter.log.LogDetail;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -23,11 +25,16 @@ import org.junit.jupiter.api.Test;
 /**
  * This class serves only as a common point for extension for the following test cases:
  * <br>
- * {@link WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT}
+ * {@link WildflyBootableJarGloballySecuredKafkaIT},
+ * {@link WildflyS2iPerConnectorSecuredKafkaIT}
  */
 public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 
 	protected abstract String getApplicationRouteUrl();
+
+	protected boolean useHttps() {
+		return true;
+	}
 
 	/**
 	 * Verify that custom data serializers (<i>PersonSerializer</i>) and
@@ -40,7 +47,12 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testSerializer() {
-		RestAssured.get(getApplicationRouteUrl() + "/serializer")
+		RestAssured.useRelaxedHTTPSValidation();
+		RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get(
+						(useHttps() ? getApplicationRouteUrl().replace("http:/", "https:/") : getApplicationRouteUrl())
+								+ "/serializer")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -69,7 +81,10 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testTx() {
-		RestAssured.get(getApplicationRouteUrl() + "/tx")
+		RestAssured.useRelaxedHTTPSValidation();
+		RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get((useHttps() ? getApplicationRouteUrl().replace("http:/", "https:/") : getApplicationRouteUrl()) + "/tx")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -94,7 +109,11 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testMetadata() {
-		RestAssured.get(getApplicationRouteUrl() + "/metadata")
+		RestAssured.useRelaxedHTTPSValidation();
+		RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get((useHttps() ? getApplicationRouteUrl().replace("http:/", "https:/") : getApplicationRouteUrl())
+						+ "/metadata")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
@@ -120,7 +139,11 @@ public abstract class WildflyMicroProfileReactiveMessagingTestsCommon {
 	 */
 	@Test
 	public void testPartitionsMetadata() {
-		RestAssured.get(getApplicationRouteUrl() + "/partitionsMetadata")
+		RestAssured.useRelaxedHTTPSValidation();
+		RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get((useHttps() ? getApplicationRouteUrl().replace("http:/", "https:/") : getApplicationRouteUrl())
+						+ "/partitionsMetadata")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)

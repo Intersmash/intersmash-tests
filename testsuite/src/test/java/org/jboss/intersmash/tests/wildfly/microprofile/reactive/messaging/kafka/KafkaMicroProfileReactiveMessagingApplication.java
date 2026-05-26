@@ -32,7 +32,8 @@ import org.jboss.intersmash.application.operator.KafkaOperatorApplication;
 
 /**
  * Provides a Kafka/Streams for Apache Kafka service which is required by
- * {@link WildflyMicroProfileReactiveMessagingPerConnectorSecuredIT},
+ * {@link WildflyBootableJarGloballySecuredKafkaIT},
+ * {@link WildflyS2iPerConnectorSecuredKafkaIT},
  * and deployed via the Strimzi/Streams for Apache Kafka operator.
  */
 public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOperatorApplication, OpenShiftApplication {
