@@ -125,6 +125,8 @@ public class WildflyPostgresqlTimerHelmApplication
 
 		// MAVEN_S2I_ARTIFACT_DIRS: tells S2I where to find artifacts to deploy (the "*-bootable.jar" file)
 		buildEnvironmentVariables.put("MAVEN_S2I_ARTIFACT_DIRS", APP_MODULE_DIRECTORY + "/target");
+		buildEnvironmentVariables.put("POSTGRESQL_DRIVER_VERSION",
+				System.getProperty("org.jboss.eap.datasources.postgresql.driver.version"));
 
 		// =======================================
 		// DEPLOY
@@ -142,8 +144,6 @@ public class WildflyPostgresqlTimerHelmApplication
 		deploymentEnvironmentVariables.put("POSTGRESQL_DATABASE", PostgresqlService.POSTGRESQL_DATABASE);
 		deploymentEnvironmentVariables.put("POSTGRESQL_USER", PostgresqlService.POSTGRESQL_USER);
 		deploymentEnvironmentVariables.put("POSTGRESQL_PASSWORD", PostgresqlService.POSTGRESQL_PASSWORD);
-		deploymentEnvironmentVariables.put("POSTGRESQL_DRIVER_VERSION",
-				System.getProperty("org.jboss.eap.datasources.postgresql.driver.version"));
 
 		// =======================================
 		// APPLICATION
@@ -154,8 +154,10 @@ public class WildflyPostgresqlTimerHelmApplication
 				.withBuildMode(getBuildMode())
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())
 				.withSourceRepositoryRef(IntersmashConfig.deploymentsRepositoryRef())
-				.withJdk17BuilderImage(IntersmashConfig.wildflyImageURL())
-				.withJdk17RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
+				.withJdk21BuilderImage(IntersmashConfig.wildflyImageURL())
+				.withJdk21RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
+				.withJdk25BuilderImage(IntersmashConfig.wildflyImageURL())
+				.withJdk25RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
 				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables);
 		List<String> channelDefinition = Arrays.asList(this.eeChannelGroupId(), this.eeChannelArtifactId(),

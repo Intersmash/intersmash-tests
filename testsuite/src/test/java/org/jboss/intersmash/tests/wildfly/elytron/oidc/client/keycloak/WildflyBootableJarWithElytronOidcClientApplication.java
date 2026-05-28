@@ -183,8 +183,8 @@ public class WildflyBootableJarWithElytronOidcClientApplication
 				.withBuildMode(WildflyHelmChartRelease.BuildMode.BOOTABLE_JAR)
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())
 				.withSourceRepositoryRef(IntersmashConfig.deploymentsRepositoryRef())
-				.withJdk17BuilderImage(IntersmashConfig.wildflyImageURL())
-				.withJdk17RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
+				.withJdk21BuilderImage(IntersmashConfig.wildflyImageURL())
+				.withJdk21BuilderImage(IntersmashConfig.wildflyRuntimeImageURL())
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
 				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables);
 		List<String> channelDefinition = Arrays.asList(this.eeChannelGroupId(), this.eeChannelArtifactId(),
