@@ -15,10 +15,12 @@
 */
 package org.jboss.intersmash.tests.wildfly.postgresql;
 
-import static io.restassured.RestAssured.get;
 import static org.hamcrest.Matchers.containsString;
 
 import cz.xtf.junit5.listeners.ProjectCreator;
+import io.restassured.RestAssured;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.config.SSLConfig;
 import io.restassured.filter.log.LogDetail;
 import java.time.LocalTime;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +37,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * WildFly (JBoss EAP) + PostgreSQL EJB Timer interoperability test.
+ * WildFly (JBoss EAP) + PostgreSQL EJB Timer interoperability test (Helm chart variant).
  *
  * <p>This test verifies that an EJB timer is correctly stored into a PostgreSQL database
  * and that the timestamp value has a correct time format (zero milliseconds).</p>
+ *
+ * @see WildflyPostgresqlTimerIT for the S2I image-based variant
  */
 @PostgreSqlTest
 @Slf4j
@@ -49,13 +53,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(ProjectCreator.class)
 @Intersmash({
 		@Service(PostgresqlService.class),
-		@Service(WildflyPostgresqlTimerApplication.class)
+		@Service(WildflyPostgresqlTimerHelmApplication.class)
 })
-public class WildflyPostgresqlTimerIT {
+public class WildflyPostgresqlTimerHelmIT {
 
 	private static final int TIME_PART_INDEX = 21;
 
-	@ServiceUrl(WildflyPostgresqlTimerApplication.class)
+	@ServiceUrl(WildflyPostgresqlTimerHelmApplication.class)
 	private String appUrl;
 
 	/**
@@ -64,7 +68,11 @@ public class WildflyPostgresqlTimerIT {
 	 */
 	@Test
 	public void testTimestampFormatHandling() {
-		String time = get(appUrl + "/EjbTimerServlet" + "?request=CREATE_TIMER")
+		RestAssured.useRelaxedHTTPSValidation();
+		String httpsUrl = appUrl.replaceFirst("http://", "https://");
+		String time = RestAssured.given()
+				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
+				.get(httpsUrl + "/EjbTimerServlet" + "?request=CREATE_TIMER")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
