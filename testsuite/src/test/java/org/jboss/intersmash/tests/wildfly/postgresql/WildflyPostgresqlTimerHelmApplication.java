@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2025 Red Hat, Inc.
+* Copyright (C) 2026 Red Hat, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.keycloak.saml.adapter;
+package org.jboss.intersmash.tests.wildfly.postgresql;
 
 import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Secret;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.util.Strings;
 import org.jboss.intersmash.IntersmashConfig;
 import org.jboss.intersmash.application.openshift.helm.HelmChartRelease;
 import org.jboss.intersmash.application.openshift.helm.WildflyHelmChartOpenShiftApplication;
@@ -35,30 +33,17 @@ import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 import org.jboss.intersmash.tests.wildfly.util.WildFlyHelmChartsConfiguration;
 
 /**
- * WildFly/JBoss EAP Application configured with Keycloak SAML Adapter for authentication.
+ * WildFly application descriptor for the PostgreSQL EJB Timer application.
  * <p>
- * This application deploys a WildFly/JBoss EAP instance that:
- * <ul>
- *   <li>Uses the Keycloak SAML adapter for securing web resources</li>
- *   <li>Configures keystores and truststores for SAML encryption and signing</li>
- *   <li>Connects to an external Keycloak/RHBK service for authentication</li>
- *   <li>Supports HTTPS communication with the Keycloak service</li>
- * </ul>
- * </p>
- * <p>
- * The application sets up the necessary permissions for KUBE_PING clustering and route discovery,
- * configures Maven build parameters, and creates the required Kubernetes secrets for keystores.
+ * Configures a WildFly application that uses EJB timers backed by a PostgreSQL database.
  * </p>
  */
 @Slf4j
-public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
+public class WildflyPostgresqlTimerHelmApplication
 		implements WildflyHelmChartOpenShiftApplication, WildflyApplicationConfiguration, WildFlyHelmChartsConfiguration {
 	/** Application name used for labeling and resource identification. */
-	public static final String APP_NAME = "keycloak-saml-adapter";
-	private static final String APP_MODULE_DIRECTORY = "wildfly/keycloak-saml-adapter-ejb-bootable-jar";
-
-	/** List of Kubernetes secrets for keystores and truststores. */
-	private final List<Secret> secrets = new ArrayList<>();
+	public static final String APP_NAME = "wildfly-postgresql-timer-application";
+	private static final String APP_MODULE_DIRECTORY = "wildfly/postgresql-timer-application";
 
 	/** Helm chart release configuration for deploying the WildFly/JBoss EAP application. */
 	private final HelmChartRelease release;
@@ -66,15 +51,7 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 	/**
 	 * Sets up the OpenShift namespace with required permissions for the WildFly/JBoss EAP application.
 	 * <p>
-	 * This method configures:
-	 * <ul>
-	 *   <li>The 'view' role for the default service account (required for KUBE_PING clustering)</li>
-	 * </ul>
-	 * </p>
-	 * <p>
-	 * Without these permissions, JGroups clustering and the SAML adapter's route discovery
-	 * feature will not function properly.
-	 * </p>
+	 * Grants the 'view' role to the default service account, which is required for KUBE_PING clustering.
 	 *
 	 * @throws IllegalStateException if the OpenShift commands fail to execute
 	 */
@@ -86,19 +63,14 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 	}
 
 	/**
-	 * Constructs a new WildFly/JBoss EAP application configured with Keycloak SAML adapter.
+	 * Constructs a new WildFly/JBoss EAP application configured for the PostgreSQL EJB Timer test.
 	 * <p>
-	 * This constructor initializes the application by:
-	 * <ul>
-	 *   <li>Setting up the OpenShift namespace with required permissions</li>
-	 *   <li>Loading and configuring the Helm chart release with build and deployment settings</li>
-	 *   <li>Configuring environment variables for Keycloak integration</li>
-	 * </ul>
-	 * </p>
+	 * This constructor sets up the OpenShift namespace, then loads and configures the
+	 * Helm chart release with build and deployment settings.
 	 *
 	 * @throws IOException if Helm chart configuration loading fails
 	 */
-	public WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication() throws IOException {
+	public WildflyPostgresqlTimerHelmApplication() throws IOException {
 		setupNamespace();
 		release = loadRelease(getHelmChartRelease());
 	}
@@ -108,16 +80,16 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 	 * <p>
 	 * This method configures:
 	 * <ul>
-	 *   <li>Build mode (Bootable JAR)</li>
+	 *   <li>Build mode (S2I)</li>
 	 *   <li>Source repository URL and reference</li>
 	 *   <li>Maven build arguments and environment variables</li>
 	 *   <li>Builder and runtime images</li>
-	 *   <li>Build and deployment environment variables including Keycloak integration settings</li>
+	 *   <li>Build and deployment environment variables including PostgreSQL connection settings</li>
 	 *   <li>Optional EE channel configuration for EAP builds</li>
 	 * </ul>
 	 * </p>
 	 *
-	 * @param release the WildFly Helm chart release to configure
+	 * @param release the Helm chart release to configure
 	 * @return the configured Helm chart release
 	 * @throws IOException if configuration loading fails
 	 */
@@ -130,8 +102,9 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 		String mavenAdditionalArgs = "-Denforcer.skip=true";
 		// let's add configurable deployment additional args:
 		mavenAdditionalArgs = mavenAdditionalArgs.concat(generateAdditionalMavenArgs());
-		// to speed up the build process we target a specific module; we also skip generating the "*-sources.jar" to disambiguate the S2I artifact to deploy (having both "*-sources.jar" and "*-bootable.jar" would fail the deployment)
-		mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dmaven.source.skip -pl " + APP_MODULE_DIRECTORY + " -am ");
+		// to speed up the build process we target a specific module; we also skip generating the "*-sources.jar" to disambiguate the artifact to deploy when using S2I (having both "*-sources.jar" and "*-bootable.jar" would fail the deployment)
+		mavenAdditionalArgs = mavenAdditionalArgs
+				.concat(getBuildSpecificMavenArgs() + " -Dmaven.source.skip -pl " + APP_MODULE_DIRECTORY + " -am ");
 
 		// =======================================
 		//  BUILD
@@ -139,7 +112,7 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 
 		Map<String, String> buildEnvironmentVariables = new HashMap<>();
 		final String mavenMirrorUrl = this.getMavenMirrorUrl();
-		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
+		if (!org.assertj.core.util.Strings.isNullOrEmpty(mavenMirrorUrl)) {
 			buildEnvironmentVariables.put("MAVEN_MIRROR_URL", mavenMirrorUrl);
 			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
 		}
@@ -150,17 +123,10 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 				IntersmashConfig.scriptDebug() != null ? IntersmashConfig.scriptDebug() : "false");
 		buildEnvironmentVariables.put("MAVEN_ARGS_APPEND", mavenAdditionalArgs);
 
-		// TEST_WILDFLY_ROUTE
-		buildEnvironmentVariables.put("TEST_WILDFLY_ROUTE",
-				String.format("http://%s", OpenShifts.master().generateHostname(APP_NAME)));
-		// TEST_KEYCLOAK_ROUTE
-		buildEnvironmentVariables.put("TEST_KEYCLOAK_ROUTE",
-				String.format("https://%s", BasicKeycloakOperatorSamlApplication.getRoute()));
-		// TEST_KEYCLOAK_REALM
-		buildEnvironmentVariables.put("TEST_KEYCLOAK_REALM", BasicKeycloakOperatorSamlApplication.REALM_NAME);
-
 		// MAVEN_S2I_ARTIFACT_DIRS: tells S2I where to find artifacts to deploy (the "*-bootable.jar" file)
 		buildEnvironmentVariables.put("MAVEN_S2I_ARTIFACT_DIRS", APP_MODULE_DIRECTORY + "/target");
+		buildEnvironmentVariables.put("POSTGRESQL_DRIVER_VERSION",
+				System.getProperty("org.jboss.eap.datasources.postgresql.driver.version"));
 
 		// =======================================
 		// DEPLOY
@@ -173,14 +139,11 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 		deploymentEnvironmentVariables.put("LOGGING_SCRIPT_DEBUG",
 				IntersmashConfig.scriptDebug() != null ? IntersmashConfig.scriptDebug() : "false");
 
-		// TEST_WILDFLY_ROUTE
-		deploymentEnvironmentVariables.put("TEST_WILDFLY_ROUTE",
-				String.format("http://%s", OpenShifts.master().generateHostname(APP_NAME)));
-		// TEST_KEYCLOAK_ROUTE
-		deploymentEnvironmentVariables.put("TEST_KEYCLOAK_ROUTE",
-				String.format("https://%s", BasicKeycloakOperatorSamlApplication.getRoute()));
-		// TEST_KEYCLOAK_REALM
-		deploymentEnvironmentVariables.put("TEST_KEYCLOAK_REALM", BasicKeycloakOperatorSamlApplication.REALM_NAME);
+		deploymentEnvironmentVariables.put("POSTGRESQL_SERVICE_HOST", PostgresqlService.POSTGRESQL_NAME);
+		deploymentEnvironmentVariables.put("POSTGRESQL_SERVICE_PORT", "5432");
+		deploymentEnvironmentVariables.put("POSTGRESQL_DATABASE", PostgresqlService.POSTGRESQL_DATABASE);
+		deploymentEnvironmentVariables.put("POSTGRESQL_USER", PostgresqlService.POSTGRESQL_USER);
+		deploymentEnvironmentVariables.put("POSTGRESQL_PASSWORD", PostgresqlService.POSTGRESQL_PASSWORD);
 
 		// =======================================
 		// APPLICATION
@@ -188,11 +151,13 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 		release
 				// we explicitly set we need an s2i build, ot Bootable JAR, otherwise the OpenJDK image would be
 				// used since the Bootable JAR mode is the default.
-				.withBuildMode(WildflyHelmChartRelease.BuildMode.BOOTABLE_JAR)
+				.withBuildMode(getBuildMode())
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())
 				.withSourceRepositoryRef(IntersmashConfig.deploymentsRepositoryRef())
 				.withJdk21BuilderImage(IntersmashConfig.wildflyImageURL())
-				.withJdk21BuilderImage(IntersmashConfig.wildflyRuntimeImageURL())
+				.withJdk21RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
+				.withJdk25BuilderImage(IntersmashConfig.wildflyImageURL())
+				.withJdk25RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
 				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables);
 		List<String> channelDefinition = Arrays.asList(this.eeChannelGroupId(), this.eeChannelArtifactId(),
@@ -203,6 +168,30 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 		}
 
 		return release;
+	}
+
+	/**
+	 * Returns the build mode for the Helm chart release.
+	 * <p>
+	 * This base implementation returns {@link WildflyHelmChartRelease.BuildMode#S2I}.
+	 * Subclasses may override this to use a different build mode (e.g. Bootable JAR).
+	 *
+	 * @return the build mode
+	 */
+	protected WildflyHelmChartRelease.BuildMode getBuildMode() {
+		return WildflyHelmChartRelease.BuildMode.S2I;
+	}
+
+	/**
+	 * Returns additional Maven arguments specific to the build mode.
+	 * <p>
+	 * This base implementation returns an empty string (no additional build-specific args for S2I).
+	 * Subclasses may override this to activate specific Maven profiles (e.g. {@code bootable-jar}).
+	 *
+	 * @return build-specific Maven arguments, or empty string
+	 */
+	protected String getBuildSpecificMavenArgs() {
+		return "";
 	}
 
 	/**
@@ -266,20 +255,13 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 	}
 
 	/**
-	 * Returns an unmodifiable list of Kubernetes secrets.
-	 * <p>
-	 * The secrets include:
-	 * <ul>
-	 *   <li>SAML keystore for encryption and signing</li>
-	 *   <li>HTTPS truststore for secure communication with Keycloak</li>
-	 * </ul>
-	 * </p>
+	 * Returns an empty list of Kubernetes secrets.
 	 *
-	 * @return unmodifiable list of Kubernetes secrets
+	 * @return empty list of Kubernetes secrets
 	 */
 	@Override
 	public List<Secret> getSecrets() {
-		return Collections.unmodifiableList(secrets);
+		return Collections.EMPTY_LIST;
 	}
 
 	/**
