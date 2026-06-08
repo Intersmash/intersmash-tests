@@ -18,19 +18,20 @@ package org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.SecretKeySelectorBuilder;
-import io.strimzi.api.kafka.model.CertificateAuthority;
-import io.strimzi.api.kafka.model.CertificateAuthorityBuilder;
-import io.strimzi.api.kafka.model.Kafka;
-import io.strimzi.api.kafka.model.KafkaBuilder;
-import io.strimzi.api.kafka.model.KafkaTopic;
-import io.strimzi.api.kafka.model.KafkaTopicBuilder;
-import io.strimzi.api.kafka.model.KafkaUser;
-import io.strimzi.api.kafka.model.KafkaUserBuilder;
-import io.strimzi.api.kafka.model.KafkaUserScramSha512ClientAuthenticationBuilder;
-import io.strimzi.api.kafka.model.PasswordSourceBuilder;
-import io.strimzi.api.kafka.model.listener.KafkaListenerAuthenticationScramSha512Builder;
-import io.strimzi.api.kafka.model.listener.arraylistener.GenericKafkaListener;
-import io.strimzi.api.kafka.model.listener.arraylistener.KafkaListenerType;
+import io.strimzi.api.kafka.model.common.CertificateAuthority;
+import io.strimzi.api.kafka.model.common.CertificateAuthorityBuilder;
+import io.strimzi.api.kafka.model.common.PasswordSourceBuilder;
+import io.strimzi.api.kafka.model.kafka.Kafka;
+import io.strimzi.api.kafka.model.kafka.KafkaBuilder;
+import io.strimzi.api.kafka.model.kafka.listener.GenericKafkaListener;
+import io.strimzi.api.kafka.model.kafka.listener.KafkaListenerAuthenticationScramSha512Builder;
+import io.strimzi.api.kafka.model.kafka.listener.KafkaListenerType;
+import io.strimzi.api.kafka.model.nodepool.KafkaNodePool;
+import io.strimzi.api.kafka.model.topic.KafkaTopic;
+import io.strimzi.api.kafka.model.topic.KafkaTopicBuilder;
+import io.strimzi.api.kafka.model.user.KafkaUser;
+import io.strimzi.api.kafka.model.user.KafkaUserBuilder;
+import io.strimzi.api.kafka.model.user.KafkaUserScramSha512ClientAuthenticationBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -52,7 +53,7 @@ public class SecuredKafkaMicroProfileReactiveMessagingApplication implements Kaf
 	public static final String APP_NAME = "amq-streams";
 
 	private static final String KAFKA_VERSION = KafkaOperatorApplication.KAFKA_VERSION;
-	private static final String KAFKA_INTER_BROKER_PROTOCOL_VERSION = KafkaOperatorApplication.INTER_BROKER_PROTOCOL_VERSION;
+	private static final String KAFKA_METADATA_VERSION = KafkaOperatorApplication.METADATA_VERSION;
 	private static final int KAFKA_INSTANCE_NUM = KafkaOperatorApplication.KAFKA_INSTANCE_NUM;
 	private static final int TOPIC_RECONCILIATION_INTERVAL_SECONDS = KafkaOperatorApplication.TOPIC_RECONCILIATION_INTERVAL_SECONDS;
 	private static final long USER_RECONCILIATION_INTERVAL_SECONDS = KafkaOperatorApplication.USER_RECONCILIATION_INTERVAL_SECONDS;
@@ -73,7 +74,7 @@ public class SecuredKafkaMicroProfileReactiveMessagingApplication implements Kaf
 
 	public SecuredKafkaMicroProfileReactiveMessagingApplication() {
 		Map<String, Object> config = new HashMap<>();
-		config.put("inter.broker.protocol.version", KAFKA_INTER_BROKER_PROTOCOL_VERSION);
+		config.put("inter.broker.protocol.version", KAFKA_METADATA_VERSION);
 		config.put("offsets.topic.replication.factor", KAFKA_INSTANCE_NUM);
 		config.put("transaction.state.log.min.isr", KAFKA_INSTANCE_NUM);
 		config.put("transaction.state.log.replication.factor", KAFKA_INSTANCE_NUM);
@@ -198,5 +199,10 @@ public class SecuredKafkaMicroProfileReactiveMessagingApplication implements Kaf
 	@Override
 	public List<Secret> getSecrets() {
 		return kafkaSecrets;
+	}
+
+	@Override
+	public List<KafkaNodePool> getNodePools() {
+		return null;
 	}
 }
