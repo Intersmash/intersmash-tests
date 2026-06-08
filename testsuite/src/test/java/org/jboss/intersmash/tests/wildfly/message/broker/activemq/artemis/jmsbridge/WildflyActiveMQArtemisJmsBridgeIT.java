@@ -171,6 +171,11 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 		assertThat(getTestQueueInfo(), containsString("browsed: 2 messages"));
 	}
 
+	/**
+	 * Browses the test queue on the AMQ broker pod via the Artemis CLI and returns the command output.
+	 *
+	 * @return the output of the {@code artemis browser} command for the configured test queue
+	 */
 	private static String getTestQueueInfo() {
 		Pod brokerPod = OpenShifts.master().getPod(FIRST_POD_NAME);
 		PodShell podShell = OpenShifts.master().podShell(brokerPod);

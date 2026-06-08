@@ -45,8 +45,9 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
 
-        <version.intersmash>0.0.3</version.intersmash>
+        <version.intersmash>0.0.5.Beta1-SNAPSHOT</version.intersmash>
         <version.junit-jupiter>5.11.1</version.junit-jupiter>
         <version.rest-assured>5.5.1</version.rest-assured>
         <version.junit-platform-launcher>1.11.3</version.junit-platform-launcher>
@@ -55,8 +56,10 @@
         <version.system-stubs-core>2.1.8</version.system-stubs-core>
         <version.slf4j>2.0.17</version.slf4j>
         <version.gson>2.13.2</version.gson>
-        <version.lombok>1.18.36</version.lombok>
+        <version.lombok>1.18.46</version.lombok>
+        <version.sundrio.builder-annotations>0.230.0</version.sundrio.builder-annotations>
         <version.org.awaitility>4.2.0</version.org.awaitility>
+        <version.com.fasterxml.jackson>2.19.2</version.com.fasterxml.jackson>
     </properties>
 
     <modules>
@@ -67,6 +70,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
             <dependency>
                 <groupId>org.jboss.intersmash</groupId>
                 <artifactId>intersmash-provisioners</artifactId>
@@ -246,6 +256,25 @@
                                 </content>
                             </licenseHeader>
                         </java>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${version.maven-compiler-plugin}</version>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${version.lombok}</version>
+                            </path>
+                            <path>
+                                <groupId>io.sundr</groupId>
+                                <artifactId>builder-annotations</artifactId>
+                                <version>${version.sundrio.builder-annotations}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
             </plugins>
