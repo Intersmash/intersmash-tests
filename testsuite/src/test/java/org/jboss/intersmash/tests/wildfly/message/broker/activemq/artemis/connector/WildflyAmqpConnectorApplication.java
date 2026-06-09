@@ -143,12 +143,16 @@ public class WildflyAmqpConnectorApplication
 		// =======================================
 		// APPLICATION
 		// =======================================
+		WildflyHelmChartRelease.JdkImage.Version jdkVersion = WildflyHelmChartRelease.JdkImage.Version
+				.fromValue(IntersmashConfig.wildflyImageJdk());
 		release
 				.withBuildMode(WildflyHelmChartRelease.BuildMode.BOOTABLE_JAR)
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())
 				.withSourceRepositoryRef(IntersmashConfig.deploymentsRepositoryRef())
-				.withJdk17BuilderImage(IntersmashConfig.wildflyImageURL())
-				.withJdk17RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
+				.withJdkBuilderImage(
+						new WildflyHelmChartRelease.JdkImage(IntersmashConfig.wildflyImageURL(), jdkVersion))
+				.withJdkRuntimeImage(
+						new WildflyHelmChartRelease.JdkImage(IntersmashConfig.wildflyRuntimeImageURL(), jdkVersion))
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
 				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables)
 				.withVolume(
