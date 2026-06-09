@@ -179,8 +179,7 @@ public class WildflyBootableJarWithElytronOidcClientApplication
 		// =======================================
 		// APPLICATION
 		// =======================================
-		WildflyHelmChartRelease.JdkImage.Version jdkVersion = WildflyHelmChartRelease.JdkImage.Version
-				.fromValue(IntersmashConfig.wildflyImageJdk());
+		WildflyHelmChartRelease.JdkImage.Version jdkVersion = getJdkImageVersion();
 		release
 				.withBuildMode(WildflyHelmChartRelease.BuildMode.BOOTABLE_JAR)
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())

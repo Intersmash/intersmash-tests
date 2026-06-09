@@ -209,8 +209,7 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 		// =======================================
 		// APPLICATION
 		// =======================================
-		WildflyHelmChartRelease.JdkImage.Version jdkVersion = WildflyHelmChartRelease.JdkImage.Version
-				.fromValue(IntersmashConfig.wildflyImageJdk());
+		WildflyHelmChartRelease.JdkImage.Version jdkVersion = getJdkImageVersion();
 		release
 				// we explicitly set we need an s2i build, ot Bootable JAR, otherwise the OpenJDK image would be
 				// used since the Bootable JAR mode is the default.
