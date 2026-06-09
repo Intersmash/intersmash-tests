@@ -185,14 +185,17 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 		// =======================================
 		// APPLICATION
 		// =======================================
+		WildflyHelmChartRelease.JdkImage.Version jdkVersion = getJdkImageVersion();
 		release
 				// we explicitly set we need an s2i build, ot Bootable JAR, otherwise the OpenJDK image would be
 				// used since the Bootable JAR mode is the default.
 				.withBuildMode(WildflyHelmChartRelease.BuildMode.BOOTABLE_JAR)
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())
 				.withSourceRepositoryRef(IntersmashConfig.deploymentsRepositoryRef())
-				.withJdk17BuilderImage(IntersmashConfig.wildflyImageURL())
-				.withJdk17RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
+				.withJdkBuilderImage(
+						new WildflyHelmChartRelease.JdkImage(IntersmashConfig.wildflyImageURL(), jdkVersion))
+				.withJdkRuntimeImage(
+						new WildflyHelmChartRelease.JdkImage(IntersmashConfig.wildflyRuntimeImageURL(), jdkVersion))
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
 				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables);
 		List<String> channelDefinition = Arrays.asList(this.eeChannelGroupId(), this.eeChannelArtifactId(),
