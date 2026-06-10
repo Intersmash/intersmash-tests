@@ -69,9 +69,10 @@ public class WildflyPostgresqlTimerHelmIT {
 	@Test
 	public void testTimestamp() {
 		RestAssured.useRelaxedHTTPSValidation();
+		String httpsUrl = appUrl.replaceFirst("http://", "https://");
 		String time = RestAssured.given()
 				.config(RestAssuredConfig.newConfig().sslConfig(new SSLConfig().relaxedHTTPSValidation()))
-				.get(appUrl + "/EjbTimerServlet" + "?request=CREATE_TIMER")
+				.get(httpsUrl + "/EjbTimerServlet" + "?request=CREATE_TIMER")
 				.then()
 				.log()
 				.ifValidationFails(LogDetail.ALL, true)
