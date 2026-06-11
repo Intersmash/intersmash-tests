@@ -15,12 +15,14 @@
 */
 package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl;
 
-import cz.xtf.builder.builders.pod.PersistentVolumeClaim;
-import cz.xtf.builder.builders.pod.VolumeMount;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -72,7 +74,7 @@ public class WildflyJmsSslApplication implements WildflyImageOpenShiftApplicatio
 	/**
 	 * Map of persistent volume claims to their associated volume mounts for storing WildFly data.
 	 */
-	private final Map<PersistentVolumeClaim, Set<VolumeMount>> persistentVolumeClaimMounts;
+	private final Map<Volume, Set<VolumeMount>> persistentVolumeClaimMounts;
 
 	/**
 	 * List of environment variables to configure the WildFly application container.
@@ -147,8 +149,10 @@ public class WildflyJmsSslApplication implements WildflyImageOpenShiftApplicatio
 		Set<VolumeMount> volumeMounts = new HashSet<>();
 		String pvcName = "data-dir";
 		volumeMounts.add(
-				new VolumeMount(pvcName, "/opt/server/standalone/data", false));
-		persistentVolumeClaimMounts.put(new PersistentVolumeClaim(pvcName, pvcName), volumeMounts);
+				new VolumeMountBuilder().withName(pvcName).withMountPath("/opt/server/standalone/data").withReadOnly(false)
+						.build());
+		persistentVolumeClaimMounts.put(new VolumeBuilder().withName(pvcName)
+				.withNewPersistentVolumeClaim(pvcName, false).build(), volumeMounts);
 
 		// Setup environment
 		environmentVariables = new ArrayList<>();
@@ -241,7 +245,7 @@ public class WildflyJmsSslApplication implements WildflyImageOpenShiftApplicatio
 	 * @return an unmodifiable map of persistent volume claims to their volume mounts
 	 */
 	@Override
-	public Map<PersistentVolumeClaim, Set<VolumeMount>> getPersistentVolumeClaimMounts() {
+	public Map<Volume, Set<VolumeMount>> getPersistentVolumeClaimMounts() {
 		return Collections.unmodifiableMap(persistentVolumeClaimMounts);
 	}
 

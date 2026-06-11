@@ -17,8 +17,6 @@ package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonSyntaxException;
-import cz.xtf.core.openshift.OpenShifts;
-import cz.xtf.core.openshift.PodShellOutput;
 import io.amq.broker.v1beta1.ActiveMQArtemis;
 import io.amq.broker.v1beta1.ActiveMQArtemisAddress;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -44,6 +42,8 @@ import org.jboss.intersmash.provision.operator.model.activemq.broker.spec.Upgrad
 import org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl.util.ArtemisCliOutputParser;
 import org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.ssl.util.JmsTestConstants;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
+import org.jboss.intersmash.tools.client.OpenShifts;
+import org.jboss.intersmash.tools.client.PodShellOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

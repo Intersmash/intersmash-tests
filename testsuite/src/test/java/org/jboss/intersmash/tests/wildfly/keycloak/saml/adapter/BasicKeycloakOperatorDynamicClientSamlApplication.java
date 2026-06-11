@@ -15,7 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.keycloak.saml.adapter;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import java.io.IOException;
@@ -31,6 +30,7 @@ import org.jboss.intersmash.application.openshift.PostgreSQLImageOpenShiftApplic
 import org.jboss.intersmash.application.operator.KeycloakOperatorApplication;
 import org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak.KeycloakPostgresqlApplication;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
+import org.jboss.intersmash.tools.client.OpenShifts;
 import org.keycloak.k8s.v2alpha1.Keycloak;
 import org.keycloak.k8s.v2alpha1.KeycloakBuilder;
 import org.keycloak.k8s.v2alpha1.KeycloakRealmImport;

@@ -15,13 +15,12 @@
 */
 package org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka;
 
-import cz.xtf.junit5.annotations.OpenShiftRecorder;
-import cz.xtf.junit5.extensions.ServiceLogsStreamingRunner;
-import cz.xtf.junit5.listeners.ProjectCreator;
 import org.jboss.intersmash.annotations.Intersmash;
 import org.jboss.intersmash.annotations.Service;
 import org.jboss.intersmash.annotations.ServiceProvisioner;
 import org.jboss.intersmash.annotations.ServiceUrl;
+import org.jboss.intersmash.junit5.recorder.OpenShiftRecorder;
+import org.jboss.intersmash.k8s.junit5.ProjectCreator;
 import org.jboss.intersmash.provision.helm.wildfly.WildflyHelmChartOpenShiftProvisioner;
 import org.jboss.intersmash.provision.openshift.OpenShiftProvisioner;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
@@ -57,9 +56,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 		@Service(KafkaMicroProfileReactiveMessagingApplication.class),
 		@Service(WildflyBootableJarGloballySecuredKafkaHelmApplication.class)
 })
+
 @OpenShiftRecorder(resourceNames = { KafkaMicroProfileReactiveMessagingApplication.APP_NAME,
 		WildflyBootableJarGloballySecuredKafkaHelmApplication.APP_NAME })
-@ExtendWith(ServiceLogsStreamingRunner.class)
 public class WildflyBootableJarGloballySecuredKafkaIT extends WildflyMicroProfileReactiveMessagingTestsCommon {
 	@ServiceUrl(WildflyBootableJarGloballySecuredKafkaHelmApplication.class)
 	private String applicationRouteUrl;

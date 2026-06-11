@@ -15,12 +15,13 @@
 */
 package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.connector;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.amq.broker.v1beta1.ActiveMQArtemis;
 import io.amq.broker.v1beta1.ActiveMQArtemisAddress;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -38,6 +39,7 @@ import org.jboss.intersmash.provision.operator.model.activemq.broker.spec.Consol
 import org.jboss.intersmash.provision.operator.model.activemq.broker.spec.DeploymentPlanBuilder;
 import org.jboss.intersmash.provision.operator.model.activemq.broker.spec.UpgradesBuilder;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * ActiveMQ Artemis broker application configured with SSL/TLS for AMQP connector testing.
@@ -165,6 +167,11 @@ public class ActiveMQArtemisAmqpApplication implements ActiveMQOperatorApplicati
 	}
 
 	public static String getWildcardSAN() {
-		return String.format("*.apps.%s", OpenShifts.master().getOpenshiftUrl().getHost().replaceFirst("^api\\.", ""));
+		try {
+			return String.format("*.apps.%s",
+					new URL(OpenShifts.master().getConfiguration().getMasterUrl()).getHost().replaceFirst("^api\\.", ""));
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

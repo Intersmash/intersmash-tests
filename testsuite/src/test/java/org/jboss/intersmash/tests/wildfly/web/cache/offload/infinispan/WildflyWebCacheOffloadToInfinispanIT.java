@@ -15,9 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan;
 
-import cz.xtf.core.openshift.OpenShifts;
-import cz.xtf.core.waiting.SimpleWaiter;
-import cz.xtf.junit5.listeners.ProjectCreator;
 import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.restassured.RestAssured;
@@ -37,6 +34,8 @@ import org.jboss.intersmash.annotations.Intersmash;
 import org.jboss.intersmash.annotations.Service;
 import org.jboss.intersmash.annotations.ServiceProvisioner;
 import org.jboss.intersmash.annotations.ServiceUrl;
+import org.jboss.intersmash.k8s.client.OpenShiftBinaries;
+import org.jboss.intersmash.k8s.junit5.ProjectCreator;
 import org.jboss.intersmash.provision.openshift.OpenShiftProvisioner;
 import org.jboss.intersmash.tests.junit.annotations.EapTest;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
@@ -44,6 +43,8 @@ import org.jboss.intersmash.tests.junit.annotations.InfinispanTest;
 import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
 import org.jboss.intersmash.tests.junit.annotations.WildflyTest;
 import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.PodHttpWithSessionRequest;
+import org.jboss.intersmash.tools.client.OpenShifts;
+import org.jboss.intersmash.tools.waiting.SimpleWaiter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -378,12 +379,12 @@ public class WildflyWebCacheOffloadToInfinispanIT {
 	private void makePodCrash(Pod pod) {
 		final String podName = pod.getMetadata().getName();
 		pod.getSpec().getContainers().stream().forEach(container -> {
-			String outcome = OpenShifts.adminBinary().execute("exec", "-it", podName, "-c", container.getName(), "--",
+			String outcome = OpenShiftBinaries.adminBinary().execute("exec", "-it", podName, "-c", container.getName(), "--",
 					"/bin/sh", "-c", "kill -9 $(ls -l /proc/*/exe|grep java | cut -d '/' -f 3)");
 			log.debug("Command for killing Java process in container {} (Pod {}) returned: {}", container.getName(), podName,
 					outcome);
 		});
-		final String podDeletionCommandOutcome = OpenShifts.adminBinary().execute("delete", "pod", podName);
+		final String podDeletionCommandOutcome = OpenShiftBinaries.adminBinary().execute("delete", "pod", podName);
 		log.debug("Command for deleting Pod {} returned: {}", podName, podDeletionCommandOutcome);
 	}
 

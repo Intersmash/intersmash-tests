@@ -15,8 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka.sasl;
 
-import cz.xtf.junit5.extensions.ServiceLogsStreamingRunner;
-import cz.xtf.junit5.listeners.ProjectCreator;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import java.util.ArrayList;
@@ -26,6 +24,7 @@ import org.jboss.intersmash.annotations.Intersmash;
 import org.jboss.intersmash.annotations.Service;
 import org.jboss.intersmash.annotations.ServiceProvisioner;
 import org.jboss.intersmash.annotations.ServiceUrl;
+import org.jboss.intersmash.k8s.junit5.ProjectCreator;
 import org.jboss.intersmash.provision.openshift.OpenShiftProvisioner;
 import org.jboss.intersmash.provision.openshift.WildflyImageOpenShiftProvisioner;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
@@ -66,7 +65,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 		@Service(SecuredKafkaMicroProfileReactiveMessagingApplication.class),
 		@Service(WildflyMicroProfileReactiveMessagingSaslSslApplication.class)
 })
-@ExtendWith(ServiceLogsStreamingRunner.class)
+
 public class WildflyMicroProfileReactiveMessagingSaslSslIT {
 	@ServiceUrl(WildflyMicroProfileReactiveMessagingSaslSslApplication.class)
 	private String applicationRouteUrl;

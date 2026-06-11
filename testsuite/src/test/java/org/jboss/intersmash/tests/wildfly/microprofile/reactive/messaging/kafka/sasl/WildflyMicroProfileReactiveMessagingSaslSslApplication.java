@@ -15,7 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka.sasl;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -29,6 +28,7 @@ import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
 import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplication;
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * WildFly/JBoss EAP application descriptor configured to use SASL_SSL for authenticating to a Kafka/Streams

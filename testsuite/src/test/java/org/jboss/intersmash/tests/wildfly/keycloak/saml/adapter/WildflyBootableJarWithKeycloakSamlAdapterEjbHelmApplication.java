@@ -15,7 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.keycloak.saml.adapter;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Secret;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ import org.jboss.intersmash.application.openshift.helm.WildflyHelmChartOpenShift
 import org.jboss.intersmash.provision.helm.wildfly.WildflyHelmChartRelease;
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 import org.jboss.intersmash.tests.wildfly.util.WildFlyHelmChartsConfiguration;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * WildFly/JBoss EAP Application configured with Keycloak SAML Adapter for authentication.

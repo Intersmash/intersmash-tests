@@ -15,7 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import java.io.IOException;
@@ -35,6 +34,7 @@ import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.operator.InfinispanOperatorApplication;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
 import org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util.InfinispanSecretUtils;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * Application descriptor that represents an Infinispan/Red Hat Data Grid service deployed by the related Operator,

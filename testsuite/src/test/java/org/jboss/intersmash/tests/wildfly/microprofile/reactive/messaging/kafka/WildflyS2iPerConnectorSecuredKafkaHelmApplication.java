@@ -15,11 +15,11 @@
 */
 package org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka;
 
-import cz.xtf.core.openshift.OpenShifts;
 import java.io.IOException;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.intersmash.provision.helm.wildfly.WildflyHelmChartRelease;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * WildFly/JBoss EAP application configured for per-connector SSL with Kafka/Streams for Apache Kafka,

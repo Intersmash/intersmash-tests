@@ -15,7 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -34,6 +33,7 @@ import org.jboss.intersmash.application.input.BuildInputBuilder;
 import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplication;
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * Application descriptor for a WildFly/JBoss EAP application that externalizes distributed HTTP sessions to a remote

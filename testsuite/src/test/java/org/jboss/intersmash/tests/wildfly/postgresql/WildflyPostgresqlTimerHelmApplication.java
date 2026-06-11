@@ -15,7 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.postgresql;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Secret;
 import java.io.IOException;
 import java.util.Arrays;
@@ -32,6 +31,7 @@ import org.jboss.intersmash.application.openshift.helm.WildflyHelmChartOpenShift
 import org.jboss.intersmash.provision.helm.wildfly.WildflyHelmChartRelease;
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 import org.jboss.intersmash.tests.wildfly.util.WildFlyHelmChartsConfiguration;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * WildFly application descriptor for the PostgreSQL EJB Timer application.

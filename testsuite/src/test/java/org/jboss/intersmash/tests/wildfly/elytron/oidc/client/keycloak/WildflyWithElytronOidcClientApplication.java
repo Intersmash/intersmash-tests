@@ -15,7 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
 import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplication;
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * WildFly image based OpenShift application descriptor that uses the <a href="https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/elytron-oidc-client-keycloak">elytron-oidc-client-keycloak</a>

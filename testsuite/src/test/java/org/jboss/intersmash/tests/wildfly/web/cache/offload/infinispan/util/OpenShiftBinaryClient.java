@@ -15,8 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util;
 
-import cz.xtf.core.config.OpenShiftConfig;
-import cz.xtf.core.openshift.OpenShifts;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +24,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jboss.intersmash.k8s.OpenShiftConfig;
+import org.jboss.intersmash.k8s.client.Kuberneteses;
 
 /**
  * Represents a binary client (i.e. {@code oc} executable) to interact with an OpenShift cluster.
@@ -39,7 +39,7 @@ public class OpenShiftBinaryClient {
 	private static final File CONFIG_FILE = new File(WORKDIR, "oc.config");
 
 	private OpenShiftBinaryClient() {
-		ocBinaryPath = OpenShifts.getBinaryPath();
+		ocBinaryPath = Kuberneteses.getBinaryPath();
 	}
 
 	public static OpenShiftBinaryClient getInstance() {

@@ -19,16 +19,14 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import cz.xtf.core.http.Https;
-import cz.xtf.core.openshift.OpenShifts;
-import cz.xtf.junit5.annotations.OpenShiftRecorder;
-import cz.xtf.junit5.listeners.ProjectCreator;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.intersmash.annotations.Intersmash;
 import org.jboss.intersmash.annotations.Service;
 import org.jboss.intersmash.annotations.ServiceUrl;
+import org.jboss.intersmash.junit5.recorder.OpenShiftRecorder;
+import org.jboss.intersmash.k8s.junit5.ProjectCreator;
 import org.jboss.intersmash.tests.junit.annotations.EapTest;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
 import org.jboss.intersmash.tests.junit.annotations.KeycloakTest;
@@ -36,6 +34,8 @@ import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
 import org.jboss.intersmash.tests.junit.annotations.WildflyTest;
 import org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak.KeycloakPostgresqlApplication;
 import org.jboss.intersmash.tests.wildfly.util.LoginUtil;
+import org.jboss.intersmash.tools.client.OpenShifts;
+import org.jboss.intersmash.tools.http.HttpsUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -115,7 +115,7 @@ public class WildFlyKeycloakSamlAdapterIT {
 	@Order(2)
 	public void testWildflyApplicationIsRunning() {
 		log.info("https base url: {}", wildflyApplicationRouteUrl);
-		Https.doesUrlReturnOK(wildflyApplicationRouteUrl);
+		HttpsUtils.doesUrlReturnOK(wildflyApplicationRouteUrl);
 		wildflyApplicationIsRunning = true;
 	}
 

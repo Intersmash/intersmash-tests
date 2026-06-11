@@ -17,8 +17,6 @@ package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.conne
 
 import static io.restassured.RestAssured.get;
 
-import cz.xtf.junit5.annotations.OpenShiftRecorder;
-import cz.xtf.junit5.listeners.ProjectCreator;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
 import java.time.Duration;
@@ -28,6 +26,8 @@ import org.hamcrest.Matchers;
 import org.jboss.intersmash.annotations.Intersmash;
 import org.jboss.intersmash.annotations.Service;
 import org.jboss.intersmash.annotations.ServiceUrl;
+import org.jboss.intersmash.junit5.recorder.OpenShiftRecorder;
+import org.jboss.intersmash.k8s.junit5.ProjectCreator;
 import org.jboss.intersmash.tests.junit.annotations.ActiveMQArtemisTest;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
 import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;

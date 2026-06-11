@@ -19,20 +19,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import cz.xtf.core.http.Https;
-import cz.xtf.junit5.listeners.ProjectCreator;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.jboss.intersmash.annotations.Intersmash;
 import org.jboss.intersmash.annotations.Service;
 import org.jboss.intersmash.annotations.ServiceUrl;
+import org.jboss.intersmash.k8s.junit5.ProjectCreator;
 import org.jboss.intersmash.tests.junit.annotations.EapTest;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
 import org.jboss.intersmash.tests.junit.annotations.KeycloakTest;
 import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
 import org.jboss.intersmash.tests.junit.annotations.WildflyTest;
 import org.jboss.intersmash.tests.wildfly.util.LoginUtil;
+import org.jboss.intersmash.tools.http.HttpsUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,7 +76,7 @@ public class WildflyWithElytronOidcClientIT {
 	@BeforeEach
 	public void beforeEach() {
 		// make sure application is up
-		Https.doesUrlReturnOK(wildflyApplicationRouteUrl).waitFor();
+		HttpsUtils.doesUrlReturnOK(wildflyApplicationRouteUrl).waitFor();
 	}
 
 	/**

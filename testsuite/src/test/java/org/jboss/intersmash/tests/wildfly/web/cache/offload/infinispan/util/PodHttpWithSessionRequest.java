@@ -15,12 +15,12 @@
 */
 package org.jboss.intersmash.tests.wildfly.web.cache.offload.infinispan.util;
 
-import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
+import org.jboss.intersmash.tools.client.OpenShifts;
 
 /**
  * Represents an HTTP request originating by a specific {@link Pod} and with a given session {@code JSESSIONID}.

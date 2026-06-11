@@ -17,7 +17,6 @@ package org.jboss.intersmash.tests.wildfly.postgresql;
 
 import static org.hamcrest.Matchers.containsString;
 
-import cz.xtf.junit5.listeners.ProjectCreator;
 import io.restassured.RestAssured;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.config.SSLConfig;
@@ -27,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.intersmash.annotations.Intersmash;
 import org.jboss.intersmash.annotations.Service;
 import org.jboss.intersmash.annotations.ServiceUrl;
+import org.jboss.intersmash.k8s.junit5.ProjectCreator;
 import org.jboss.intersmash.tests.junit.annotations.EapTest;
 import org.jboss.intersmash.tests.junit.annotations.EapXpTest;
 import org.jboss.intersmash.tests.junit.annotations.OpenShiftTest;
