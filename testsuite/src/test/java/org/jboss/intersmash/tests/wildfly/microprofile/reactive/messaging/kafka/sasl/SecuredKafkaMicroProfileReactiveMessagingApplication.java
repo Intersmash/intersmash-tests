@@ -26,7 +26,6 @@ import io.strimzi.api.kafka.model.kafka.KafkaBuilder;
 import io.strimzi.api.kafka.model.kafka.listener.GenericKafkaListener;
 import io.strimzi.api.kafka.model.kafka.listener.KafkaListenerAuthenticationScramSha512Builder;
 import io.strimzi.api.kafka.model.kafka.listener.KafkaListenerType;
-import io.strimzi.api.kafka.model.nodepool.KafkaNodePool;
 import io.strimzi.api.kafka.model.topic.KafkaTopic;
 import io.strimzi.api.kafka.model.topic.KafkaTopicBuilder;
 import io.strimzi.api.kafka.model.user.KafkaUser;
@@ -199,10 +198,5 @@ public class SecuredKafkaMicroProfileReactiveMessagingApplication implements Kaf
 	@Override
 	public List<Secret> getSecrets() {
 		return kafkaSecrets;
-	}
-
-	@Override
-	public List<KafkaNodePool> getNodePools() {
-		return null;
 	}
 }

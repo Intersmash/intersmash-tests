@@ -21,7 +21,6 @@ import io.strimzi.api.kafka.model.kafka.Kafka;
 import io.strimzi.api.kafka.model.kafka.KafkaBuilder;
 import io.strimzi.api.kafka.model.kafka.listener.GenericKafkaListener;
 import io.strimzi.api.kafka.model.kafka.listener.KafkaListenerType;
-import io.strimzi.api.kafka.model.nodepool.KafkaNodePool;
 import io.strimzi.api.kafka.model.topic.KafkaTopic;
 import io.strimzi.api.kafka.model.user.KafkaUser;
 import java.util.ArrayList;
@@ -40,8 +39,8 @@ import org.jboss.intersmash.application.operator.KafkaOperatorApplication;
 public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOperatorApplication, OpenShiftApplication {
 	public static final String APP_NAME = "amq-streams";
 
-	private static final String KAFKA_VERSION = "3.8.0";
-	private static final String KAFKA_INTER_BROKER_PROTOCOL_VERSION = "3.8";
+	private static final String KAFKA_VERSION = "4.2.0";
+	private static final String KAFKA_INTER_BROKER_PROTOCOL_VERSION = "4.2";
 	private static final int KAFKA_INSTANCE_NUM = 3;
 	private static final int TOPIC_RECONCILIATION_INTERVAL_SECONDS = 90;
 	private static final long USER_RECONCILIATION_INTERVAL_SECONDS = 120L;
@@ -127,11 +126,6 @@ public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOpera
 	@Override
 	public List<KafkaUser> getUsers() {
 		// We don't need any user for our tests.
-		return null;
-	}
-
-	@Override
-	public List<KafkaNodePool> getNodePools() {
 		return null;
 	}
 

@@ -190,6 +190,10 @@ public class WildflyBootableJarWithElytronOidcClientApplication
 						new WildflyHelmChartRelease.JdkImage(IntersmashConfig.wildflyRuntimeImageURL(), jdkVersion))
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
 				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables);
+		// Bootable Jar image can optionally be overridden with e.g. -Dintersmash.bootable.jar.image=registry.access.redhat.com/ubi10/openjdk-25:latest
+		if (!Strings.isNullOrEmpty(IntersmashConfig.bootableJarImageURL())) {
+			release.setBootableJarBuilderImage(IntersmashConfig.bootableJarImageURL());
+		}
 		List<String> channelDefinition = Arrays.asList(this.eeChannelGroupId(), this.eeChannelArtifactId(),
 				this.eeChannelVersion());
 		if (!channelDefinition.isEmpty()) {
