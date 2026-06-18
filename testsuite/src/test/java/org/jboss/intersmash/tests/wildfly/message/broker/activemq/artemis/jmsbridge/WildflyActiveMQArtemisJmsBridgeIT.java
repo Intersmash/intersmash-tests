@@ -181,7 +181,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 		PodShell podShell = OpenShifts.master().podShell(brokerPod);
 		String output = podShell.executeWithBash(
 				String.format(
-						"amq-broker/bin/artemis browser --url tcp://%s:%d --user %s --password %s --destination queue://%s",
+						"amq-broker/bin/artemis browser --url=tcp://%s:%d --user=%s --password='%s' --destination=queue://%s",
 						ActiveMQArtemisApplication.getHeadlessService(), ActiveMQArtemisApplication.ARTEMIS_ACCEPTOR_PORT,
 						ActiveMQArtemisApplication.ADMIN_USER, ActiveMQArtemisApplication.ADMIN_PASSWORD,
 						ActiveMQArtemisApplication.QUEUE_NAME))
