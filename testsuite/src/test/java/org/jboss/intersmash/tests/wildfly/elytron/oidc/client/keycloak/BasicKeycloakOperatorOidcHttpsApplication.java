@@ -18,8 +18,8 @@ package org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak;
 import java.io.IOException;
 import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.operator.KeycloakOperatorApplication;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Clients;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.ClientsBuilder;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.Clients;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.ClientsBuilder;
 
 /**
  * Deploys one basic Keycloak instance with a realm with users and a client.

@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Attach to mvnDebug",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 8000
+        }
+    ]
+    
+}
+
+mvnDebug verify -pl testsuite -amd --batch-mode -fn -Dinsecure.repositories=WARN -Dorg.jboss.eap.datasources.postgresql.driver.version=42.5.1 -Dwildfly.feature-pack.location=org.jboss.eap.xp:wildfly-galleon-pack:6.0.0.GA-redhat-00037 -Dwildfly.ee-feature-pack.location=org.jboss.eap:wildfly-ee-galleon-pack:8.1.1.GA-redhat-00019 -Dwildfly.cloud-feature-pack.location=org.jboss.eap.xp.cloud:eap-xp-cloud-galleon-pack:2.0.0.Final-redhat-00033 -Dwildfly.datasources-feature-pack.location=org.jboss.eap:eap-datasources-galleon-pack:8.1.1.Final-redhat-00015 -Dwildfly.ee-channel.groupId=org.jboss.eap.channels -Dwildfly.ee-channel.artifactId=eap-8.1-plus-eap-xp-6.0 -Dwildfly.ee-channel.version=1.5.0.GA-redhat-00005 -Dmaven-mirror.url=http://repository.eapqe.psi.redhat.com:8081/repository/customer-xp/ -Dwildfly-maven-plugin.groupId=org.jboss.eap.plugins -Dwildfly-maven-plugin.artifactId=eap-maven-plugin -Dwildfly-maven-plugin.version=2.0.1.Final-redhat-00015 -Dversion.wildfly-jar-maven-plugin=12.0.0.Final-redhat-00035 -Dxtf.helm.binary.path=/home/hudson/static_build_env/helm/clients/latest/linux-amd64/helm -Dversion.intersmash=0.0.5.Beta1-SNAPSHOT -Dgroups="eap-xp & infinispan" -Pwildfly-target-distribution.jboss-eap-xp.merged-channel -Dintersmash.deployments.repository.url=https://github.com/Intersmash/intersmash-applications.git -Dintersmash.deployments.repository.ref=main

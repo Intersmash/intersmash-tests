@@ -18,11 +18,11 @@ package org.jboss.intersmash.tests.wildfly.keycloak.saml.adapter;
 import java.io.IOException;
 import org.jboss.intersmash.application.openshift.OpenShiftApplication;
 import org.jboss.intersmash.application.operator.KeycloakOperatorApplication;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Clients;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.ClientsBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Users;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.UsersBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.users.CredentialsBuilder;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.Clients;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.ClientsBuilder;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.Users;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.UsersBuilder;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.users.CredentialsBuilder;
 
 /**
  * Keycloak Operator Application with pre-configured SAML client for adapter testing.
