@@ -241,6 +241,27 @@ public class WildFlyInfinispanDistributedTimersIT {
 		//
 		basicClusters();
 		try {
+			/**
+			 * Cache list can be a single item, e.g.:
+			 * <pre>
+			 * {@code
+			 *   ["ROOT.war.TransactionalRecurringTimerService.PERSISTENT","___protobuf_metadata","___script_cache"]
+			 * }
+			 * </pre>
+			 *
+			 * or multiple items, e.g.:
+			 * <pre>
+			 * {@code
+			 *   [ ROOT.war.TransactionalRecurringTimerService.PERSISTENT.0,
+			 *     ROOT.war.TransactionalRecurringTimerService.PERSISTENT.1,
+			 *     ROOT.war.TransactionalRecurringTimerService.PERSISTENT.10,
+			 *     ROOT.war.TransactionalRecurringTimerService.PERSISTENT.100,
+			 *     ... ]
+			 * }
+			 * </pre>
+			 *
+			 * depending on cache segmentation configuration.
+			 */
 			RestAssured
 					.given()
 					.auth()
