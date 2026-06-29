@@ -13,17 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.microprofile.reactive.messaging.kafka;
+package org.jboss.intersmash.tests.wildfly.postgresql;
 
 import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,34 +34,17 @@ import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 import org.jboss.intersmash.tests.wildfly.util.WildFlyHelmChartsConfiguration;
 
 /**
- * Base WildFly/JBoss EAP application configured with SSL for Kafka/Streams for Apache Kafka,
- * deployed as a bootable JAR via Helm Charts.
+ * WildFly application descriptor for the PostgreSQL EJB Timer application.
  * <p>
- * The {@code wildfly/kafka-application} module does not produce a bootable JAR by default;
- * the {@code bootable-jar} Maven profile must be activated to enable bootable JAR packaging.
- * <p>
- * This base class configures the Elytron SSL context <i>globally</i> via
- * {@code MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_WILDFLY_ELYTRON_SSL_CONTEXT}.
- * <p>
- * Subclasses can customize the SSL configuration (per-connector vs global) via
- * {@link #addSslContextEnvironmentVariables(Map)}, the build mode via {@link #getBuildMode()},
- * and build-specific Maven arguments via {@link #getBuildSpecificMavenArgs()}.
- *
- * @see WildflyS2iPerConnectorSecuredKafkaHelmApplication
+ * Configures a WildFly application that uses EJB timers backed by a PostgreSQL database.
+ * </p>
  */
 @Slf4j
-public class WildflyBootableJarGloballySecuredKafkaHelmApplication
+public class WildflyPostgresqlTimerHelmApplication
 		implements WildflyHelmChartOpenShiftApplication, WildflyApplicationConfiguration, WildFlyHelmChartsConfiguration {
 	/** Application name used for labeling and resource identification. */
-	public static final String APP_NAME = "mp-reactive-messaging-bjar";
-	private static final String APP_MODULE_DIRECTORY = "wildfly/kafka-application";
-
-	protected static final String CLIENT_SSL_CONTEXT_NAME = "kafka-ssl-test";
-	private static final String SECRETS_VOLUME_MOUNT_PATH = "/etc/secrets";
-	private static final String CERTIFICATE_SECRET_PATH = SECRETS_VOLUME_MOUNT_PATH + "/ca.p12";
-
-	/** List of Kubernetes secrets for keystores and truststores. */
-	private final List<Secret> secrets = new ArrayList<>();
+	public static final String APP_NAME = "wildfly-postgresql-timer-application";
+	private static final String APP_MODULE_DIRECTORY = "wildfly/postgresql-timer-application";
 
 	/** Helm chart release configuration for deploying the WildFly/JBoss EAP application. */
 	private final HelmChartRelease release;
@@ -86,14 +64,14 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 	}
 
 	/**
-	 * Constructs a new WildFly/JBoss EAP application configured with SSL for Kafka.
+	 * Constructs a new WildFly/JBoss EAP application configured for the PostgreSQL EJB Timer test.
 	 * <p>
 	 * This constructor sets up the OpenShift namespace, then loads and configures the
-	 * Helm chart release with build, deployment, and SSL settings.
+	 * Helm chart release with build and deployment settings.
 	 *
 	 * @throws IOException if Helm chart configuration loading fails
 	 */
-	public WildflyBootableJarGloballySecuredKafkaHelmApplication() throws IOException {
+	public WildflyPostgresqlTimerHelmApplication() throws IOException {
 		setupNamespace();
 		release = loadRelease(getHelmChartRelease());
 	}
@@ -103,11 +81,11 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 	 * <p>
 	 * This method configures:
 	 * <ul>
-	 *   <li>Build mode (Bootable JAR)</li>
+	 *   <li>Build mode (S2I)</li>
 	 *   <li>Source repository URL and reference</li>
 	 *   <li>Maven build arguments and environment variables</li>
 	 *   <li>Builder and runtime images</li>
-	 *   <li>Build and deployment environment variables including Kafka SSL settings</li>
+	 *   <li>Build and deployment environment variables including PostgreSQL connection settings</li>
 	 *   <li>Optional EE channel configuration for EAP builds</li>
 	 * </ul>
 	 * </p>
@@ -135,7 +113,7 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 
 		Map<String, String> buildEnvironmentVariables = new HashMap<>();
 		final String mavenMirrorUrl = this.getMavenMirrorUrl();
-		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
+		if (!org.assertj.core.util.Strings.isNullOrEmpty(mavenMirrorUrl)) {
 			buildEnvironmentVariables.put("MAVEN_MIRROR_URL", mavenMirrorUrl);
 			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
 		}
@@ -148,6 +126,8 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 
 		// MAVEN_S2I_ARTIFACT_DIRS: tells S2I where to find artifacts to deploy (the "*-bootable.jar" file)
 		buildEnvironmentVariables.put("MAVEN_S2I_ARTIFACT_DIRS", APP_MODULE_DIRECTORY + "/target");
+		buildEnvironmentVariables.put("POSTGRESQL_DRIVER_VERSION",
+				System.getProperty("org.jboss.eap.datasources.postgresql.driver.version"));
 
 		// =======================================
 		// DEPLOY
@@ -160,51 +140,11 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 		deploymentEnvironmentVariables.put("LOGGING_SCRIPT_DEBUG",
 				IntersmashConfig.scriptDebug() != null ? IntersmashConfig.scriptDebug() : "false");
 
-		// Bootstrap servers: connect to the plaintext (unencrypted) Kafka listener
-		deploymentEnvironmentVariables.put(
-				"KAFKA_SERVICE_UNENCRYPTED",
-				KafkaMicroProfileReactiveMessagingApplication.APP_NAME
-						+ "-kafka-bootstrap:"
-						+ KafkaMicroProfileReactiveMessagingApplication.KAFKA_PLAINTEXT_PORT);
-		// Bootstrap servers: connect to the secured (encrypted) Kafka listener
-		deploymentEnvironmentVariables.put(
-				"KAFKA_SERVICE_ENCRYPTED",
-				KafkaMicroProfileReactiveMessagingApplication.APP_NAME
-						+ "-kafka-bootstrap:"
-						+ KafkaMicroProfileReactiveMessagingApplication.KAFKA_SSL_PORT);
-
-		// =======================================
-		// SECRET
-		// =======================================
-
-		/**
-		 * Kafka secret is like:
-		 * {@code
-				kind: Secret
-				apiVersion: v1
-				metadata:
-					name: amq-streams-cluster-ca-cert
-				data:
-					ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZMVENDQXhXZ0F3SUJBZ0lVR01Cc3Fab ...
-					ca.p12: MIIGogIBAzCCBkwGCSqGSIb3DQEHAaCCBj0EggY5MIIGNTCCBjEGCSqGSIb3DQEHBqCCBiIwg ...
-					ca.password: b0QybzJ3T2czUUpm
-				type: Opaque
-		 * }
-		 * see https://docs.redhat.com/en/documentation/red_hat_amq/7.7/html-single/using_amq_streams_on_openshift/index#cluster_ca_secrets
-		 */
-
-		Secret clientSecret = OpenShifts.master().getSecret("amq-streams-cluster-ca-cert");
-		clientSecret.getMetadata().setName("client-amq-streams-cluster-ca-cert-secret");
-		clientSecret.getMetadata().setResourceVersion(null);
-		String password = new String(Base64.getDecoder().decode(clientSecret.getData().get("ca.password")));
-		secrets.add(clientSecret);
-
-		// SSL
-		deploymentEnvironmentVariables.put("KEYSTORE_PATH", CERTIFICATE_SECRET_PATH);
-		deploymentEnvironmentVariables.put("KEYSTORE_PASSWORD", password);
-
-		// Configure the Elytron SSL context
-		addSslContextEnvironmentVariables(deploymentEnvironmentVariables);
+		deploymentEnvironmentVariables.put("POSTGRESQL_SERVICE_HOST", PostgresqlService.POSTGRESQL_NAME);
+		deploymentEnvironmentVariables.put("POSTGRESQL_SERVICE_PORT", "5432");
+		deploymentEnvironmentVariables.put("POSTGRESQL_DATABASE", PostgresqlService.POSTGRESQL_DATABASE);
+		deploymentEnvironmentVariables.put("POSTGRESQL_USER", PostgresqlService.POSTGRESQL_USER);
+		deploymentEnvironmentVariables.put("POSTGRESQL_PASSWORD", PostgresqlService.POSTGRESQL_PASSWORD);
 
 		// =======================================
 		// APPLICATION
@@ -221,21 +161,7 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 				.withJdkRuntimeImage(
 						new WildflyHelmChartRelease.JdkImage(IntersmashConfig.wildflyRuntimeImageURL(), jdkVersion))
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
-				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables)
-				.withVolume(
-						new VolumeBuilder()
-								.withName("client-amq-streams-cluster-ca-cert-secret")
-								.withSecret(
-										new SecretVolumeSourceBuilder()
-												.withSecretName("client-amq-streams-cluster-ca-cert-secret")
-												.build())
-								.build())
-				.withVolumeMount(
-						new VolumeMountBuilder()
-								.withName("client-amq-streams-cluster-ca-cert-secret")
-								.withMountPath(SECRETS_VOLUME_MOUNT_PATH)
-								.withReadOnly(true)
-								.build());
+				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables);
 		// Bootable Jar image can optionally be overridden with e.g. -Dintersmash.bootable.jar.image=registry.access.redhat.com/ubi10/openjdk-25:latest
 		if (!Strings.isNullOrEmpty(IntersmashConfig.bootableJarImageURL())) {
 			release.setBootableJarBuilderImage(IntersmashConfig.bootableJarImageURL());
@@ -253,41 +179,25 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 	/**
 	 * Returns the build mode for the Helm chart release.
 	 * <p>
-	 * This base implementation returns {@link WildflyHelmChartRelease.BuildMode#BOOTABLE_JAR}.
-	 * Subclasses may override this to use a different build mode (e.g. S2I).
+	 * This base implementation returns {@link WildflyHelmChartRelease.BuildMode#S2I}.
+	 * Subclasses may override this to use a different build mode (e.g. Bootable JAR).
 	 *
 	 * @return the build mode
 	 */
 	protected WildflyHelmChartRelease.BuildMode getBuildMode() {
-		return WildflyHelmChartRelease.BuildMode.BOOTABLE_JAR;
+		return WildflyHelmChartRelease.BuildMode.S2I;
 	}
 
 	/**
 	 * Returns additional Maven arguments specific to the build mode.
 	 * <p>
-	 * This base implementation activates the {@code bootable-jar} Maven profile to produce a
-	 * bootable JAR from the {@code wildfly/kafka-application} module. Subclasses may override
-	 * this to return an empty string for build modes that do not require bootable JAR packaging
-	 * (e.g. S2I).
+	 * This base implementation returns an empty string (no additional build-specific args for S2I).
+	 * Subclasses may override this to activate specific Maven profiles (e.g. {@code bootable-jar}).
 	 *
 	 * @return build-specific Maven arguments, or empty string
 	 */
 	protected String getBuildSpecificMavenArgs() {
-		return " -Pbootable-jar";
-	}
-
-	/**
-	 * Adds SSL context environment variables for Kafka communication.
-	 * <p>
-	 * This base implementation configures the Elytron SSL context globally via
-	 * {@code MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_WILDFLY_ELYTRON_SSL_CONTEXT}.
-	 * Subclasses may override this to configure SSL per-connector.
-	 *
-	 * @param deploymentEnvironmentVariables the deployment environment variables map to populate
-	 */
-	protected void addSslContextEnvironmentVariables(Map<String, String> deploymentEnvironmentVariables) {
-		deploymentEnvironmentVariables.put("MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_WILDFLY_ELYTRON_SSL_CONTEXT",
-				CLIENT_SSL_CONTEXT_NAME);
+		return "";
 	}
 
 	/**
@@ -351,15 +261,13 @@ public class WildflyBootableJarGloballySecuredKafkaHelmApplication
 	}
 
 	/**
-	 * Returns an unmodifiable list of Kubernetes secrets.
-	 * <p>
-	 * The secrets include the Kafka cluster CA certificate used for SSL communication.
+	 * Returns an empty list of Kubernetes secrets.
 	 *
-	 * @return unmodifiable list of Kubernetes secrets
+	 * @return empty list of Kubernetes secrets
 	 */
 	@Override
 	public List<Secret> getSecrets() {
-		return Collections.unmodifiableList(secrets);
+		return Collections.EMPTY_LIST;
 	}
 
 	/**

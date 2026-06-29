@@ -179,14 +179,21 @@ public class WildflyBootableJarWithElytronOidcClientApplication
 		// =======================================
 		// APPLICATION
 		// =======================================
+		WildflyHelmChartRelease.JdkImage.Version jdkVersion = getJdkImageVersion();
 		release
 				.withBuildMode(WildflyHelmChartRelease.BuildMode.BOOTABLE_JAR)
 				.withSourceRepositoryUrl(IntersmashConfig.deploymentsRepositoryUrl())
 				.withSourceRepositoryRef(IntersmashConfig.deploymentsRepositoryRef())
-				.withJdk17BuilderImage(IntersmashConfig.wildflyImageURL())
-				.withJdk17RuntimeImage(IntersmashConfig.wildflyRuntimeImageURL())
+				.withJdkBuilderImage(
+						new WildflyHelmChartRelease.JdkImage(IntersmashConfig.wildflyImageURL(), jdkVersion))
+				.withJdkRuntimeImage(
+						new WildflyHelmChartRelease.JdkImage(IntersmashConfig.wildflyRuntimeImageURL(), jdkVersion))
 				.withBuildEnvironmentVariables(buildEnvironmentVariables)
 				.withDeploymentEnvironmentVariables(deploymentEnvironmentVariables);
+		// Bootable Jar image can optionally be overridden with e.g. -Dintersmash.bootable.jar.image=registry.access.redhat.com/ubi10/openjdk-25:latest
+		if (!Strings.isNullOrEmpty(IntersmashConfig.bootableJarImageURL())) {
+			release.setBootableJarBuilderImage(IntersmashConfig.bootableJarImageURL());
+		}
 		List<String> channelDefinition = Arrays.asList(this.eeChannelGroupId(), this.eeChannelArtifactId(),
 				this.eeChannelVersion());
 		if (!channelDefinition.isEmpty()) {

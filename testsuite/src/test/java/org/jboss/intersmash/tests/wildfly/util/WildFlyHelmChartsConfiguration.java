@@ -15,12 +15,15 @@
 */
 package org.jboss.intersmash.tests.wildfly.util;
 
-import org.jboss.intersmash.model.helm.charts.values.eap81.HelmEap81Release;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.jboss.intersmash.IntersmashConfig;
+import org.jboss.intersmash.model.helm.charts.values.eap82.HelmEap82Release;
 import org.jboss.intersmash.model.helm.charts.values.wildfly.HelmWildflyRelease;
 import org.jboss.intersmash.model.helm.charts.values.xp6.HelmXp6Release;
 import org.jboss.intersmash.provision.helm.wildfly.WildFlyHelmChartReleaseAdapterPatched;
 import org.jboss.intersmash.provision.helm.wildfly.WildflyHelmChartRelease;
-import org.jboss.intersmash.provision.helm.wildfly.eap81.Eap81HelmChartReleaseAdapter;
+import org.jboss.intersmash.provision.helm.wildfly.eap82.Eap82HelmChartReleaseAdapter;
 import org.jboss.intersmash.provision.helm.wildfly.xp6.EapXp6HelmChartReleaseAdapter;
 import org.jboss.intersmash.tests.junit.annotations.TargetReleaseSensitive;
 
@@ -50,19 +53,37 @@ public interface WildFlyHelmChartsConfiguration {
 	 * The method selects the release adapter based on the distribution type:
 	 * <ul>
 	 *   <li>For distributions starting with "jboss-eap-xp": returns {@link EapXp6HelmChartReleaseAdapter}</li>
-	 *   <li>For distributions starting with "jboss-eap": returns {@link Eap81HelmChartReleaseAdapter}</li>
+	 *   <li>For distributions starting with "jboss-eap": returns {@link Eap82HelmChartReleaseAdapter}</li>
 	 *   <li>For all other distributions (default "wildfly"): returns {@link WildFlyHelmChartReleaseAdapterPatched}</li>
 	 * </ul>
 	 *
 	 * @return the Helm chart release adapter for the configured WildFly distribution
 	 */
+	Pattern OPENJDK_PATTERN = Pattern.compile("jdk(\\d+)");
+
+	/**
+	 * Detects the JDK version from the builder image URL (e.g. "openjdk21" in the URL yields "21").
+	 * Falls back to {@link IntersmashConfig#wildflyImageJdk()} if the pattern is not found.
+	 */
+	default WildflyHelmChartRelease.JdkImage.Version getJdkImageVersion() {
+		String imageUrl = IntersmashConfig.wildflyImageURL();
+		if (imageUrl != null) {
+			Matcher matcher = OPENJDK_PATTERN.matcher(imageUrl);
+			if (matcher.find()) {
+				return WildflyHelmChartRelease.JdkImage.Version.fromValue(matcher.group(1));
+			}
+		}
+		return WildflyHelmChartRelease.JdkImage.Version.fromValue(IntersmashConfig.wildflyImageJdk());
+	}
+
 	@TargetReleaseSensitive
 	default WildflyHelmChartRelease getHelmChartRelease() {
 		String targetDistribution = getWildflyTargetDistribution();
 		if (targetDistribution.startsWith("jboss-eap-xp")) {
 			return new EapXp6HelmChartReleaseAdapter(new HelmXp6Release());
 		} else if (targetDistribution.startsWith("jboss-eap")) {
-			return new Eap81HelmChartReleaseAdapter(new HelmEap81Release());
+			String chartsName = IntersmashConfig.getWildflyHelmChartsName();
+			return new Eap82HelmChartReleaseAdapter(new HelmEap82Release());
 		} else {
 			return new WildFlyHelmChartReleaseAdapterPatched(new HelmWildflyRelease());
 		}
