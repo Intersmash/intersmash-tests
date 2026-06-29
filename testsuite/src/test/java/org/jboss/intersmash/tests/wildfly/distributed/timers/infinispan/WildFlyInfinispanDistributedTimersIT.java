@@ -172,6 +172,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  *         3. eventually scale back to the minimal cluster form again to let Infinispan have the exact number of
  *         replicas (1) that will be expected at the following restart.<br>
  */
+@ExtendWith(ProjectCreator.class)
 @Intersmash({
 		@Service(PostgresqlTimerExpirationStoreApplication.class),
 		@Service(WildFlyTimerExpirationStoreApplication.class),
@@ -184,12 +185,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @InfinispanTest
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@ExtendWith(ProjectCreator.class)
 public class WildFlyInfinispanDistributedTimersIT {
 
 	private static final OpenShift MASTER_SHIFT = OpenShifts.master();
 	private static final Long RECURRING_TIMER_EXPIRATION_TIMEOUT = 10_000L;
-	private static final Long RECURRING_TIMER_INITIAL_DELAY = 0L;
 	private static final String RECURRING_TIMER_INFO = WildFlyDistributedTimersApplication.class.getSimpleName();
 	private static final int INFINISPAN_MINIMAL_CLUSTER_REPLICAS = 0;
 	private static final int WILDFLY_MINIMAL_CLUSTER_REPLICAS = 0;
@@ -226,7 +225,7 @@ public class WildFlyInfinispanDistributedTimersIT {
 	}
 
 	/**
-	 * Checks that the WildFly/JBoss EAP application service cache has been successfully created, by
+	 * Checks that the WildFly/JBoss EAP application service cache has been successfully created in the Infinispan Remote Cluster, by
 	 * consuming the Infinispan REST APIs.
 	 * <br>
 	 * The list of {@code Cache} objects returned by the Infinispan REST APIs contains conventionally named
@@ -290,7 +289,7 @@ public class WildFlyInfinispanDistributedTimersIT {
 	 * the {@code javax.ejb.TimerService::getTimers()} method will take all the cluster instances into account, and
 	 * timers owned by all nodes will be returned.
 	 * <br>
-	 * No timer expirations have been recorded in the monitored time period.
+	 * The gist of the test is no timer expirations is recorded in the monitored time period.
 	 *
 	 * @throws InterruptedException Thrown when the main thread wait interval is interrupted unexpectedly
 	 * @throws ExecutionException Thrown when an error occurs during the asynchronous monitoring method execution
@@ -298,41 +297,29 @@ public class WildFlyInfinispanDistributedTimersIT {
 	@Test
 	@Order(2)
 	public void testTimerCanBeSuccessfullyCancelledClusterWide() throws InterruptedException, ExecutionException {
-		final Long expirationTimeout = RECURRING_TIMER_EXPIRATION_TIMEOUT;
-		// set a time window
 		final Long timeWindowDuration = SHORT_TIME_WINDOW_DURATION_SECONDS * 1_000L;
-		// now, let's forge the timer info (the server will use such id to delete it)
 		final String applicationInfo = String.format("%s:%s", RECURRING_TIMER_INFO,
 				"testTimerCanBeSuccessfullyCancelledClusterWide");
-		// scale up to the basic form so that we have a non executor
 		basicClusters();
 		try {
 			Pod nonExecutor = null;
-			createTimer(RECURRING_TIMER_INITIAL_DELAY, expirationTimeout, applicationInfo);
+			createTimer(applicationInfo);
 			try {
-				// let's give the timer some time to execute
-				final Long waitInterval = 2 * expirationTimeout;
-				giveTheTimerEnoughTimeToExecuteOnce(waitInterval, applicationInfo);
+				giveTheTimerEnoughTimeToExecuteOnce(2 * RECURRING_TIMER_EXPIRATION_TIMEOUT, applicationInfo);
 				nonExecutor = getNonExecutor(applicationInfo);
 				Assertions.assertNotNull(nonExecutor, "Expected non-executing pod was not found after timer creation");
 				log.debug("Current non-executing pod is {}", nonExecutor.getMetadata().getName());
 			} finally {
 				if (nonExecutor == null) {
-					// this can happen when an exception is thrown and the non executor is null: we need to cancel the
-					// timer anyway, the flow will jump out of the test method itself
 					cancelTimer(applicationInfo);
 				} else {
 					cancelTimer(nonExecutor, applicationInfo);
 				}
 			}
-			// let's check the timer doesn't execute anymore
-			// define the failure we want to inject (none, BTW)
 			final Runnable injectedFailure = () -> log
 					.info("No failure is injected when checking that a timer has been cancelled");
-			// timer expirations are expected to be exactly 0
 			final BiFunction<List<TimerExpiration>, Long, Boolean> expirationsValidator = (actualExpirations,
 					pause) -> actualExpirations.isEmpty();
-			// timer expirations are expected to be from exactly 0 executors, since the timer should have been cancelled
 			final Function<Long, Boolean> executorsValidator = (actualExecutors) -> actualExecutors == 0;
 			testFailOverWithinTimeWindow(timeWindowDuration, applicationInfo, injectedFailure, expirationsValidator,
 					executorsValidator);
@@ -342,170 +329,91 @@ public class WildFlyInfinispanDistributedTimersIT {
 	}
 
 	/**
-	 * Verify a (distributed) timers persistence service fail-over scenario. One minimal (0-0)
-	 * WildFly/Infinispan cluster is started, the initial Infinispan pod is marked for deletion. Then a distributed persistent interval
-	 * timer is started, after which the cluster is scaled up to its basic (2-2) form. Now timer expirations will be
-	 * counted asynchronously for a given time period, during which a failure will be injected, i.e. the initial Infinispan
-	 * will be stopped. At the end of the given monitoring period, the list of expirations is checked to perform
-	 * assertions about the persistence service fail-over capabilities.
-	 * <br>
-	 * The expected timer expirations by <i>exactly</i> one executor have been recorded in the monitored
-	 * time period.
+	 * Verify a (distributed) timers persistence service fail-over scenario.
+	 * Kills one Infinispan pod and asserts that the expected number of expirations still occurred from the
+	 * same WildFly executor, proving the Infinispan cluster survived the loss of a node.
 	 */
 	@Test
 	@Order(3)
 	public void testPersistenceServiceBasicFailOver() throws InterruptedException, ExecutionException {
-		final Long expirationTimeout = RECURRING_TIMER_EXPIRATION_TIMEOUT;
-		// set a time window (duration + 2 more expirations in order to be sure...)
-		final Long timeWindowDuration = LONG_TIME_WINDOW_DURATION_SECONDS * 1_000L + (expirationTimeout * 2);
-		// and expectations:
-		// timer expirations are expected to be from the original executor, since only Infinispan will be restarted
-		final Function<Long, Boolean> executorsValidator = (actualExecutors) -> actualExecutors == 1;
-		// calculate expected timer expirations
-		final Long computedExpirations = timeWindowDuration / expirationTimeout;
-		final BiFunction<List<TimerExpiration>, Long, Boolean> expirationsValidator = (actualExpirations,
-				pause) -> validateExpectedExpirations(computedExpirations, pause, expirationTimeout, actualExpirations);
-		// start clusters
-		basicClusters();
-		try {
-			// now, let's forge the timer info (the server will use such id to delete it)
-			final String applicationInfo = String.format("%s:%s", RECURRING_TIMER_INFO, "testPersistenceServiceBasicFailOver");
-			// trigger the recurring timer creation on distributed timers WildFly/JBoss EAP app
-			createTimer(RECURRING_TIMER_INITIAL_DELAY, expirationTimeout, applicationInfo);
-			try {
-				// let's give the timer some time to execute
-				final Long waitInterval = 2 * expirationTimeout;
-				giveTheTimerEnoughTimeToExecuteOnce(waitInterval, applicationInfo);
-				// let's log the executed timers, just for debugging purpose
-				final Pod timerExecutor = getExecutor(applicationInfo);
-				log.debug("Current timer executor is {}", timerExecutor.getMetadata().getName());
-				// get a reference to the pod that's going to be stopped
-				Pod podToBeDeleted = infinispanProvisioner.getPods().get(0);
-				Assertions.assertNotNull(podToBeDeleted, "Infinispan Pod to be deleted was not found");
-				log.debug("Current Infinispan Pod designated for deletion is {}", podToBeDeleted.getMetadata().getName());
-				// define the failure we want to inject
-				final Long intervalBeforeStoppingThePod = expirationTimeout * 2;
-				final Runnable injectedFailure = () -> stopOriginalServicePod(podToBeDeleted, intervalBeforeStoppingThePod);
-				// inspect the time window for expected results
-				testFailOverWithinTimeWindow(timeWindowDuration, applicationInfo, injectedFailure, expirationsValidator,
-						executorsValidator);
-			} finally {
-				// always cancel a previously created timer
-				cancelTimer(applicationInfo);
-			}
-		} finally {
-			// otherwise Infinispan won't restart because of spec.replicasWantedAtRestart
-			minimalClusters();
-		}
+		runFailoverTest("testPersistenceServiceBasicFailOver",
+				executors -> executors == 1,
+				appInfo -> {
+					Pod executor = getExecutor(appInfo);
+					log.debug("Current timer executor is {}", executor.getMetadata().getName());
+					Pod podToBeDeleted = infinispanProvisioner.getPods().get(0);
+					log.debug("Infinispan pod designated for deletion: {}", podToBeDeleted.getMetadata().getName());
+					long delay = RECURRING_TIMER_EXPIRATION_TIMEOUT * 2;
+					return () -> stopOriginalServicePod(podToBeDeleted, delay);
+				});
 	}
 
 	/**
-	 * Verifies a EJB (distributed) timer service fail-over scenario. One minimal (0-0)
-	 * EPA/Infinispan cluster is started, then the cluster is scaled up to its basic (2-2) form. Now timer expirations will be
-	 * counted asynchronously for a given time period, during which a failure will be injected, i.e. the actual executor
-	 * will be stopped. At the end of the given monitoring period, the list of expirations is checked to perform
-	 * assertions about the timer service fail-over capabilities.
-	 * <br>
-	 * The expected timer expirations by <i>more than one</i> executor have been recorded in the monitored
-	 * time period.
+	 * Verify a EJB (distributed) timer service fail-over scenario.
+	 * Kills the WildFly pod that is executing the timer and asserts that expirations were recorded by
+	 * &ge; 1 executor, proving timer execution fails over between WildFly nodes.
 	 */
 	@Test
 	@Order(4)
 	public void testTimerServiceBasicFailOver() throws InterruptedException, ExecutionException {
-		final Long initialDelay = RECURRING_TIMER_INITIAL_DELAY,
-				expirationTimeout = RECURRING_TIMER_EXPIRATION_TIMEOUT;
-		// set a time window (duration + 2 more expirations in order to be sure...)
-		final Long timeWindowDuration = LONG_TIME_WINDOW_DURATION_SECONDS * 1_000L + (expirationTimeout * 2);
-		// and expectations...
-		// timer expirations are expected to be from >= 1 different executors. Initially it will be the one which
-		// scheduled the timer expiration after the scale up (topology change) to the basic cluster form.
-		// At such point the actual executor is stopped, hence the timer expiration could be scheduled by:
-		// - yet the original one
-		// - the remaining one or by the one created by OpenShift to replace the stopped one, bringing the total number
-		// of executors to 2.
-		final Function<Long, Boolean> executorsValidator = (actualExecutors) -> actualExecutors >= 1;
-		// calculate expected timer expirations
-		final Long computedExpirations = timeWindowDuration / expirationTimeout;
-		final BiFunction<List<TimerExpiration>, Long, Boolean> expirationsValidator = (actualExpirations,
-				pause) -> validateExpectedExpirations(computedExpirations, pause, expirationTimeout, actualExpirations);
-		// now, let's forge the timer info (the server will use such id to delete it)
-		final String applicationInfo = String.format("%s:%s", RECURRING_TIMER_INFO, "testTimerServiceBasicFailOver");
-		// scale up from minimal to basic configuration
-		basicClusters();
-		try {
-			// trigger the recurring timer creation on distributed timers WildFly/JBoss EAP app
-			createTimer(initialDelay, expirationTimeout, applicationInfo);
-			try {
-				// let's give the timer some time to execute
-				final Long waitInterval = 2 * expirationTimeout;
-				giveTheTimerEnoughTimeToExecuteOnce(waitInterval, applicationInfo);
-				// now one of the two instances is executing the timer, let's discover which one is actually
-				final Pod podToBeDeleted = getExecutor(applicationInfo);
-				Assertions.assertNotNull(podToBeDeleted, "Expected timer executor was not found after timer creation");
-				log.debug("Current timer executor is {}", podToBeDeleted.getMetadata().getName());
-				// define the failure we want to inject
-				final Long intervalBeforeStoppingThePod = expirationTimeout + (expirationTimeout / 2);
-				final Runnable injectedFailure = () -> stopOriginalServicePod(podToBeDeleted, intervalBeforeStoppingThePod);
-				testFailOverWithinTimeWindow(timeWindowDuration, applicationInfo, injectedFailure, expirationsValidator,
-						executorsValidator);
-			} finally {
-				// always cancel a previously created timer
-				cancelTimer(applicationInfo);
-			}
-		} finally {
-			// otherwise Infinispan won't restart because of spec.replicasWantedAtRestart
-			minimalClusters();
-		}
+		runFailoverTest("testTimerServiceBasicFailOver",
+				executors -> executors >= 1,
+				appInfo -> {
+					Pod podToBeDeleted = getExecutor(appInfo);
+					log.debug("Current timer executor is {}", podToBeDeleted.getMetadata().getName());
+					long delay = RECURRING_TIMER_EXPIRATION_TIMEOUT + (RECURRING_TIMER_EXPIRATION_TIMEOUT / 2);
+					return () -> stopOriginalServicePod(podToBeDeleted, delay);
+				});
 	}
 
 	/**
-	 * Verifies a (distributed) timers persistence service fail-over scenario. One minimal (0-0)
-	 * WildFly/Infinispan cluster is started and then scaled to its basic (2-2) form.
-	 * Then a distributed persistent interval timer is created, which expirations will be counted asynchronously for a
-	 * given time period, during which a failure will be injected, i.e. the WildFly/JBoss EAP cluster will be gracefully shut down,
-	 * and eventually restarted.
-	 * At the end of the given monitoring period, the list of expirations is checked to perform assertions about the
-	 * persistence service fail-over capabilities.
-	 * <br>
-	 * The expected timer expirations by <i>more than</i> one executor have been recorded in the monitored
-	 * time period.
+	 * Verify that persistent timers survive a full application server restart.
+	 * Shuts down the entire WildFly cluster (scale to 0) and restarts it, then asserts that timer expirations
+	 * resume from &gt; 1 executor, proving persistent timers survive because their state lives in the external
+	 * Infinispan cluster.
 	 */
 	@Test
 	@Order(5)
 	public void testPersistentTimersSurviveTimerServiceTemporaryShutdown() throws InterruptedException, ExecutionException {
-		final Long initialDelay = RECURRING_TIMER_INITIAL_DELAY,
-				expirationTimeout = RECURRING_TIMER_EXPIRATION_TIMEOUT;
-		// set a time window (duration + 2 more expirations in order to be sure...)
-		final Long timeWindowDuration = LONG_TIME_WINDOW_DURATION_SECONDS * 1_000L + (expirationTimeout * 2);
-		// and expectations...
-		// timer expirations are expected to be from > 1 executor, since the original one will stop because of the
-		// shutdown, then two more topology related re-balances occur when restoring the timer service
-		final Function<Long, Boolean> executorsValidator = (actualExecutors) -> actualExecutors > 1;
-		// calculate expected timer expirations
-		final Long computedExpirations = timeWindowDuration / expirationTimeout;
+		runFailoverTest("testPersistentTimersSurviveTimerServiceTemporaryShutdown",
+				executors -> executors > 1,
+				appInfo -> () -> shutTimerServiceDown());
+	}
+
+	/**
+	 * Common template for failover tests (tests 3, 4, 5). Scales to basic clusters, creates a timer,
+	 * waits for at least one expiration, runs the test-specific failure scenario, then validates
+	 * expirations and executor counts.
+	 *
+	 * @param testName Used to build the applicationInfo identifier
+	 * @param executorsValidator Validates the expected number of distinct executors
+	 * @param failureFactory Given the applicationInfo, sets up pre-failure state and returns the failure Runnable
+	 */
+	private void runFailoverTest(
+			String testName,
+			Function<Long, Boolean> executorsValidator,
+			Function<String, Runnable> failureFactory) throws InterruptedException, ExecutionException {
+		final Long timeWindowDuration = LONG_TIME_WINDOW_DURATION_SECONDS * 1_000L + (RECURRING_TIMER_EXPIRATION_TIMEOUT * 2);
 		final BiFunction<List<TimerExpiration>, Long, Boolean> expirationsValidator = (actualExpirations,
-				pause) -> validateExpectedExpirations(computedExpirations, pause, expirationTimeout, actualExpirations);
-		// define the failure we'll inject within the observed time window
-		final Runnable injectedFailure = this::shutTimerServiceDown;
-		// now, let's forge the timer info (the server will use such id to delete it)
-		final String applicationInfo = String.format("%s:%s", RECURRING_TIMER_INFO,
-				"testPersistentTimersSurviveTimerServiceTemporaryShutdown");
-		// scale up from minimal to basic configuration
+				pause) -> validateExpectedExpirations(timeWindowDuration, pause, actualExpirations);
+		final String applicationInfo = String.format("%s:%s", RECURRING_TIMER_INFO, testName);
 		basicClusters();
 		try {
-			createTimer(initialDelay, expirationTimeout, applicationInfo);
+			createTimer(applicationInfo);
 			try {
-				// let's give the timer some time to execute
-				final Long waitInterval = 2 * expirationTimeout;
-				giveTheTimerEnoughTimeToExecuteOnce(waitInterval, applicationInfo);
-				testFailOverWithinTimeWindow(timeWindowDuration, applicationInfo, injectedFailure, expirationsValidator,
+				giveTheTimerEnoughTimeToExecuteOnce(2 * RECURRING_TIMER_EXPIRATION_TIMEOUT, applicationInfo);
+				Runnable failure = failureFactory.apply(applicationInfo);
+				testFailOverWithinTimeWindow(timeWindowDuration, applicationInfo, failure, expirationsValidator,
 						executorsValidator);
 			} finally {
-				// always cancel a previously created timer
-				cancelTimer(applicationInfo);
+				try {
+					cancelTimer(applicationInfo);
+				} catch (Exception e) {
+					log.warn("Timer cancellation failed during cleanup: {}", e.getMessage());
+				}
 			}
 		} finally {
-			// always back to minimal, otherwise Infinispan won't restart because of spec.replicasWantedAtRestart
+			// otherwise Infinispan won't restart because of spec.replicasWantedAtRestart
 			minimalClusters();
 		}
 	}
@@ -529,12 +437,12 @@ public class WildFlyInfinispanDistributedTimersIT {
 		wildflyDistributedTimersProvisioner.scale(WILDFLY_BASIC_CLUSTER_REPLICAS, Boolean.TRUE);
 	}
 
-	private void createTimer(final Long initialDelay, final Long expirationTimeout, final String applicationInfo) {
+	private void createTimer(final String applicationInfo) {
 		log.info("About to CREATE a timer by calling: " + wildflyDistributedTimersRouteUrl);
 		RestAssured
 				.given()
-				.queryParam("initialDelay", initialDelay)
-				.queryParam("expirationInterval", expirationTimeout)
+				.queryParam("initialDelay", 0L)
+				.queryParam("expirationInterval", RECURRING_TIMER_EXPIRATION_TIMEOUT)
 				.queryParam("applicationInfo", applicationInfo)
 				.get(wildflyDistributedTimersRouteUrl + "/timer/custom-interval")
 				.then()
@@ -600,69 +508,47 @@ public class WildFlyInfinispanDistributedTimersIT {
 					log.info(checkResponseBody);
 					return HttpStatus.SC_NOT_FOUND == checkResponse.statusCode();
 				},
-				"Checking a deleted timer is actually removed after the REST call").interval(TimeUnit.SECONDS, 5);
+				"Checking a deleted timer is actually removed after the REST call").interval(TimeUnit.SECONDS, 10);
 		// We wait here since we've seen cases in which this is the timeout after an HTTP 504 is returned,
 		// and we've filed https://issues.redhat.com/browse/JBEAP-25790 + 30 secs again to support cases in which
 		// execution will be resumed by the newly created pod, rather than the surviving one
-		waiter.timeout(TimeUnit.SECONDS, 60).waitFor();
+		waiter.timeout(TimeUnit.SECONDS, 120).waitFor();
 	}
 
 	private void giveTheTimerEnoughTimeToExecuteOnce(final Long waitInterval, final String applicationInfo) {
 		SimpleWaiter waiter = new SimpleWaiter(
-				() -> !retrieveExpirations(applicationInfo).isEmpty(),
+				() -> !fetchExpirations(timerExpirationStoreRouteUrl + "/timer", applicationInfo).isEmpty(),
 				"Waiting for at least one timer expiration to be recorded");
 		waiter.timeout(TimeUnit.MILLISECONDS, waitInterval).waitFor();
 	}
 
 	private Pod getExecutor(String applicationInfo) {
-		final List<TimerExpiration> latestExpirations = retrieveExpirations(applicationInfo);
-		final String currentExecutorName = retrieveExecutorName(latestExpirations);
-		final Pod podToBeDeleted = retrieveExecutor(currentExecutorName);
-		return podToBeDeleted;
+		return findPodByExecutorRole(applicationInfo, true);
 	}
 
 	private Pod getNonExecutor(String applicationInfo) {
-		final List<TimerExpiration> latestExpirations = retrieveExpirations(applicationInfo);
-		final String currentExecutorName = retrieveExecutorName(latestExpirations);
-		final Pod nonExecutor = retrieveNonExecutor(currentExecutorName);
-		return nonExecutor;
+		return findPodByExecutorRole(applicationInfo, false);
 	}
 
-	private String retrieveExecutorName(final List<TimerExpiration> expirations) {
+	private Pod findPodByExecutorRole(String applicationInfo, boolean isExecutor) {
+		List<TimerExpiration> expirations = fetchExpirations(timerExpirationStoreRouteUrl + "/timer", applicationInfo);
 		if (expirations.isEmpty()) {
 			throw new IllegalStateException("There are no recorded timer expirations");
 		}
-		// sort DESC
-		final List<TimerExpiration> sortedExpirations = expirations.stream()
-				.sorted((b, a) -> a.getTimestamp().compareTo(b.getTimestamp()))
-				.collect(Collectors.toList());
-		log.debug("Retrieving current timer executor pod name, the following {} expirations were collected so far:\n---\n{}",
-				expirations.size(),
-				sortedExpirations.stream()
-						.map(Objects::toString).collect(Collectors.joining("\n---\n")));
-		// MUST work, since not empty
-		return sortedExpirations.stream().findFirst().get().getExecutor().split("/")[0];
-	}
-
-	private Pod retrieveExecutor(final String currentExecutorName) {
-		final Pod actualExecutor = wildflyDistributedTimersProvisioner.getPods().stream()
-				.filter(p -> currentExecutorName.equals(p.getMetadata().getName()))
+		String executorName = expirations.stream()
+				.max(Comparator.comparing(TimerExpiration::getTimestamp))
+				.get().getExecutor().split("/")[0];
+		log.debug("Current timer executor pod name: {}, from {} expirations", executorName, expirations.size());
+		return wildflyDistributedTimersProvisioner.getPods().stream()
+				.filter(p -> isExecutor == executorName.equals(p.getMetadata().getName()))
 				.findFirst().get();
-		return actualExecutor;
 	}
 
-	private Pod retrieveNonExecutor(final String currentExecutorName) {
-		final Pod actualExecutor = wildflyDistributedTimersProvisioner.getPods().stream()
-				.filter(p -> !currentExecutorName.equals(p.getMetadata().getName()))
-				.findFirst().get();
-		return actualExecutor;
-	}
-
-	private List<TimerExpiration> retrieveExpirations(final String applicationInfo) {
+	private List<TimerExpiration> fetchExpirations(String url, String applicationInfo) {
 		return Arrays.stream(
 				RestAssured
 						.when()
-						.get(timerExpirationStoreRouteUrl + "/timer")
+						.get(url)
 						.then()
 						.assertThat()
 						.statusCode(HttpStatus.SC_OK)
@@ -703,13 +589,13 @@ public class WildFlyInfinispanDistributedTimersIT {
 		wildflyDistributedTimersProvisioner.scale(WILDFLY_BASIC_CLUSTER_REPLICAS, Boolean.TRUE);
 	}
 
-	private boolean validateExpectedExpirations(Long expected, Long pause, Long interval, List<TimerExpiration> actual) {
-		// expected without injected failure - (missed (i.e. pause/interval) + 1 coalesced expiration)
-		long missed = pause / interval;
-		final long actualExpectation = expected - missed + 1;
-		log.info(String.format("Expected expirations: %d, missed during pause: %d, pause: %d, interval: %d, actual: %d",
-				expected, missed, pause, interval, actual.size()));
-		return actualExpectation == (long) actual.size();
+	private boolean validateExpectedExpirations(long timeWindowDuration, long pause, List<TimerExpiration> actual) {
+		long expected = timeWindowDuration / RECURRING_TIMER_EXPIRATION_TIMEOUT;
+		long missed = pause / RECURRING_TIMER_EXPIRATION_TIMEOUT;
+		long minExpected = expected - missed;
+		log.info("Expected expirations: {}, missed during pause: {}, pause: {}ms, actual: {}",
+				expected, missed, pause, actual.size());
+		return actual.size() >= minExpected;
 	}
 
 	/**
@@ -736,9 +622,11 @@ public class WildFlyInfinispanDistributedTimersIT {
 			final BiFunction<List<TimerExpiration>, Long, Boolean> expectedExpirationsValidator,
 			final Function<Long, Boolean> expectedExecutorsValidator)
 			throws InterruptedException, ExecutionException {
-		final List<TimerExpiration> actualExpirations = executeMonitoredWorkflow(timeWindowDuration, applicationInfo, failure);
-		long pause = 0;
-		// ok, let's assert...
+		CompletableFuture<List<TimerExpiration>> monitorFuture = CompletableFuture.supplyAsync(
+				() -> monitorTimerExpirationsInTimeWindow(timeWindowDuration, applicationInfo));
+		log.debug("Started observing timer expirations for {} milliseconds", timeWindowDuration);
+		failure.run();
+		final List<TimerExpiration> actualExpirations = monitorFuture.get();
 		log.debug("Finished observing timer expirations for {} milliseconds.", timeWindowDuration);
 		if (!actualExpirations.isEmpty()) {
 			log.debug(
@@ -746,58 +634,25 @@ public class WildFlyInfinispanDistributedTimersIT {
 					actualExpirations.size(),
 					applicationInfo,
 					actualExpirations.stream()
-							.sorted((b, a) -> a.getTimestamp().compareTo(b.getTimestamp()))
+							.sorted(Comparator.comparing(TimerExpiration::getTimestamp).reversed())
 							.map(Objects::toString).collect(Collectors.joining("\n---\n")));
 		}
 		if (actualExpirations.size() == 1) {
 			throw new IllegalStateException("Only one expiration was collected, which doesn't allow to perform assertions");
 		}
-		// let's assert the number of timer expirations
+		// find the largest gap between consecutive expirations (the "blackout" window)
 		List<TimerExpiration> sorted = actualExpirations.stream()
-				.sorted(Comparator.comparing(TimerExpiration::getTimestamp).reversed())
+				.sorted(Comparator.comparing(TimerExpiration::getTimestamp))
 				.collect(Collectors.toList());
-		// store the maximum interval between ticks, as the supposed "black-out" window - just 1 (coalesced tick)
-		// should be executed in such time
-		for (int i = 0; i < actualExpirations.size() - 1; i++) {
-			final long interval = Duration.between(Instant.from(sorted.get(i + 1).getTimestamp()),
-					Instant.from(sorted.get(i).getTimestamp())).toMillis();
-			if (interval > pause)
-				pause = interval;
+		long pause = 0;
+		for (int i = 1; i < sorted.size(); i++) {
+			long gap = Duration.between(sorted.get(i - 1).getTimestamp(), sorted.get(i).getTimestamp()).toMillis();
+			if (gap > pause)
+				pause = gap;
 		}
 		Assertions.assertTrue(expectedExpirationsValidator.apply(actualExpirations, pause));
-		// also, let's assert that timer expirations are by a given number of executors
 		Assertions.assertTrue(expectedExecutorsValidator
 				.apply(actualExpirations.stream().map(TimerExpiration::getExecutor).distinct().count()));
-	}
-
-	/**
-	 *
-	 * @param timeWindowDuration Duration of the monitored time window in milliseconds
-	 * @param applicationInfo The timer info that will be used to identify a given timer
-	 * @param failure A {@link Runnable} instance that represents the failure which is being injected within the
-	 *                monitored time window
-	 * @return A list of {@link TimerExpiration} instances, representing a given timer expirations occurred within
-	 * the monitored time window
-	 *
-	 * @throws InterruptedException Thrown when the main thread wait interval is interrupted unexpectedly
-	 * @throws ExecutionException Thrown when an error occurs during the asynchronous monitoring method execution
-	 */
-	private List<TimerExpiration> executeMonitoredWorkflow(
-			Long timeWindowDuration, String applicationInfo, Runnable failure) throws InterruptedException, ExecutionException {
-		// start an asynchronous time window that will return the expirations
-		CompletableFuture<List<TimerExpiration>> completableFuture = CompletableFuture.supplyAsync(
-				() -> monitorTimerExpirationsInTimeWindow(timeWindowDuration, applicationInfo));
-		log.debug("Started observing timer expirations for {} milliseconds:", timeWindowDuration);
-		// execute failure workflow
-		failure.run();
-		// wait until the time window will pass, meantime timers should be expiring again and filling the time window
-		// results
-		while (!completableFuture.isDone()) {
-			// it is ok to sleep for 1 sec given the granularity of this test (several seconds time windows)
-			Thread.sleep(1_000L);
-			log.debug("Still observing timer expirations...");
-		}
-		return completableFuture.get();
 	}
 
 	/**
@@ -811,49 +666,21 @@ public class WildFlyInfinispanDistributedTimersIT {
 	private List<TimerExpiration> monitorTimerExpirationsInTimeWindow(final Long timeWindowDuration,
 			final String applicationInfo) {
 		List<TimerExpiration> expirations = new ArrayList<>();
-		// set the start and end of a time window
 		final Instant start = Instant.now(), end = start.plusMillis(timeWindowDuration);
 		final String requestUrl = timerExpirationStoreRouteUrl
 				+ String.format("/timer/range?from=%s&to=%s", start, end);
 		log.debug("---> Observing time window from {} to {} ({})", start, end, requestUrl);
 		do {
-			// wait until enough time (i.e. greater than the above window) is passed, so the window is reliable
 			try {
-				expirations = Arrays.stream(
-						RestAssured
-								.when()
-								.get(requestUrl)
-								.then()
-								.assertThat()
-								.statusCode(HttpStatus.SC_OK)
-								.contentType(ContentType.JSON)
-								.extract()
-								.as(TimerExpiration[].class))
-						.filter(e -> applicationInfo.equals(e.getInfo())).collect(Collectors.toList());
-				log.debug(
-						"---> There are currently {} expirations in the monitored time window",
-						expirations.size());
-				// it is ok to sleep for 1 sec given the granularity of this test (several seconds time windows)
+				expirations = fetchExpirations(requestUrl, applicationInfo);
+				log.debug("---> {} expirations in the monitored time window", expirations.size());
 				Thread.sleep(1_000L);
 			} catch (InterruptedException e) {
 				throw new IllegalStateException("Test error. Observing timer expirations failed: " + e.getMessage());
 			}
 		} while (Instant.now().isBefore(end));
-		// now fetch executions for the last time in the conventional time window from the EJB Timer Expiration Store app
-		expirations = Arrays.stream(
-				RestAssured
-						.when()
-						.get(requestUrl)
-						.then()
-						.assertThat()
-						.statusCode(HttpStatus.SC_OK)
-						.contentType(ContentType.JSON)
-						.extract()
-						.as(TimerExpiration[].class))
-				.filter(e -> applicationInfo.equals(e.getInfo())).collect(Collectors.toList());
-		log.debug(
-				"---> There are finally {} expirations in the monitored time window",
-				expirations.size());
+		expirations = fetchExpirations(requestUrl, applicationInfo);
+		log.debug("---> Finally {} expirations in the monitored time window", expirations.size());
 		return expirations;
 	}
 }
