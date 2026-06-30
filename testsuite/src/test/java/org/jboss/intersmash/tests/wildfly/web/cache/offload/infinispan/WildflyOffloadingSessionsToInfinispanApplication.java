@@ -26,6 +26,7 @@ import org.jboss.intersmash.IntersmashConfig;
 import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
 import org.jboss.intersmash.application.openshift.WildflyImageOpenShiftApplication;
+import org.jboss.intersmash.tests.infinispan.Infinispan2ReplicasService;
 import org.jboss.intersmash.tests.wildfly.WildflyApplicationConfiguration;
 
 /**

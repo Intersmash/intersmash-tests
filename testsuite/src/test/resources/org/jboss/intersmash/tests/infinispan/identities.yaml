@@ -1,0 +1,7 @@
+credentials:
+  - username: foo
+    password: bar
+  - username: known-admin
+    password: changeme
+    roles:
+      - admin

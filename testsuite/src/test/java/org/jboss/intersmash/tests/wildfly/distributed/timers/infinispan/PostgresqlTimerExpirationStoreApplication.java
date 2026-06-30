@@ -13,22 +13,33 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.jboss.intersmash.tests.wildfly.postgresql;
+package org.jboss.intersmash.tests.wildfly.distributed.timers.infinispan;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.jboss.intersmash.application.openshift.PostgreSQLTemplateOpenShiftApplication;
 import org.jboss.intersmash.application.openshift.template.PostgreSQLTemplate;
 
 /**
- * Deploy the postgresql database using the {@link PostgreSQLTemplate#POSTGRESQL_EPHEMERAL} template.
+ * Deploy the PostgreSQL database using the {@link PostgreSQLTemplate#POSTGRESQL_EPHEMERAL} template to implement
+ * the persistence store holding distributed timers expirations.
+ * Uses the template default parameters.
  */
-public class PostgresqlService implements PostgreSQLTemplateOpenShiftApplication {
+public class PostgresqlTimerExpirationStoreApplication implements PostgreSQLTemplateOpenShiftApplication {
 
-	static final String POSTGRESQL_NAME = "postgresql";
-	public static final String POSTGRESQL_DATABASE = "sampledb";
-	public static final String POSTGRESQL_PASSWORD = "s3c37Pa88w0rd1234";
-	public static final String POSTGRESQL_USER = "user09M";
+	public static final String POSTGRESQL_NAME = "postgresql";
+	public static final String POSTGRESQL_DATABASE = "theData";
+	public static final String POSTGRESQL_PASSWORD = "thePassword";
+	public static final String POSTGRESQL_USER = "theUser";
+
+	private final Map<String, String> parameters = new HashMap<>();
+
+	public PostgresqlTimerExpirationStoreApplication() {
+		parameters.put("POSTGRESQL_DATABASE", POSTGRESQL_DATABASE);
+		parameters.put("POSTGRESQL_PASSWORD", POSTGRESQL_PASSWORD);
+		parameters.put("POSTGRESQL_USER", POSTGRESQL_USER);
+	}
 
 	@Override
 	public PostgreSQLTemplate getTemplate() {
@@ -42,10 +53,6 @@ public class PostgresqlService implements PostgreSQLTemplateOpenShiftApplication
 
 	@Override
 	public Map<String, String> getParameters() {
-		Map<String, String> parameters = new HashMap<>();
-		parameters.put("POSTGRESQL_DATABASE", POSTGRESQL_DATABASE);
-		parameters.put("POSTGRESQL_PASSWORD", POSTGRESQL_PASSWORD);
-		parameters.put("POSTGRESQL_USER", POSTGRESQL_USER);
-		return parameters;
+		return Collections.unmodifiableMap(parameters);
 	}
 }
