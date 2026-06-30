@@ -47,7 +47,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
 
-        <version.intersmash>0.0.5.Beta1</version.intersmash>
+        <version.intersmash>0.0.5.Beta2-SNAPSHOT</version.intersmash>
         <version.junit-jupiter>5.11.1</version.junit-jupiter>
         <version.rest-assured>5.5.1</version.rest-assured>
         <version.junit-platform-launcher>1.11.3</version.junit-platform-launcher>
@@ -81,19 +81,18 @@
                 <groupId>org.jboss.intersmash</groupId>
                 <artifactId>intersmash-provisioners</artifactId>
                 <version>${version.intersmash}</version>
-                <exclusions>
-                    <!-- workaround for https://howtodoinjava.com/lombok/lombok-nosuchfielderror-error/ -->
-                    <exclusion>
-                        <groupId>org.projectlombok</groupId>
-                        <artifactId>lombok</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
-            <!-- workaround for https://howtodoinjava.com/lombok/lombok-nosuchfielderror-error/ -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${version.lombok}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.sundr</groupId>
+                <artifactId>builder-annotations</artifactId>
+                <version>${version.sundrio.builder-annotations}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.intersmash.tests</groupId>
@@ -206,6 +205,25 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <annotationProcessorPaths>
+                          <path>
+                            <groupId>io.sundr</groupId>
+                            <artifactId>builder-annotations</artifactId>
+                            <version>${version.sundr.builder-annotations}</version>
+                          </path>
+                          <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${version.lombok}</version>
+                          </path>
+                        </annotationProcessorPaths>
+                        <useIncrementalCompilation>false</useIncrementalCompilation>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${version.failsafe.plugin}</version>
                     <executions>
@@ -222,19 +240,12 @@
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>${version.spotless-maven-plugin}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.jboss.intersmash.tests</groupId>
-                            <artifactId>style-config</artifactId>
-                            <version>0.0.1-SNAPSHOT</version>
-                        </dependency>
-                    </dependencies>
                     <configuration>
                         <java>
                             <removeUnusedImports/>
                             <importOrder/>
                             <eclipse>
-                                <file>org/jboss/intersmash/tests/configs/eclipse-formatter.xml</file>
+                                <file>${maven.multiModuleProjectDirectory}/style-config/src/main/resources/org/jboss/intersmash/tests/configs/eclipse-formatter.xml</file>
                             </eclipse>
                             <licenseHeader>
                                 <content>

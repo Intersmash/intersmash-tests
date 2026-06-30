@@ -31,22 +31,22 @@ import org.jboss.intersmash.application.openshift.PostgreSQLImageOpenShiftApplic
 import org.jboss.intersmash.application.operator.KeycloakOperatorApplication;
 import org.jboss.intersmash.tests.wildfly.elytron.oidc.client.keycloak.KeycloakPostgresqlApplication;
 import org.jboss.intersmash.tests.wildfly.util.SimpleCommandLineBasedKeystoreGenerator;
-import org.keycloak.k8s.v2alpha1.Keycloak;
-import org.keycloak.k8s.v2alpha1.KeycloakBuilder;
-import org.keycloak.k8s.v2alpha1.KeycloakRealmImport;
-import org.keycloak.k8s.v2alpha1.KeycloakRealmImportBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.RealmBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Clients;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.RequiredActionsBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.Users;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.UsersBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakrealmimportspec.realm.users.CredentialsBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakspec.DbBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakspec.HostnameBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakspec.HttpBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakspec.IngressBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakspec.db.PasswordSecretBuilder;
-import org.keycloak.k8s.v2alpha1.keycloakspec.db.UsernameSecretBuilder;
+import org.keycloak.k8s.v2beta1.Keycloak;
+import org.keycloak.k8s.v2beta1.KeycloakBuilder;
+import org.keycloak.k8s.v2beta1.KeycloakRealmImport;
+import org.keycloak.k8s.v2beta1.KeycloakRealmImportBuilder;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.RealmBuilder;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.Clients;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.RequiredActionsBuilder;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.Users;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.UsersBuilder;
+import org.keycloak.k8s.v2beta1.keycloakrealmimportspec.realm.users.CredentialsBuilder;
+import org.keycloak.k8s.v2beta1.keycloakspec.DbBuilder;
+import org.keycloak.k8s.v2beta1.keycloakspec.HostnameBuilder;
+import org.keycloak.k8s.v2beta1.keycloakspec.HttpBuilder;
+import org.keycloak.k8s.v2beta1.keycloakspec.IngressBuilder;
+import org.keycloak.k8s.v2beta1.keycloakspec.db.PasswordSecretBuilder;
+import org.keycloak.k8s.v2beta1.keycloakspec.db.UsernameSecretBuilder;
 
 /**
  * Basic Keycloak Operator Application for SAML adapter testing.
