@@ -44,7 +44,7 @@ public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOpera
 
 	private static final String KAFKA_VERSION = "4.2.0";
 	private static final int KAFKA_INSTANCE_NUM = 3;
-	private static final int TOPIC_RECONCILIATION_INTERVAL_SECONDS = 90;
+	private static final long TOPIC_RECONCILIATION_INTERVAL_SECONDS = 90L;
 	private static final long USER_RECONCILIATION_INTERVAL_SECONDS = 120L;
 
 	public static final int KAFKA_PLAINTEXT_PORT = 9092;
@@ -80,10 +80,6 @@ public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOpera
 		// We need this configuration due to the tests that sets custom partition number for the message in topic.
 		config.put("num.partitions", 2);
 
-		config.put("advertised.listeners",
-				"SSL://localhost:" + KAFKA_SSL_PORT + ",PLAINTEXT://localhost:" + KAFKA_PLAINTEXT_PORT);
-		config.put("security.inter.broker.protocol", "PLAINTEXT");
-
 		List<GenericKafkaListener> listeners = new ArrayList<>();
 
 		GenericKafkaListener listenerSsl = new GenericKafkaListener();
@@ -104,19 +100,21 @@ public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOpera
 		CertificateAuthority ca = new CertificateAuthorityBuilder().build();
 
 		// Initialize AMQ Streams Kafka resource (KRaft mode - ZooKeeper removed in Kafka 4.x)
+		// Note: replicas and storage are configured in KafkaNodePool, not in Kafka spec
 		kafka = new KafkaBuilder()
-				.withNewMetadata().withName(APP_NAME).endMetadata()
+				.withNewMetadata().withName(APP_NAME)
+				.withAnnotations(Map.of("strimzi.io/node-pools", "enabled", "strimzi.io/kraft", "enabled"))
+				.endMetadata()
 				.withNewSpec()
 				.withNewEntityOperator()
-				.withNewTopicOperator().withReconciliationIntervalSeconds(TOPIC_RECONCILIATION_INTERVAL_SECONDS)
+				.withNewTopicOperator().withReconciliationIntervalMs(TOPIC_RECONCILIATION_INTERVAL_SECONDS * 1000)
 				.endTopicOperator()
-				.withNewUserOperator().withReconciliationIntervalSeconds(USER_RECONCILIATION_INTERVAL_SECONDS).endUserOperator()
+				.withNewUserOperator().withReconciliationIntervalMs(USER_RECONCILIATION_INTERVAL_SECONDS * 1000)
+				.endUserOperator()
 				.endEntityOperator()
 				.withNewKafka()
 				.withConfig(config)
 				.withListeners(listeners)
-				.withReplicas(KAFKA_INSTANCE_NUM)
-				.withNewEphemeralStorage().endEphemeralStorage()
 				.withVersion(KAFKA_VERSION)
 				.endKafka()
 				.withClusterCa(ca)

@@ -57,7 +57,7 @@ public class SecuredKafkaMicroProfileReactiveMessagingApplication implements Kaf
 
 	private static final String KAFKA_VERSION = KafkaOperatorApplication.KAFKA_VERSION;
 	private static final int KAFKA_INSTANCE_NUM = KafkaOperatorApplication.KAFKA_INSTANCE_NUM;
-	private static final int TOPIC_RECONCILIATION_INTERVAL_SECONDS = KafkaOperatorApplication.TOPIC_RECONCILIATION_INTERVAL_SECONDS;
+	private static final long TOPIC_RECONCILIATION_INTERVAL_SECONDS = KafkaOperatorApplication.TOPIC_RECONCILIATION_INTERVAL_SECONDS;
 	private static final long USER_RECONCILIATION_INTERVAL_SECONDS = KafkaOperatorApplication.USER_RECONCILIATION_INTERVAL_SECONDS;
 
 	public static final int KAFKA_PLAINTEXT_PORT = 9092;
@@ -157,20 +157,19 @@ public class SecuredKafkaMicroProfileReactiveMessagingApplication implements Kaf
 		CertificateAuthority ca = new CertificateAuthorityBuilder().build();
 
 		// Initialize Kafka resource (KRaft mode - ZooKeeper removed in Kafka 4.x)
+		// Note: replicas and storage are configured in KafkaNodePool, not in Kafka spec
 		kafka = new KafkaBuilder()
 				.withNewMetadata().withName(APP_NAME).endMetadata()
 				.withNewSpec()
 				.withNewEntityOperator()
-				.withNewTopicOperator().withReconciliationIntervalSeconds(TOPIC_RECONCILIATION_INTERVAL_SECONDS)
+				.withNewTopicOperator().withReconciliationIntervalMs(TOPIC_RECONCILIATION_INTERVAL_SECONDS * 1000)
 				.endTopicOperator()
-				.withNewUserOperator().withReconciliationIntervalSeconds(USER_RECONCILIATION_INTERVAL_SECONDS)
+				.withNewUserOperator().withReconciliationIntervalMs(USER_RECONCILIATION_INTERVAL_SECONDS * 1000)
 				.endUserOperator()
 				.endEntityOperator()
 				.withNewKafka()
 				.withConfig(config)
 				.withListeners(listeners)
-				.withReplicas(KAFKA_INSTANCE_NUM)
-				.withNewEphemeralStorage().endEphemeralStorage()
 				.withVersion(KAFKA_VERSION)
 				.endKafka()
 				.withClusterCa(ca)
