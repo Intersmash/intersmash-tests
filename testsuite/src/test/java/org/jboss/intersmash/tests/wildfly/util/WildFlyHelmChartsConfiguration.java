@@ -80,7 +80,12 @@ public interface WildFlyHelmChartsConfiguration {
 	default WildflyHelmChartRelease getHelmChartRelease() {
 		String targetDistribution = getWildflyTargetDistribution();
 		if (targetDistribution.startsWith("jboss-eap-xp")) {
-			return new EapXp6HelmChartReleaseAdapter(new HelmXp6Release());
+			String chartsName = IntersmashConfig.getWildflyHelmChartsName();
+			if (chartsName != null && chartsName.startsWith("eap-xp6")) {
+				return new EapXp6HelmChartReleaseAdapter(new HelmXp6Release());
+			}
+			//TODO: replace with proper XP7 mapping if any will ever arrive, otherwise delete this comment
+			return new Eap82HelmChartReleaseAdapter(new HelmEap82Release());
 		} else if (targetDistribution.startsWith("jboss-eap")) {
 			String chartsName = IntersmashConfig.getWildflyHelmChartsName();
 			return new Eap82HelmChartReleaseAdapter(new HelmEap82Release());
