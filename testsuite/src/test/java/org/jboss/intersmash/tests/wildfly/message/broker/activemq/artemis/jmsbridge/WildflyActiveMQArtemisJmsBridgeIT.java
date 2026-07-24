@@ -88,7 +88,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 	@Order(1)
 	public void testSendMessageToAMQThroughJmsBridge() {
 
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 0 messages"));
+		assertThat(getAmqTestQueueInfo().replace("\n", " "), containsString("browsed: 0 messages"));
 
 		// Produce a message to be sent to the JMS Bridge on WildFly/JBoss EAP
 		final int totMessages = 10;
@@ -103,7 +103,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 					.body(containsString(QUEUE_SEND_RESPONSE));
 		}
 
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: " + totMessages + " messages"));
+		assertThat(getAmqTestQueueInfo().replace("\n", " "), containsString("browsed: " + totMessages + " messages"));
 	}
 
 	/**
@@ -155,8 +155,16 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 				"Waiting for the JMS Bridge to be reconnected, and messages count to be 0").interval(TimeUnit.SECONDS, 3);
 		waiter.timeout(TimeUnit.SECONDS, MAX_SECONDS_WAIT_FOR_JMS_BRIDGE_RECONCILIATION).waitFor();
 
+		// Give WildFly/JBoss EAP some time to get the message back from ActiveMQ Broker
+		try {
+			Thread.sleep(5 * 1000);
+		} catch (InterruptedException e) {
+			throw new IllegalStateException(
+					"Test error. Waiting for WildFly/JBoss EAP to get message from ActiveMQ Broker: " + e.getMessage());
+		}
+
 		// just the one message parked on WildFly/JBoss EAP that is sent after AMQ Broker is resumed
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 1 messages"));
+		assertThat(getAmqTestQueueInfo().replace("\n", " "), containsString("browsed: 1 messages"));
 
 		// Produce a message to be sent to the JMS Bridge on WildFly/JBoss EAP
 		get(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE)
@@ -168,7 +176,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 				.assertThat()
 				.body(containsString(QUEUE_SEND_RESPONSE));
 
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 2 messages"));
+		assertThat(getAmqTestQueueInfo().replace("\n", " "), containsString("browsed: 2 messages"));
 	}
 
 	/**
@@ -176,7 +184,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 	 *
 	 * @return the output of the {@code artemis browser} command for the configured test queue
 	 */
-	private static String getTestQueueInfo() {
+	private static String getAmqTestQueueInfo() {
 		Pod brokerPod = OpenShifts.master().getPod(FIRST_POD_NAME);
 		PodShell podShell = OpenShifts.master().podShell(brokerPod);
 		String output = podShell.executeWithBash(
