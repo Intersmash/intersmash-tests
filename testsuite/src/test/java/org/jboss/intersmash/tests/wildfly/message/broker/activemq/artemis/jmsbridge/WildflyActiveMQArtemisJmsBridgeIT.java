@@ -18,6 +18,7 @@ package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.jmsbr
 import static io.restassured.RestAssured.get;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import cz.xtf.core.openshift.OpenShifts;
 import cz.xtf.core.openshift.PodShell;
@@ -88,7 +89,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 	@Order(1)
 	public void testSendMessageToAMQThroughJmsBridge() {
 
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 0 messages"));
+		assertThat(getAmqTestQueueInfo().replace("\n", " "), containsString("browsed: 0 messages"));
 
 		// Produce a message to be sent to the JMS Bridge on WildFly/JBoss EAP
 		final int totMessages = 10;
@@ -103,7 +104,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 					.body(containsString(QUEUE_SEND_RESPONSE));
 		}
 
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: " + totMessages + " messages"));
+		assertThat(getAmqTestQueueInfo().replace("\n", " "), containsString("browsed: " + totMessages + " messages"));
 	}
 
 	/**
@@ -127,14 +128,30 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 		amqBrokerOperatorProvisioner.scale(0, true);
 
 		// Produce a message to be sent to the JMS Bridge on WildFly/JBoss EAP: the message should wait on WildFly/JBoss EAP until AQM is resumed
-		get(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE)
-				.then()
-				.log()
-				.ifValidationFails(LogDetail.ALL, true)
-				.assertThat()
-				.statusCode(200)
-				.assertThat()
-				.body(containsString(QUEUE_SEND_RESPONSE));
+		// The produce call sometimes silently fails, so we retry until the count endpoint confirms the message was queued
+		boolean messageProduced = false;
+		for (int attempt = 1; attempt <= 10; attempt++) {
+			get(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE)
+					.then()
+					.log()
+					.ifValidationFails(LogDetail.ALL, true)
+					.assertThat()
+					.statusCode(200)
+					.assertThat()
+					.body(containsString(QUEUE_SEND_RESPONSE));
+			ExtractableResponse<Response> countResponse = get(eapUrl + "/jms-test?request=" + REQUEST_COUNT)
+					.then()
+					.log()
+					.everything(true)
+					.assertThat().extract();
+			if (countResponse.body().asString().contains(String.format(QUEUE_COUNT_TEMPLATE, 1))) {
+				log.info("Message produced successfully on attempt {}", attempt);
+				messageProduced = true;
+				break;
+			}
+			log.warn("Produce attempt {} did not result in queued message, retrying...", attempt);
+		}
+		assertTrue(messageProduced, "Message should have been produced and queued after 10 attempts");
 
 		// scaling back to 1: now the message parked on WildFly/JBoss EAP is sent to AMQ
 		amqBrokerOperatorProvisioner.scale(1, true);
@@ -156,7 +173,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 		waiter.timeout(TimeUnit.SECONDS, MAX_SECONDS_WAIT_FOR_JMS_BRIDGE_RECONCILIATION).waitFor();
 
 		// just the one message parked on WildFly/JBoss EAP that is sent after AMQ Broker is resumed
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 1 messages"));
+		assertThat(getAmqTestQueueInfo().replace("\n", " "), containsString("browsed: 1 messages"));
 
 		// Produce a message to be sent to the JMS Bridge on WildFly/JBoss EAP
 		get(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE)
@@ -168,7 +185,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 				.assertThat()
 				.body(containsString(QUEUE_SEND_RESPONSE));
 
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 2 messages"));
+		assertThat(getAmqTestQueueInfo().replace("\n", " "), containsString("browsed: 2 messages"));
 	}
 
 	/**
@@ -176,7 +193,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 	 *
 	 * @return the output of the {@code artemis browser} command for the configured test queue
 	 */
-	private static String getTestQueueInfo() {
+	private static String getAmqTestQueueInfo() {
 		Pod brokerPod = OpenShifts.master().getPod(FIRST_POD_NAME);
 		PodShell podShell = OpenShifts.master().podShell(brokerPod);
 		String output = podShell.executeWithBash(
