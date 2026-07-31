@@ -15,18 +15,20 @@
 */
 package org.jboss.intersmash.tests.wildfly.message.broker.activemq.artemis.jmsbridge;
 
-import static io.restassured.RestAssured.get;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import cz.xtf.core.openshift.OpenShifts;
 import cz.xtf.core.openshift.PodShell;
 import cz.xtf.core.waiting.SimpleWaiter;
 import cz.xtf.junit5.listeners.ProjectCreator;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.restassured.filter.log.LogDetail;
-import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.intersmash.annotations.Intersmash;
@@ -59,6 +61,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class WildflyActiveMQArtemisJmsBridgeIT {
 
+	private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 	private static final int MAX_SECONDS_WAIT_FOR_JMS_BRIDGE_RECONCILIATION = 70;
 
 	static final String QUEUE_SEND_RESPONSE = "Sent a text message to ";
@@ -86,21 +89,17 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 	 */
 	@Test
 	@Order(1)
-	public void testSendMessageToAMQThroughJmsBridge() {
+	public void testSendMessageToAMQThroughJmsBridge() throws Exception {
 
 		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 0 messages"));
 
 		// Produce a message to be sent to the JMS Bridge on WildFly/JBoss EAP
 		final int totMessages = 10;
 		for (int messages = 0; messages < totMessages; messages++) {
-			get(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE)
-					.then()
-					.log()
-					.ifValidationFails(LogDetail.ALL, true)
-					.assertThat()
-					.statusCode(200)
-					.assertThat()
-					.body(containsString(QUEUE_SEND_RESPONSE));
+			HttpResponse<String> response = httpGet(
+					eapUrl + "/jms-test?request=" + REQUEST_PRODUCE + "&test=testSendMessageToAMQThroughJmsBridge");
+			assertEquals(200, response.statusCode());
+			assertThat(response.body(), containsString(QUEUE_SEND_RESPONSE));
 		}
 
 		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: " + totMessages + " messages"));
@@ -122,19 +121,18 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 	 */
 	@Test
 	@Order(2)
-	public void testScaleAMQ() throws InterruptedException {
+	public void testScaleAMQ() throws Exception {
 		// being the AMQ Broker stateless in the current configuration, scaling to zero causes loss of all messages
 		amqBrokerOperatorProvisioner.scale(0, true);
 
 		// Produce a message to be sent to the JMS Bridge on WildFly/JBoss EAP: the message should wait on WildFly/JBoss EAP until AQM is resumed
-		get(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE)
-				.then()
-				.log()
-				.ifValidationFails(LogDetail.ALL, true)
-				.assertThat()
-				.statusCode(200)
-				.assertThat()
-				.body(containsString(QUEUE_SEND_RESPONSE));
+		HttpResponse<String> response = httpGet(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE + "&test=testScaleAMQ");
+		assertEquals(200, response.statusCode());
+		assertThat(response.body(), containsString(QUEUE_SEND_RESPONSE));
+
+		// Log how may messages are queued on
+		HttpResponse<String> cnt = httpGet(eapUrl + "/jms-test?request=" + REQUEST_COUNT + "&test=testScaleAMQ");
+		log.info("BEFORE RESTARTING AMQ:\n" + cnt.body());
 
 		// scaling back to 1: now the message parked on WildFly/JBoss EAP is sent to AMQ
 		amqBrokerOperatorProvisioner.scale(1, true);
@@ -145,30 +143,39 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 		// last for 70 seconds, just to be sure.
 		SimpleWaiter waiter = new SimpleWaiter(
 				() -> {
-					ExtractableResponse<Response> response = get(eapUrl + "/jms-test?request=" + REQUEST_COUNT)
-							.then()
-							.log()
-							.everything(true)
-							.assertThat().extract();
-					return response.body().asString().contains(String.format(QUEUE_COUNT_TEMPLATE, 0));
+					try {
+						HttpResponse<String> countResponse = httpGet(
+								eapUrl + "/jms-test?request=" + REQUEST_COUNT + "&test=testScaleAMQ");
+						return countResponse.body().contains(String.format(QUEUE_COUNT_TEMPLATE, 0));
+					} catch (IOException | InterruptedException e) {
+						throw new RuntimeException(e);
+					}
 				},
 				"Waiting for the JMS Bridge to be reconnected, and messages count to be 0").interval(TimeUnit.SECONDS, 3);
 		waiter.timeout(TimeUnit.SECONDS, MAX_SECONDS_WAIT_FOR_JMS_BRIDGE_RECONCILIATION).waitFor();
 
 		// just the one message parked on WildFly/JBoss EAP that is sent after AMQ Broker is resumed
-		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 1 messages"));
+		new SimpleWaiter(
+				() -> getTestQueueInfo().replace("\n", " ").contains("browsed: 1 messages"),
+				"Waiting for 1 message to appear on the AMQ broker queue")
+				.interval(TimeUnit.SECONDS, 5)
+				.timeout(TimeUnit.SECONDS, MAX_SECONDS_WAIT_FOR_JMS_BRIDGE_RECONCILIATION)
+				.waitFor();
 
 		// Produce a message to be sent to the JMS Bridge on WildFly/JBoss EAP
-		get(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE)
-				.then()
-				.log()
-				.ifValidationFails(LogDetail.ALL, true)
-				.assertThat()
-				.statusCode(200)
-				.assertThat()
-				.body(containsString(QUEUE_SEND_RESPONSE));
+		HttpResponse<String> produceResponse = httpGet(eapUrl + "/jms-test?request=" + REQUEST_PRODUCE + "&test=testScaleAMQ");
+		assertEquals(200, produceResponse.statusCode());
+		assertThat(produceResponse.body(), containsString(QUEUE_SEND_RESPONSE));
 
 		assertThat(getTestQueueInfo().replace("\n", " "), containsString("browsed: 2 messages"));
+	}
+
+	private HttpResponse<String> httpGet(String url) throws IOException, InterruptedException {
+		HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create(url))
+				.GET()
+				.build();
+		return HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
 	}
 
 	/**
@@ -186,7 +193,7 @@ public class WildflyActiveMQArtemisJmsBridgeIT {
 						ActiveMQArtemisApplication.ADMIN_USER, ActiveMQArtemisApplication.ADMIN_PASSWORD,
 						ActiveMQArtemisApplication.QUEUE_NAME))
 				.getOutput();
-
+		log.info(output);
 		return output;
 	}
 }
