@@ -21,6 +21,9 @@ import io.strimzi.api.kafka.model.kafka.Kafka;
 import io.strimzi.api.kafka.model.kafka.KafkaBuilder;
 import io.strimzi.api.kafka.model.kafka.listener.GenericKafkaListener;
 import io.strimzi.api.kafka.model.kafka.listener.KafkaListenerType;
+import io.strimzi.api.kafka.model.nodepool.KafkaNodePool;
+import io.strimzi.api.kafka.model.nodepool.KafkaNodePoolBuilder;
+import io.strimzi.api.kafka.model.nodepool.ProcessRoles;
 import io.strimzi.api.kafka.model.topic.KafkaTopic;
 import io.strimzi.api.kafka.model.user.KafkaUser;
 import java.util.ArrayList;
@@ -40,19 +43,33 @@ public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOpera
 	public static final String APP_NAME = "amq-streams";
 
 	private static final String KAFKA_VERSION = "4.2.0";
-	private static final String KAFKA_INTER_BROKER_PROTOCOL_VERSION = "4.2";
 	private static final int KAFKA_INSTANCE_NUM = 3;
-	private static final int TOPIC_RECONCILIATION_INTERVAL_SECONDS = 90;
+	private static final long TOPIC_RECONCILIATION_INTERVAL_SECONDS = 90L;
 	private static final long USER_RECONCILIATION_INTERVAL_SECONDS = 120L;
 
 	public static final int KAFKA_PLAINTEXT_PORT = 9092;
 	public static final int KAFKA_SSL_PORT = 9093;
 
 	private final Kafka kafka;
+	private final List<KafkaNodePool> kafkaNodePools = new ArrayList<>();
 
 	public KafkaMicroProfileReactiveMessagingApplication() {
+		// Create a KafkaNodePool for KRaft mode (required for Kafka 4.x)
+		// This node pool combines broker and controller roles
+		kafkaNodePools.add(new KafkaNodePoolBuilder()
+				.withNewMetadata()
+				.withName("kafka-pool")
+				.withLabels(Map.of("strimzi.io/cluster", APP_NAME))
+				.endMetadata()
+				.withNewSpec()
+				.withReplicas(KAFKA_INSTANCE_NUM)
+				.withRoles(ProcessRoles.BROKER, ProcessRoles.CONTROLLER)
+				.withNewEphemeralStorage()
+				.endEphemeralStorage()
+				.endSpec()
+				.build());
+
 		Map<String, Object> config = new HashMap<>();
-		config.put("inter.broker.protocol.version", KAFKA_INTER_BROKER_PROTOCOL_VERSION);
 		config.put("offsets.topic.replication.factor", KAFKA_INSTANCE_NUM);
 		config.put("transaction.state.log.min.isr", KAFKA_INSTANCE_NUM);
 		config.put("transaction.state.log.replication.factor", KAFKA_INSTANCE_NUM);
@@ -62,10 +79,6 @@ public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOpera
 
 		// We need this configuration due to the tests that sets custom partition number for the message in topic.
 		config.put("num.partitions", 2);
-
-		config.put("advertised.listeners",
-				"SSL://localhost:" + KAFKA_SSL_PORT + ",PLAINTEXT://localhost:" + KAFKA_PLAINTEXT_PORT);
-		config.put("security.inter.broker.protocol", "PLAINTEXT");
 
 		List<GenericKafkaListener> listeners = new ArrayList<>();
 
@@ -86,26 +99,24 @@ public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOpera
 
 		CertificateAuthority ca = new CertificateAuthorityBuilder().build();
 
-		// Initialize AMQ Streams Kafka resource
+		// Initialize AMQ Streams Kafka resource (KRaft mode - ZooKeeper removed in Kafka 4.x)
+		// Note: replicas and storage are configured in KafkaNodePool, not in Kafka spec
 		kafka = new KafkaBuilder()
-				.withNewMetadata().withName(APP_NAME).endMetadata()
+				.withNewMetadata().withName(APP_NAME)
+				.withAnnotations(Map.of("strimzi.io/node-pools", "enabled", "strimzi.io/kraft", "enabled"))
+				.endMetadata()
 				.withNewSpec()
 				.withNewEntityOperator()
-				.withNewTopicOperator().withReconciliationIntervalSeconds(TOPIC_RECONCILIATION_INTERVAL_SECONDS)
+				.withNewTopicOperator().withReconciliationIntervalMs(TOPIC_RECONCILIATION_INTERVAL_SECONDS * 1000)
 				.endTopicOperator()
-				.withNewUserOperator().withReconciliationIntervalSeconds(USER_RECONCILIATION_INTERVAL_SECONDS).endUserOperator()
+				.withNewUserOperator().withReconciliationIntervalMs(USER_RECONCILIATION_INTERVAL_SECONDS * 1000)
+				.endUserOperator()
 				.endEntityOperator()
 				.withNewKafka()
 				.withConfig(config)
 				.withListeners(listeners)
-				.withReplicas(KAFKA_INSTANCE_NUM)
-				.withNewEphemeralStorage().endEphemeralStorage()
 				.withVersion(KAFKA_VERSION)
 				.endKafka()
-				.withNewZookeeper()
-				.withReplicas(KAFKA_INSTANCE_NUM)
-				.withNewEphemeralStorage().endEphemeralStorage()
-				.endZookeeper()
 				.withClusterCa(ca)
 				.endSpec()
 				.build();
@@ -132,5 +143,10 @@ public class KafkaMicroProfileReactiveMessagingApplication implements KafkaOpera
 	@Override
 	public String getName() {
 		return APP_NAME;
+	}
+
+	@Override
+	public List<KafkaNodePool> getNodePools() {
+		return kafkaNodePools;
 	}
 }

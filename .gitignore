@@ -15,3 +15,13 @@
 /testsuite/wildfly-web-cache-offload-infinispan/tmp/
 /testsuite/intersmash-tests-testsuite.iml
 /testsuite/log/
+/testsuite/tmp
+
+# JEnv
+.java-version
+# Claude
+CLAUDE.md
+.claude
+.mcp*
+# VS Code
+.vscode
