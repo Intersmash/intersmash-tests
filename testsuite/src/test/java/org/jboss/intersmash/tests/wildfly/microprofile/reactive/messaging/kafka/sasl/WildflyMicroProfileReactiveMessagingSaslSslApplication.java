@@ -22,7 +22,9 @@ import io.fabric8.kubernetes.api.model.Secret;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.assertj.core.util.Strings;
 import org.jboss.intersmash.IntersmashConfig;
 import org.jboss.intersmash.application.input.BuildInput;
@@ -145,14 +147,14 @@ public class WildflyMicroProfileReactiveMessagingSaslSslApplication
 						.build());
 		String mavenAdditionalArgs = generateAdditionalMavenArgs()
 				.concat(" -pl " + applicationDir + " -am");
-		final String mavenMirrorUrl = this.getMavenMirrorUrl();
-		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
-			environmentVariables.add(
-					new EnvVarBuilder().withName("MAVEN_MIRROR_URL")
-							.withValue(mavenMirrorUrl)
-							.build());
-			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
-		}
+		Map<String, String> proxyEnvVars = new LinkedHashMap<>();
+		mavenAdditionalArgs = mavenAdditionalArgs.concat(
+				configureMavenProxy(proxyEnvVars,
+						IntersmashConfig.mavenProxyUrl(),
+						IntersmashConfig.mavenProxyUsername(),
+						IntersmashConfig.mavenProxyPassword()));
+		proxyEnvVars.forEach((name, value) -> environmentVariables.add(
+				new EnvVarBuilder().withName(name).withValue(value).build()));
 		environmentVariables.add(
 				new EnvVarBuilder().withName("MAVEN_ARGS_APPEND")
 						.withValue(mavenAdditionalArgs)

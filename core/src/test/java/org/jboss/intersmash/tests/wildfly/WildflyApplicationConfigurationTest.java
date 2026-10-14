@@ -15,6 +15,8 @@
 */
 package org.jboss.intersmash.tests.wildfly;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -133,5 +135,43 @@ public class WildflyApplicationConfigurationTest {
 				mavenArgs.contains(String.format(" -Dbom.wildfly-ee.version=%s", app.bomsEeServerVersion())));
 		Assertions.assertTrue(mavenArgs.contains("-Dmaven.wagon.http.ssl.insecure=true"));
 		Assertions.assertTrue(mavenArgs.contains("-Dmaven.resolver.transport=wagon"));
+	}
+
+	@Test
+	void configureMavenProxyWithNullUrl() {
+		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
+		};
+		Map<String, String> envVars = new LinkedHashMap<>();
+		String result = app.configureMavenProxy(envVars, null, null, null);
+		Assertions.assertEquals("", result);
+		Assertions.assertTrue(envVars.isEmpty());
+	}
+
+	@Test
+	void configureMavenProxyWithUrlOnly() {
+		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
+		};
+		Map<String, String> envVars = new LinkedHashMap<>();
+		String result = app.configureMavenProxy(envVars, "https://proxy.example.com", null, null);
+		Assertions.assertEquals(" -Dinsecure.repositories=WARN", result);
+		Assertions.assertEquals(2, envVars.size());
+		Assertions.assertEquals("https://proxy.example.com", envVars.get("MAVEN_MIRROR_URL"));
+		Assertions.assertEquals("eap-qe-maven-proxy-repository", envVars.get("MAVEN_MIRROR_ID"));
+	}
+
+	@Test
+	void configureMavenProxyWithUrlAndCredentials() {
+		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
+		};
+		Map<String, String> envVars = new LinkedHashMap<>();
+		String result = app.configureMavenProxy(envVars, "https://proxy.example.com", "user", "pass");
+		Assertions.assertEquals(" -Dinsecure.repositories=WARN", result);
+		Assertions.assertEquals(6, envVars.size());
+		Assertions.assertEquals("https://proxy.example.com", envVars.get("MAVEN_MIRROR_URL"));
+		Assertions.assertEquals("eap-qe-maven-proxy-repository", envVars.get("MAVEN_MIRROR_ID"));
+		Assertions.assertEquals("https://proxy.example.com", envVars.get("MAVEN_REPO_URL"));
+		Assertions.assertEquals("eap-qe-maven-proxy-repository", envVars.get("MAVEN_REPO_ID"));
+		Assertions.assertEquals("user", envVars.get("MAVEN_REPO_USERNAME"));
+		Assertions.assertEquals("pass", envVars.get("MAVEN_REPO_PASSWORD"));
 	}
 }
