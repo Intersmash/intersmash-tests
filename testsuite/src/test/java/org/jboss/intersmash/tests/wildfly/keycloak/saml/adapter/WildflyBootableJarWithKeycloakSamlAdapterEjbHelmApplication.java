@@ -138,10 +138,19 @@ public class WildflyBootableJarWithKeycloakSamlAdapterEjbHelmApplication
 		// =======================================
 
 		Map<String, String> buildEnvironmentVariables = new HashMap<>();
-		final String mavenMirrorUrl = this.getMavenMirrorUrl();
+		final String mavenMirrorUrl = IntersmashConfig.mavenProxyUrl();
 		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
 			buildEnvironmentVariables.put("MAVEN_MIRROR_URL", mavenMirrorUrl);
+			buildEnvironmentVariables.put("MAVEN_MIRROR_ID", "eap-qe-maven-proxy-repository");
 			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
+			final String mavenMirrorUsername = IntersmashConfig.mavenProxyUsername();
+			final String mavenMirrorPassword = IntersmashConfig.mavenProxyPassword();
+			if (!Strings.isNullOrEmpty(mavenMirrorUsername) && !Strings.isNullOrEmpty(mavenMirrorPassword)) {
+				buildEnvironmentVariables.put("MAVEN_REPO_URL", mavenMirrorUrl);
+				buildEnvironmentVariables.put("MAVEN_REPO_ID", "eap-qe-maven-proxy-repository");
+				buildEnvironmentVariables.put("MAVEN_REPO_USERNAME", mavenMirrorUsername);
+				buildEnvironmentVariables.put("MAVEN_REPO_PASSWORD", mavenMirrorPassword);
+			}
 		}
 
 		buildEnvironmentVariables.put("SCRIPT_DEBUG",
