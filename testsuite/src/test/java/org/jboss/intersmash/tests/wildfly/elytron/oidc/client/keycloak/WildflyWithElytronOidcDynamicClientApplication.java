@@ -227,13 +227,37 @@ public class WildflyWithElytronOidcDynamicClientApplication
 						.build());
 		String mavenAdditionalArgs = generateAdditionalMavenArgs()
 				.concat(" -pl " + applicationDir + " -am");
-		final String mavenMirrorUrl = this.getMavenMirrorUrl();
+		final String mavenMirrorUrl = IntersmashConfig.mavenProxyUrl();
 		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
 			environmentVariables.add(
 					new EnvVarBuilder().withName("MAVEN_MIRROR_URL")
 							.withValue(mavenMirrorUrl)
 							.build());
+			environmentVariables.add(
+					new EnvVarBuilder().withName("MAVEN_MIRROR_ID")
+							.withValue("eap-qe-maven-proxy-repository")
+							.build());
 			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
+			final String mavenMirrorUsername = IntersmashConfig.mavenProxyUsername();
+			final String mavenMirrorPassword = IntersmashConfig.mavenProxyPassword();
+			if (!Strings.isNullOrEmpty(mavenMirrorUsername) && !Strings.isNullOrEmpty(mavenMirrorPassword)) {
+				environmentVariables.add(
+						new EnvVarBuilder().withName("MAVEN_REPO_URL")
+								.withValue(mavenMirrorUrl)
+								.build());
+				environmentVariables.add(
+						new EnvVarBuilder().withName("MAVEN_REPO_ID")
+								.withValue("eap-qe-maven-proxy-repository")
+								.build());
+				environmentVariables.add(
+						new EnvVarBuilder().withName("MAVEN_REPO_USERNAME")
+								.withValue(mavenMirrorUsername)
+								.build());
+				environmentVariables.add(
+						new EnvVarBuilder().withName("MAVEN_REPO_PASSWORD")
+								.withValue(mavenMirrorPassword)
+								.build());
+			}
 		}
 		/**
 		 * See maven profile "no-oidc-json" in <a href="https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/elytron-oidc-client-keycloak/pom.xml#L52">elytron-oidc-client-keycloak/pom.xml</a>
