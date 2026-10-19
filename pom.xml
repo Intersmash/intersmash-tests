@@ -205,25 +205,6 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <annotationProcessorPaths>
-                          <path>
-                            <groupId>io.sundr</groupId>
-                            <artifactId>builder-annotations</artifactId>
-                            <version>${version.sundr.builder-annotations}</version>
-                          </path>
-                          <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${version.lombok}</version>
-                          </path>
-                        </annotationProcessorPaths>
-                        <useIncrementalCompilation>false</useIncrementalCompilation>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${version.failsafe.plugin}</version>
                     <executions>
