@@ -47,7 +47,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
 
-        <version.intersmash>0.0.5.Beta4</version.intersmash>
+        <version.intersmash>0.0.5.Beta6</version.intersmash>
         <version.junit-jupiter>5.11.1</version.junit-jupiter>
         <version.rest-assured>5.5.1</version.rest-assured>
         <version.junit-platform-launcher>1.11.3</version.junit-platform-launcher>
@@ -203,25 +203,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <annotationProcessorPaths>
-                          <path>
-                            <groupId>io.sundr</groupId>
-                            <artifactId>builder-annotations</artifactId>
-                            <version>${version.sundr.builder-annotations}</version>
-                          </path>
-                          <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${version.lombok}</version>
-                          </path>
-                        </annotationProcessorPaths>
-                        <useIncrementalCompilation>false</useIncrementalCompilation>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
