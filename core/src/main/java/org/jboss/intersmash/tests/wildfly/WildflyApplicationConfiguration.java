@@ -15,6 +15,7 @@
 */
 package org.jboss.intersmash.tests.wildfly;
 
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -22,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
  * configuration which should be taken into account by s2i builds
  */
 public interface WildflyApplicationConfiguration {
+
+	String MAVEN_PROXY_REPOSITORY_ID = "eap-qe-maven-proxy-repository";
 
 	String WILDFLY_EE_FEATURE_PACK_LOCATION = "wildfly.ee-feature-pack.location";
 	String WILDFLY_FEATURE_PACK_LOCATION = "wildfly.feature-pack.location";
@@ -35,7 +38,6 @@ public interface WildflyApplicationConfiguration {
 	String WILDFLY_MAVEN_PLUGIN_ARTIFACTID = "wildfly-maven-plugin.artifactId";
 	String WILDFLY_MAVEN_PLUGIN_VERSION = "wildfly-maven-plugin.version";
 	String WILDFLY_KEYCLOAK_SAML_ADAPTER_FEATURE_PACK_VERSION = "wildfly.keycloak-saml-adapter-feature-pack.version";
-	String MAVEN_MIRROR_URL = "maven-mirror.url";
 	String MAVEN_RESOLVER_TRANSPORT = "maven.resolver.transport";
 	String MAVEN_WAGON_HTTP_SSL_INSECURE = "maven.wagon.http.ssl.insecure";
 
@@ -81,10 +83,6 @@ public interface WildflyApplicationConfiguration {
 
 	default String bomsEeServerVersion() {
 		return System.getProperty(WILDFLY_BOMS_EE_SERVER_VERSION);
-	}
-
-	default String getMavenMirrorUrl() {
-		return System.getProperty(MAVEN_MIRROR_URL);
 	}
 
 	default String getMavenResolverTransport() {
@@ -236,6 +234,23 @@ public interface WildflyApplicationConfiguration {
 	 */
 	default String wildflyMavenPluginVersionPropertyName() {
 		return WILDFLY_MAVEN_PLUGIN_VERSION;
+	}
+
+	default String configureMavenProxy(Map<String, String> environmentVariables,
+			String mavenProxyUrl, String mavenProxyUsername, String mavenProxyPassword) {
+		String additionalArgs = "";
+		if (!StringUtils.isBlank(mavenProxyUrl)) {
+			environmentVariables.put("MAVEN_MIRROR_URL", mavenProxyUrl);
+			environmentVariables.put("MAVEN_MIRROR_ID", MAVEN_PROXY_REPOSITORY_ID);
+			additionalArgs = " -Dinsecure.repositories=WARN";
+			if (!StringUtils.isBlank(mavenProxyUsername) && !StringUtils.isBlank(mavenProxyPassword)) {
+				environmentVariables.put("MAVEN_REPO_URL", mavenProxyUrl);
+				environmentVariables.put("MAVEN_REPO_ID", MAVEN_PROXY_REPOSITORY_ID);
+				environmentVariables.put("MAVEN_REPO_USERNAME", mavenProxyUsername);
+				environmentVariables.put("MAVEN_REPO_PASSWORD", mavenProxyPassword);
+			}
+		}
+		return additionalArgs;
 	}
 
 	/**
