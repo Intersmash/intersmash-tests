@@ -15,7 +15,6 @@
 */
 package org.jboss.intersmash.tests.wildfly.distributed.timers.infinispan;
 
-import com.google.common.base.Strings;
 import cz.xtf.builder.builders.SecretBuilder;
 import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.EnvVar;
@@ -24,7 +23,9 @@ import io.fabric8.kubernetes.api.model.Secret;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.jboss.intersmash.IntersmashConfig;
 import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
@@ -115,14 +116,14 @@ public class WildFlyDistributedTimersApplication
 		String mavenAdditionalArgs = generateAdditionalMavenArgs()
 				.concat(" -pl " + applicationDir + " -am");
 
-		final String mavenMirrorUrl = this.getMavenMirrorUrl();
-		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
-			environmentVariables.add(
-					new EnvVarBuilder().withName("MAVEN_MIRROR_URL")
-							.withValue(mavenMirrorUrl)
-							.build());
-			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
-		}
+		Map<String, String> proxyEnvVars = new LinkedHashMap<>();
+		mavenAdditionalArgs = mavenAdditionalArgs.concat(
+				configureMavenProxy(proxyEnvVars,
+						IntersmashConfig.mavenProxyUrl(),
+						IntersmashConfig.mavenProxyUsername(),
+						IntersmashConfig.mavenProxyPassword()));
+		proxyEnvVars.forEach((name, value) -> environmentVariables.add(
+				new EnvVarBuilder().withName(name).withValue(value).build()));
 
 		environmentVariables.add(
 				new EnvVarBuilder().withName("MAVEN_ARGS_APPEND")

@@ -15,6 +15,7 @@
 */
 package org.jboss.intersmash.tests.wildfly;
 
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -23,6 +24,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public interface WildflyApplicationConfiguration {
 
+	String MAVEN_PROXY_REPOSITORY_ID = "eap-qe-maven-proxy-repository";
+
 	String WILDFLY_EE_FEATURE_PACK_LOCATION = "wildfly.ee-feature-pack.location";
 	String WILDFLY_FEATURE_PACK_LOCATION = "wildfly.feature-pack.location";
 	String WILDFLY_CLOUD_FEATURE_PACK_LOCATION = "wildfly.cloud-feature-pack.location";
@@ -30,12 +33,19 @@ public interface WildflyApplicationConfiguration {
 	String WILDFLY_EE_CHANNEL_GROUPID = "wildfly.ee-channel.groupId";
 	String WILDFLY_EE_CHANNEL_ARTIFACTID = "wildfly.ee-channel.artifactId";
 	String WILDFLY_EE_CHANNEL_VERSION = "wildfly.ee-channel.version";
+	String WILDFLY_BOMS_EE_GROUPID = "bom.wildfly-ee.groupId";
+	String WILDFLY_BOMS_EE_ARTIFACTID = "bom.wildfly-ee.artifactId";
 	String WILDFLY_BOMS_EE_SERVER_VERSION = "bom.wildfly-ee.version";
+	String WILDFLY_BOMS_EJB_CLIENT_GROUPID = "bom.wildfly-ejb-client.groupId";
+	String WILDFLY_BOMS_EJB_CLIENT_ARTIFACTID = "bom.wildfly-ejb-client.artifactId";
+	String WILDFLY_BOMS_EJB_CLIENT_VERSION = "bom.wildfly-ejb-client.version";
+	String WILDFLY_BOMS_MICROPROFILE_GROUPID = "bom.wildfly-microprofile.groupId";
+	String WILDFLY_BOMS_MICROPROFILE_ARTIFACTID = "bom.wildfly-microprofile.artifactId";
+	String WILDFLY_BOMS_MICROPROFILE_VERSION = "bom.wildfly-microprofile.version";
 	String WILDFLY_MAVEN_PLUGIN_GROUPID = "wildfly-maven-plugin.groupId";
 	String WILDFLY_MAVEN_PLUGIN_ARTIFACTID = "wildfly-maven-plugin.artifactId";
 	String WILDFLY_MAVEN_PLUGIN_VERSION = "wildfly-maven-plugin.version";
-	String WILDFLY_KEYCLOAK_SAML_ADAPTER_FEATURE_PACK_VERSION = "wildfly.keycloak-saml-adapter-feature-pack.version";
-	String MAVEN_MIRROR_URL = "maven-mirror.url";
+	String WILDFLY_KEYCLOAK_SAML_ADAPTER_FEATURE_PACK_VERSION = "keycloak-saml-adapter-galleon-pack.version";
 	String MAVEN_RESOLVER_TRANSPORT = "maven.resolver.transport";
 	String MAVEN_WAGON_HTTP_SSL_INSECURE = "maven.wagon.http.ssl.insecure";
 
@@ -79,12 +89,40 @@ public interface WildflyApplicationConfiguration {
 		return System.getProperty(WILDFLY_EE_CHANNEL_VERSION);
 	}
 
+	default String bomsEeGroupId() {
+		return System.getProperty(WILDFLY_BOMS_EE_GROUPID);
+	}
+
+	default String bomsEeArtifactId() {
+		return System.getProperty(WILDFLY_BOMS_EE_ARTIFACTID);
+	}
+
 	default String bomsEeServerVersion() {
 		return System.getProperty(WILDFLY_BOMS_EE_SERVER_VERSION);
 	}
 
-	default String getMavenMirrorUrl() {
-		return System.getProperty(MAVEN_MIRROR_URL);
+	default String bomsEjbClientGroupId() {
+		return System.getProperty(WILDFLY_BOMS_EJB_CLIENT_GROUPID);
+	}
+
+	default String bomsEjbClientArtifactId() {
+		return System.getProperty(WILDFLY_BOMS_EJB_CLIENT_ARTIFACTID);
+	}
+
+	default String bomsEjbClientVersion() {
+		return System.getProperty(WILDFLY_BOMS_EJB_CLIENT_VERSION);
+	}
+
+	default String bomsMicroprofileGroupId() {
+		return System.getProperty(WILDFLY_BOMS_MICROPROFILE_GROUPID);
+	}
+
+	default String bomsMicroprofileArtifactId() {
+		return System.getProperty(WILDFLY_BOMS_MICROPROFILE_ARTIFACTID);
+	}
+
+	default String bomsMicroprofileVersion() {
+		return System.getProperty(WILDFLY_BOMS_MICROPROFILE_VERSION);
 	}
 
 	default String getMavenResolverTransport() {
@@ -153,7 +191,7 @@ public interface WildflyApplicationConfiguration {
 
 	/**
 	 * This must match the property name in the pom.xml file used to set the
-	 * "wildfly.keycloak-saml-adapter-feature-pack.version" feature pack version.
+	 * "keycloak-saml-adapter-galleon-pack.version" feature pack version.
 	 *
 	 * @return property name in the pom.xml file used to set the Keycloack SAML
 	 *         Adapter feature pack version
@@ -238,6 +276,23 @@ public interface WildflyApplicationConfiguration {
 		return WILDFLY_MAVEN_PLUGIN_VERSION;
 	}
 
+	default String configureMavenProxy(Map<String, String> environmentVariables,
+			String mavenProxyUrl, String mavenProxyUsername, String mavenProxyPassword) {
+		String additionalArgs = "";
+		if (!StringUtils.isBlank(mavenProxyUrl)) {
+			environmentVariables.put("MAVEN_MIRROR_URL", mavenProxyUrl);
+			environmentVariables.put("MAVEN_MIRROR_ID", MAVEN_PROXY_REPOSITORY_ID);
+			additionalArgs = " -Dinsecure.repositories=WARN";
+			if (!StringUtils.isBlank(mavenProxyUsername) && !StringUtils.isBlank(mavenProxyPassword)) {
+				environmentVariables.put("MAVEN_REPO_URL", mavenProxyUrl);
+				environmentVariables.put("MAVEN_REPO_ID", MAVEN_PROXY_REPOSITORY_ID);
+				environmentVariables.put("MAVEN_REPO_USERNAME", mavenProxyUsername);
+				environmentVariables.put("MAVEN_REPO_PASSWORD", mavenProxyPassword);
+			}
+		}
+		return additionalArgs;
+	}
+
 	/**
 	 * Build a string that will be used to set the {@code MAVEN_ARGS_APPEND}
 	 * environment variable of a s2i build configuration. This way all relevant
@@ -289,9 +344,33 @@ public interface WildflyApplicationConfiguration {
 						? ""
 						: (" -D" + this.wildflyMavenPluginVersionPropertyName() + "="
 								+ this.wildflyMavenPluginVersion())))
+				+ ((StringUtils.isBlank(this.bomsEeGroupId())
+						? ""
+						: (" -D" + WILDFLY_BOMS_EE_GROUPID + "=" + this.bomsEeGroupId())))
+				+ ((StringUtils.isBlank(this.bomsEeArtifactId())
+						? ""
+						: (" -D" + WILDFLY_BOMS_EE_ARTIFACTID + "=" + this.bomsEeArtifactId())))
 				+ ((StringUtils.isBlank(this.bomsEeServerVersion())
 						? ""
-						: (" -D" + this.bomsEeServerVersionPropertyName() + "=" + this.bomsEeServerVersion()))));
+						: (" -D" + this.bomsEeServerVersionPropertyName() + "=" + this.bomsEeServerVersion())))
+				+ ((StringUtils.isBlank(this.bomsEjbClientGroupId())
+						? ""
+						: (" -D" + WILDFLY_BOMS_EJB_CLIENT_GROUPID + "=" + this.bomsEjbClientGroupId())))
+				+ ((StringUtils.isBlank(this.bomsEjbClientArtifactId())
+						? ""
+						: (" -D" + WILDFLY_BOMS_EJB_CLIENT_ARTIFACTID + "=" + this.bomsEjbClientArtifactId())))
+				+ ((StringUtils.isBlank(this.bomsEjbClientVersion())
+						? ""
+						: (" -D" + WILDFLY_BOMS_EJB_CLIENT_VERSION + "=" + this.bomsEjbClientVersion())))
+				+ ((StringUtils.isBlank(this.bomsMicroprofileGroupId())
+						? ""
+						: (" -D" + WILDFLY_BOMS_MICROPROFILE_GROUPID + "=" + this.bomsMicroprofileGroupId())))
+				+ ((StringUtils.isBlank(this.bomsMicroprofileArtifactId())
+						? ""
+						: (" -D" + WILDFLY_BOMS_MICROPROFILE_ARTIFACTID + "=" + this.bomsMicroprofileArtifactId())))
+				+ ((StringUtils.isBlank(this.bomsMicroprofileVersion())
+						? ""
+						: (" -D" + WILDFLY_BOMS_MICROPROFILE_VERSION + "=" + this.bomsMicroprofileVersion()))));
 		// let's forward the distribution for building the application.
 		result = result.concat(" " + getWildflyApplicationTargetDistributionProfile());
 		// wagon related properties

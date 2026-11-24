@@ -112,11 +112,11 @@ public class WildflyPostgresqlTimerHelmApplication
 		// =======================================
 
 		Map<String, String> buildEnvironmentVariables = new HashMap<>();
-		final String mavenMirrorUrl = this.getMavenMirrorUrl();
-		if (!org.assertj.core.util.Strings.isNullOrEmpty(mavenMirrorUrl)) {
-			buildEnvironmentVariables.put("MAVEN_MIRROR_URL", mavenMirrorUrl);
-			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
-		}
+		mavenAdditionalArgs = mavenAdditionalArgs.concat(
+				configureMavenProxy(buildEnvironmentVariables,
+						IntersmashConfig.mavenProxyUrl(),
+						IntersmashConfig.mavenProxyUsername(),
+						IntersmashConfig.mavenProxyPassword()));
 
 		buildEnvironmentVariables.put("SCRIPT_DEBUG",
 				IntersmashConfig.scriptDebug() != null ? IntersmashConfig.scriptDebug() : "false");

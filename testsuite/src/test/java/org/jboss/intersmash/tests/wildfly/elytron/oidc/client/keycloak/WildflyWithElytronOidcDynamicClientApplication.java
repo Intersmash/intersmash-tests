@@ -24,11 +24,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.assertj.core.util.Strings;
 import org.jboss.intersmash.IntersmashConfig;
 import org.jboss.intersmash.application.input.BuildInput;
 import org.jboss.intersmash.application.input.BuildInputBuilder;
@@ -227,14 +227,14 @@ public class WildflyWithElytronOidcDynamicClientApplication
 						.build());
 		String mavenAdditionalArgs = generateAdditionalMavenArgs()
 				.concat(" -pl " + applicationDir + " -am");
-		final String mavenMirrorUrl = this.getMavenMirrorUrl();
-		if (!Strings.isNullOrEmpty(mavenMirrorUrl)) {
-			environmentVariables.add(
-					new EnvVarBuilder().withName("MAVEN_MIRROR_URL")
-							.withValue(mavenMirrorUrl)
-							.build());
-			mavenAdditionalArgs = mavenAdditionalArgs.concat(" -Dinsecure.repositories=WARN");
-		}
+		Map<String, String> proxyEnvVars = new LinkedHashMap<>();
+		mavenAdditionalArgs = mavenAdditionalArgs.concat(
+				configureMavenProxy(proxyEnvVars,
+						IntersmashConfig.mavenProxyUrl(),
+						IntersmashConfig.mavenProxyUsername(),
+						IntersmashConfig.mavenProxyPassword()));
+		proxyEnvVars.forEach((name, value) -> environmentVariables.add(
+				new EnvVarBuilder().withName(name).withValue(value).build()));
 		/**
 		 * See maven profile "no-oidc-json" in <a href="https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/elytron-oidc-client-keycloak/pom.xml#L52">elytron-oidc-client-keycloak/pom.xml</a>
 		 */

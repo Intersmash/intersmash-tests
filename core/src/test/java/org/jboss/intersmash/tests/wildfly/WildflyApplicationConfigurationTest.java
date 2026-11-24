@@ -15,6 +15,8 @@
 */
 package org.jboss.intersmash.tests.wildfly;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +49,7 @@ public class WildflyApplicationConfigurationTest {
 				"org.wildfly.cloud:wildfly-cloud-galleon-pack:5.0.1.Final");
 		systemProperties.set("wildfly.datasources-feature-pack.location",
 				"org.wildfly:wildfly-datasources-galleon-pack:6.0.0.Final");
-		systemProperties.set("wildfly.keycloak-saml-adapter-feature-pack.version", "22.0.3");
+		systemProperties.set("keycloak-saml-adapter-galleon-pack.version", "22.0.3");
 		systemProperties.set("wildfly.ee-channel.groupId", "wildfly.ee-channel.groupId.NONE_FOR_WILDFLY");
 		systemProperties.set("wildfly.ee-channel.artifactId", "wildfly.ee-channel.artifactId.NONE_FOR_WILDFLY");
 		systemProperties.set("wildfly.ee-channel.version", "wildfly.ee-channel.version.NONE_FOR_WILDFLY");
@@ -67,7 +69,7 @@ public class WildflyApplicationConfigurationTest {
 				app.cloudFeaturePackLocation());
 		Assertions.assertEquals(System.getProperty("wildfly.datasources-feature-pack.location"),
 				app.datasourcesFeaturePackLocation());
-		Assertions.assertEquals(System.getProperty("wildfly.keycloak-saml-adapter-feature-pack.version"),
+		Assertions.assertEquals(System.getProperty("keycloak-saml-adapter-galleon-pack.version"),
 				app.keycloakSamlAdapterFeaturePackVersion());
 		Assertions.assertEquals(System.getProperty("wildfly.ee-channel.groupId"), app.eeChannelGroupId());
 		Assertions.assertEquals(System.getProperty("wildfly.ee-channel.artifactId"), app.eeChannelArtifactId());
@@ -76,9 +78,12 @@ public class WildflyApplicationConfigurationTest {
 	}
 
 	/**
-	 * Verify that the value for the Maven additional arguments environment variable
+	 * <p>Verify that the value for the Maven additional arguments environment variable
 	 * (MAVEN_ARGS_APPEND) that should be passed to a s2i build is generated
-	 * properly.
+	 * properly.</p>
+	 * <p>When used with <a href="https://github.com/Intersmash/intersmash-applications/">intersmash-applications</a>,
+	 * this method takes care of properly setting properties in
+	 * <a href="https://github.com/Intersmash/intersmash-applications/blob/main/wildfly/pom.xml">wildfly/pom.xml</a>.</p>
 	 */
 	@Test
 	void generatedMavenArgsAppendValueIncludesAllSystemProperties() {
@@ -92,11 +97,19 @@ public class WildflyApplicationConfigurationTest {
 				"org.wildfly.cloud:wildfly-cloud-galleon-pack:5.0.1.Final");
 		systemProperties.set("wildfly.datasources-feature-pack.location",
 				"org.wildfly:wildfly-datasources-galleon-pack:6.0.0.Final");
-		systemProperties.set("wildfly.keycloak-saml-adapter-feature-pack.version", "22.0.3");
+		systemProperties.set("keycloak-saml-adapter-galleon-pack.version", "22.0.3");
 		systemProperties.set("wildfly.ee-channel.groupId", "wildfly.ee-channel.groupId.NONE_FOR_WILDFLY");
 		systemProperties.set("wildfly.ee-channel.artifactId", "wildfly.ee-channel.artifactId.NONE_FOR_WILDFLY");
 		systemProperties.set("wildfly.ee-channel.version", "wildfly.ee-channel.version.NONE_FOR_WILDFLY");
+		systemProperties.set("bom.wildfly-ee.groupId", "org.jboss.bom");
+		systemProperties.set("bom.wildfly-ee.artifactId", "jboss-eap-ee");
 		systemProperties.set("bom.wildfly-ee.version", "30.0.0.Final");
+		systemProperties.set("bom.wildfly-ejb-client.groupId", "org.jboss.eap");
+		systemProperties.set("bom.wildfly-ejb-client.artifactId", "wildfly-ejb-client-bom");
+		systemProperties.set("bom.wildfly-ejb-client.version", "30.0.0.Final");
+		systemProperties.set("bom.wildfly-microprofile.groupId", "org.jboss.bom");
+		systemProperties.set("bom.wildfly-microprofile.artifactId", "jboss-eap-xp-microprofile");
+		systemProperties.set("bom.wildfly-microprofile.version", "5.0.2.GA-redhat-00003");
 		systemProperties.set("maven.wagon.http.ssl.insecure", "true");
 		systemProperties.set("maven.resolver.transport", "wagon");
 
@@ -120,9 +133,8 @@ public class WildflyApplicationConfigurationTest {
 				.contains(String.format(" -Dwildfly.cloud-feature-pack.location=%s", app.cloudFeaturePackLocation())));
 		Assertions.assertTrue(mavenArgs.contains(String.format(" -Dwildfly.datasources-feature-pack.location=%s",
 				app.datasourcesFeaturePackLocation())));
-		Assertions
-				.assertTrue(mavenArgs.contains(String.format(" -Dwildfly.keycloak-saml-adapter-feature-pack.version=%s",
-						app.keycloakSamlAdapterFeaturePackVersion())));
+		Assertions.assertTrue(mavenArgs.contains(String.format(" -Dkeycloak-saml-adapter-galleon-pack.version=%s",
+				app.keycloakSamlAdapterFeaturePackVersion())));
 		Assertions.assertTrue(
 				mavenArgs.contains(String.format(" -Dwildfly.ee-channel.groupId=%s", app.eeChannelGroupId())));
 		Assertions.assertTrue(
@@ -130,8 +142,62 @@ public class WildflyApplicationConfigurationTest {
 		Assertions.assertTrue(
 				mavenArgs.contains(String.format(" -Dwildfly.ee-channel.version=%s", app.eeChannelVersion())));
 		Assertions.assertTrue(
+				mavenArgs.contains(String.format(" -Dbom.wildfly-ee.groupId=%s", app.bomsEeGroupId())));
+		Assertions.assertTrue(
+				mavenArgs.contains(String.format(" -Dbom.wildfly-ee.artifactId=%s", app.bomsEeArtifactId())));
+		Assertions.assertTrue(
 				mavenArgs.contains(String.format(" -Dbom.wildfly-ee.version=%s", app.bomsEeServerVersion())));
+		Assertions.assertTrue(
+				mavenArgs.contains(String.format(" -Dbom.wildfly-ejb-client.groupId=%s", app.bomsEjbClientGroupId())));
+		Assertions.assertTrue(mavenArgs
+				.contains(String.format(" -Dbom.wildfly-ejb-client.artifactId=%s", app.bomsEjbClientArtifactId())));
+		Assertions.assertTrue(
+				mavenArgs.contains(String.format(" -Dbom.wildfly-ejb-client.version=%s", app.bomsEjbClientVersion())));
+		Assertions.assertTrue(mavenArgs
+				.contains(String.format(" -Dbom.wildfly-microprofile.groupId=%s", app.bomsMicroprofileGroupId())));
+		Assertions.assertTrue(mavenArgs
+				.contains(String.format(" -Dbom.wildfly-microprofile.artifactId=%s", app.bomsMicroprofileArtifactId())));
+		Assertions.assertTrue(mavenArgs
+				.contains(String.format(" -Dbom.wildfly-microprofile.version=%s", app.bomsMicroprofileVersion())));
 		Assertions.assertTrue(mavenArgs.contains("-Dmaven.wagon.http.ssl.insecure=true"));
 		Assertions.assertTrue(mavenArgs.contains("-Dmaven.resolver.transport=wagon"));
+	}
+
+	@Test
+	void configureMavenProxyWithNullUrl() {
+		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
+		};
+		Map<String, String> envVars = new LinkedHashMap<>();
+		String result = app.configureMavenProxy(envVars, null, null, null);
+		Assertions.assertEquals("", result);
+		Assertions.assertTrue(envVars.isEmpty());
+	}
+
+	@Test
+	void configureMavenProxyWithUrlOnly() {
+		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
+		};
+		Map<String, String> envVars = new LinkedHashMap<>();
+		String result = app.configureMavenProxy(envVars, "https://proxy.example.com", null, null);
+		Assertions.assertEquals(" -Dinsecure.repositories=WARN", result);
+		Assertions.assertEquals(2, envVars.size());
+		Assertions.assertEquals("https://proxy.example.com", envVars.get("MAVEN_MIRROR_URL"));
+		Assertions.assertEquals("eap-qe-maven-proxy-repository", envVars.get("MAVEN_MIRROR_ID"));
+	}
+
+	@Test
+	void configureMavenProxyWithUrlAndCredentials() {
+		WildflyApplicationConfiguration app = new WildflyApplicationConfiguration() {
+		};
+		Map<String, String> envVars = new LinkedHashMap<>();
+		String result = app.configureMavenProxy(envVars, "https://proxy.example.com", "user", "pass");
+		Assertions.assertEquals(" -Dinsecure.repositories=WARN", result);
+		Assertions.assertEquals(6, envVars.size());
+		Assertions.assertEquals("https://proxy.example.com", envVars.get("MAVEN_MIRROR_URL"));
+		Assertions.assertEquals("eap-qe-maven-proxy-repository", envVars.get("MAVEN_MIRROR_ID"));
+		Assertions.assertEquals("https://proxy.example.com", envVars.get("MAVEN_REPO_URL"));
+		Assertions.assertEquals("eap-qe-maven-proxy-repository", envVars.get("MAVEN_REPO_ID"));
+		Assertions.assertEquals("user", envVars.get("MAVEN_REPO_USERNAME"));
+		Assertions.assertEquals("pass", envVars.get("MAVEN_REPO_PASSWORD"));
 	}
 }

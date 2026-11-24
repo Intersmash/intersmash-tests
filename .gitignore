@@ -16,6 +16,7 @@
 /testsuite/intersmash-tests-testsuite.iml
 /testsuite/log/
 /testsuite/tmp
+/red-hat-openshift-local
 
 # JEnv
 .java-version
